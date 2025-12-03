@@ -81,7 +81,7 @@ services:
       MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD:-password}
       MINIO_BUCKET: storysphere-media
       # Integration placeholders
-      OLLAMA_HOST: http://host.docker.internal:11434
+      OLLAMA_HOST: ${OLLAMA_HOST:-http://host.docker.internal:11434}
       COMFYUI_HOST: http://host.docker.internal:8188
     depends_on:
       - postgres

@@ -1,11 +1,13 @@
 import { Worker, Job } from 'bullmq';
 import { config } from './config';
 import { generateScript } from "./ollama";
-import { putJson } from "./storage";
+import { putJson, putObject, getObjectBuffer } from "./storage";
 import { logForJob } from "./logging";
 import { generateAudioForJob } from "./tts";
+import fs from 'fs/promises';
+import { execFileSync } from 'child_process';
+import path from 'path';
 
-// Define the Job Data Interface
 interface GenerationJobData {
   prompt: string;
   title: string;
@@ -18,11 +20,18 @@ interface GenerationJobData {
 
 console.log('Starting StorySphere Worker...');
 
+const tmpDir = '/tmp/storysphere';
+async function ensureTmp() {
+  try { await fs.mkdir(tmpDir, { recursive: true }); } catch {}
+}
+
 const worker = new Worker<GenerationJobData>(
   'generation-queue',
   async (job: Job) => {
     console.log(`[Job ${job.id}] Processing started: ${job.data.title}`);
     await job.updateProgress(0);
+
+    await ensureTmp();
 
     try {
       // Step 1: Script Generation (Ollama)
@@ -38,44 +47,71 @@ const worker = new Worker<GenerationJobData>(
       } catch (e: any) {
         await logForJob(job.id!, `Warning: failed to upload script to MinIO: ${e?.message || e}`);
       }
-      // Advance progress
       await job.updateProgress(15);
 
       // Step 2: TTS
       await logForJob(job.id!, "Step 2: Generating Audio...");
       await job.updateProgress(30);
-      const audioKey = await generateAudioForJob(job.id!, script);
+      const audioKey = await generateAudioForJob(job.id!.toString(), script);
       await logForJob(job.id!, `Audio generated at ${audioKey}`);
+      await job.updateProgress(50);
 
-      // Step 3: Visual Generation (Mock/Placeholder)
-      console.log(`[Job ${job.id}] Step 3: Generating Visuals (Placeholder)...`);
-      await job.updateProgress(60);
-      // TODO: Call ComfyUI
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Download audio from MinIO to tmp
+      const audioBuf = await getObjectBuffer(audioKey);
+      const audioPath = path.join(tmpDir, `audio-${job.id}.mp3`);
+      await fs.writeFile(audioPath, audioBuf);
 
-      // Step 4: Assembly (Mock/Placeholder)
-      console.log(`[Job ${job.id}] Step 4: Assembling Media (Placeholder)...`);
-      await job.updateProgress(90);
-      // TODO: FFmpeg assembly
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Step 3: Visual Generation (simple local ffmpeg placeholder)
+      await logForJob(job.id!, "Step 3: Generating visuals (local ffmpeg placeholder)...");
+      await job.updateProgress(65);
+      const duration = Math.max(1, Math.round(job.data.duration_target || 8));
+      const videoPath = path.join(tmpDir, `video-${job.id}.mp4`);
+      // Create a black video of requested duration
+      execFileSync('ffmpeg', [
+        '-y',
+        '-f', 'lavfi',
+        '-i', `color=size=1280x720:duration=${duration}:rate=25:color=black`,
+        '-c:v', 'libx264',
+        '-pix_fmt', 'yuv420p',
+        videoPath
+      ], { stdio: 'ignore' });
 
-      console.log(`[Job ${job.id}] Completed successfully.`);
+      // Step 4: Assemble audio+video
+      await logForJob(job.id!, "Step 4: Assembling media with ffmpeg...");
+      await job.updateProgress(85);
+      const previewPath = path.join(tmpDir, `preview-${job.id}.mp4`);
+      execFileSync('ffmpeg', [
+        '-y',
+        '-i', videoPath,
+        '-i', audioPath,
+        '-c:v', 'copy',
+        '-c:a', 'aac',
+        '-shortest',
+        previewPath
+      ], { stdio: 'ignore' });
+
+      // Upload preview to MinIO at key "<jobId>/preview.mp4"
+      const previewKey = `${job.id}/preview.mp4`;
+      const previewBuf = await fs.readFile(previewPath);
+      await putObject(previewKey, previewBuf);
+      await logForJob(job.id!, `Preview uploaded to ${config.minio.bucket}/${previewKey}`);
       await job.updateProgress(100);
 
+      console.log(`[Job ${job.id}] Completed successfully.`);
       return {
-        preview_url: `http://localhost:9000/storysphere-media/${job.id}/preview.mp4`, // Mock URL
+        preview_url: `http://${config.minio.endPoint}:${config.minio.port}/${config.minio.bucket}/${job.id}/preview.mp4`,
         audio_url: `/api/v1/jobs/${job.id}/audio`,
         status: 'completed'
       };
 
-    } catch (error) {
+    } catch (error: any) {
       console.error(`[Job ${job.id}] Failed:`, error);
       throw error;
     }
   },
   {
     connection: config.redis,
-    concurrency: 2 // Allow processing 2 jobs at once
+    concurrency: 2
   }
 );
 
@@ -84,7 +120,8 @@ worker.on('completed', (job) => {
 });
 
 worker.on('failed', (job, err) => {
-  console.log(`[Job ${job?.id}] Failed with ${err.message}`);
+  console.log(`[Job ${job?.id}] Failed with ${err?.message}`);
 });
 
 console.log('Worker is ready to accept jobs.');
+
