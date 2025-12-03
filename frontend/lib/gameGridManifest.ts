@@ -19,8 +19,15 @@ export const gameGridManifest: GameGridSpec[] = [
     slug: "nebula-runner",
     title: "Nebula Runner",
     emoji: "✨",
-    shortDesc: "Endless runner prototype. Arrow keys to dodge meteors.",
+    shortDesc: "Fast-paced grid runner. Dodge hazards on a shifting track.",
     playPath: "/games/nebula-runner/index.html",
+    specs: {
+      coreLoop: "Navigate a ship on a 12x6 grid; columns shift left. Avoid hazards and collect powerups.",
+      hook: "Deterministic daily seeds create a shared, learnable track for leaderboards.",
+      fit: "Fits GameGrid's tile/arcade constraints with small footprint and PIP support.",
+      complexity: "Medium",
+      retention: "Daily challenge leaderboards and high-speed twitch gameplay.",
+    },
   },
   {
     slug: "lighthouse-defense",
