@@ -24,5 +24,10 @@ export const config = {
   },
   comfyui: {
     host: process.env.COMFYUI_HOST || 'http://localhost:8188',
+  },
+  eleven: {
+    apiKey: process.env.ELEVEN_API_KEY || "",
+    voiceId: process.env.ELEVEN_VOICE_ID || "alloy",
+    host: process.env.ELEVEN_HOST || "https://api.elevenlabs.io"
   }
 };
