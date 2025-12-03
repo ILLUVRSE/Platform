@@ -3,7 +3,8 @@ import { config } from "./config";
 
 type ImageRef = { filename: string; subfolder: string; type: string };
 
-const COMFY_TIMEOUT_MS = 180000;
+// Allow plenty of time for CPU-only runs; 20 minutes is generous but prevents premature timeouts.
+const COMFY_TIMEOUT_MS = 1_200_000;
 
 export async function renderComfyFrame(prompt: string): Promise<Buffer> {
   const host = config.comfyui.host.replace(/\/$/, "");
@@ -51,7 +52,7 @@ function buildBasicWorkflow(opts: {
       class_type: "KSampler",
       inputs: {
         seed,
-        steps: 8,
+        steps: 2,
         cfg: 6.5,
         sampler_name: opts.sampler,
         scheduler: "normal",
@@ -65,8 +66,8 @@ function buildBasicWorkflow(opts: {
     "5": {
       class_type: "EmptyLatentImage",
       inputs: {
-        width: 1280,
-        height: 720,
+        width: 512,
+        height: 288,
         batch_size: 1,
       },
     },

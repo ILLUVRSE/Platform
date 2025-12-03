@@ -25,7 +25,7 @@ Only return JSON, no prose.`;
     const resp = await axios.post(
       `${config.ollama.host.replace(/\/$/, "")}/api/generate`,
       { model, prompt: templatedPrompt, stream: false },
-      { timeout: 60_000 }
+      { timeout: 180_000 }
     );
 
     const parsed = parseOllamaResponse(resp.data);

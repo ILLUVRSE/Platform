@@ -3,7 +3,7 @@ import cors from 'cors';
 import { createClient } from 'redis';
 import { Queue } from 'bullmq';
 import { config } from './config';
-import { getJson, getObjectBuffer } from "./storage";
+import { getJson, getObjectBuffer, listObjects, getPresignedUrl } from "./storage";
 
 const app = express();
 app.use(cors());
@@ -102,23 +102,6 @@ app.get('/api/v1/jobs/:id', async (req, res) => {
   }
 });
 
-// List Jobs Endpoint (for LiveLoop)
-app.get('/api/v1/jobs', async (req, res) => {
-  try {
-    const jobs = await generationQueue.getJobs(['completed'], 0, 49, false); // Newest first
-    const list = jobs.map(j => ({
-      id: j.id,
-      data: j.data,
-      result: j.returnvalue,
-      finishedOn: j.finishedOn
-    }));
-    res.json(list);
-  } catch (error) {
-    console.error('Error listing jobs:', error);
-    res.status(500).json({ error: 'Failed to list jobs' });
-  }
-});
-
 // Get Script Endpoint
 app.get("/api/v1/jobs/:id/script", async (req, res) => {
   try {
@@ -145,17 +128,27 @@ app.get("/api/v1/jobs/:id/audio", async (req, res) => {
   }
 });
 
-// Get Preview Video Endpoint
-app.get("/api/v1/jobs/:id/preview", async (req, res) => {
-  const key = `${req.params.id}/preview.mp4`;
+// Library listing (MinIO) with presigned URLs
+app.get("/api/v1/library", async (req, res) => {
   try {
-    const buf = await getObjectBuffer(key);
-    res.setHeader("Content-Type", "video/mp4");
-    res.setHeader("Content-Length", String(buf.length));
-    res.end(buf);
-  } catch (err) {
-    console.error("Video fetch error:", err);
-    res.status(404).json({ error: "Video not found" });
+    const prefix = (req.query.prefix as string) || "";
+    const limit = Math.min(500, parseInt((req.query.limit as string) || "100", 10));
+    const objects = await listObjects(prefix, limit);
+    const enriched = await Promise.all(
+      objects.map(async (obj) => {
+        const url = await getPresignedUrl(obj.name, 3600);
+        return {
+          key: obj.name,
+          size: obj.size,
+          lastModified: obj.lastModified,
+          url,
+        };
+      })
+    );
+    res.json({ items: enriched });
+  } catch (error) {
+    console.error("Error listing library objects:", error);
+    res.status(500).json({ error: "Failed to list library items" });
   }
 });
 

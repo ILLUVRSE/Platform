@@ -1,36 +1,80 @@
 import Link from "next/link";
 
+const cards = [
+  {
+    title: "StorySphere",
+    body: "Prompt-to-MP4 generator powered by Ollama, ElevenLabs, and ComfyUI.",
+    href: "/storysphere",
+    cta: "Open generator",
+  },
+  {
+    title: "LiveLoop",
+    body: "Roku-style channel grid with inline player for your queue.",
+    href: "/livelLoop",
+    cta: "Open channel",
+  },
+  {
+    title: "Library",
+    body: "Browse your rendered media and uploads in MinIO.",
+    href: "/library",
+    cta: "Open library",
+  },
+  {
+    title: "Arcade",
+    body: "Play lightweight web games in PIP-ready mode.",
+    href: "/arcade",
+    cta: "Open arcade",
+  },
+];
+
 export default function Home() {
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start text-center sm:text-left">
-        <h1 className="text-4xl sm:text-6xl font-bold font-serif text-accent">
-          StorySphere
-        </h1>
-        <p className="text-lg sm:text-xl max-w-2xl">
-          A local-first personal studio that turns prompts into MP4s, hosts them in a personal library, and streams them on a continuous LiveLoop channel.
+    <div className="space-y-10">
+      <section className="bg-[var(--color-surface)]/70 border border-white/10 rounded-2xl p-8 shadow-lg">
+        <p className="uppercase tracking-[0.25em] text-xs text-white/60 mb-3">
+          Illuvrse
         </p>
+        <h1 className="text-4xl sm:text-5xl font-serif font-bold mb-4">
+          Your personal studio for stories, loops, and play.
+        </h1>
+        <p className="text-lg text-white/80 max-w-3xl mb-6">
+          Generate scenes with StorySphere, keep everything in your own library,
+          and stream or play from one place. Designed to run locally and stay
+          fast.
+        </p>
+        <div className="flex flex-wrap gap-3">
+          <Link
+            href="/storysphere"
+            className="px-5 py-3 rounded-full bg-[var(--color-gold)] text-black font-semibold shadow-md hover:opacity-90 transition"
+          >
+            Launch StorySphere
+          </Link>
+          <Link
+            href="/library"
+            className="px-5 py-3 rounded-full border border-white/20 hover:bg-white/5 transition"
+          >
+            View Library
+          </Link>
+        </div>
+      </section>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
+      <section className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {cards.map((card) => (
           <Link
-            href="/create"
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-gold text-gold-foreground gap-2 hover:bg-[#e6c200] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 font-bold shadow-md"
+            key={card.title}
+            href={card.href}
+            className="group rounded-2xl border border-white/10 bg-white/[0.03] p-5 hover:border-[var(--color-accent)]/40 transition flex flex-col gap-3"
           >
-            Create New Story
+            <div className="text-sm uppercase tracking-[0.15em] text-white/50">
+              {card.title}
+            </div>
+            <p className="text-white/80 flex-1">{card.body}</p>
+            <div className="text-[var(--color-accent)] font-semibold group-hover:underline">
+              {card.cta} →
+            </div>
           </Link>
-          <Link
-            href="/watch"
-            className="rounded-full border border-solid border-white/20 transition-colors flex items-center justify-center hover:bg-white/10 text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-          >
-            View LiveLoop
-          </Link>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center opacity-70">
-        <div className="flex items-center gap-2">
-           Status: <span className="w-2 h-2 rounded-full bg-green-500"></span> Online
-        </div>
-      </footer>
+        ))}
+      </section>
     </div>
   );
 }

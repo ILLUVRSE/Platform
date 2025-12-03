@@ -81,3 +81,48 @@ export async function getJson(key: string, bucket = config.minio.bucket) {
     });
   });
 }
+
+export async function listObjects(
+  prefix = "",
+  limit = 100,
+  bucket = config.minio.bucket
+): Promise<
+  { name: string; size: number; lastModified?: Date; etag?: string }[]
+> {
+  await ensureBucketExists(bucket);
+  return new Promise((resolve, reject) => {
+    const results: {
+      name: string;
+      size: number;
+      lastModified?: Date;
+      etag?: string;
+    }[] = [];
+    const stream = minioClient.listObjectsV2(bucket, prefix, true);
+    stream.on("data", (obj) => {
+      if (results.length < limit) {
+        results.push({
+          name: obj.name || "",
+          size: obj.size,
+          lastModified: obj.lastModified,
+          etag: obj.etag,
+        });
+      }
+    });
+    stream.on("end", () => resolve(results));
+    stream.on("error", (err) => reject(err));
+  });
+}
+
+export async function getPresignedUrl(
+  key: string,
+  expirySeconds = 3600,
+  bucket = config.minio.bucket
+): Promise<string> {
+  await ensureBucketExists(bucket);
+  return new Promise((resolve, reject) => {
+    minioClient.presignedGetObject(bucket, key, expirySeconds, (err, url) => {
+      if (err) return reject(err);
+      resolve(url);
+    });
+  });
+}
