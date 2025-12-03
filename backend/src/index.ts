@@ -2,8 +2,10 @@ import express from 'express';
 import cors from 'cors';
 import { createClient } from 'redis';
 import { Queue } from 'bullmq';
+import { randomUUID } from 'crypto';
 import { config } from './config';
 import { getJson, getObjectBuffer, listObjects, getPresignedUrl } from "./storage";
+import { validateTimelineSchema } from './types/timeline';
 
 const app = express();
 app.use(cors());
@@ -150,6 +152,35 @@ app.get("/api/v1/library", async (req, res) => {
     console.error("Error listing library objects:", error);
     res.status(500).json({ error: "Failed to list library items" });
   }
+});
+
+// Render timeline → MP4 (stub)
+app.post("/api/v1/render", async (req, res) => {
+  const validation = validateTimelineSchema(req.body);
+  if (!validation.valid || !validation.sanitized) {
+    return res.status(400).json({ error: "Invalid timeline payload", details: validation.errors });
+  }
+
+  const timeline = validation.sanitized;
+  const renderId = randomUUID();
+  const outputPath = `/storysphere-assets/renders/${timeline.projectId || renderId}.mp4`;
+
+  console.log(
+    `[render] accepted ${renderId} for project=${timeline.projectId} tracks=${timeline.tracks.length} fps=${timeline.render.fps}`
+  );
+
+  // Future: enqueue real FFmpeg worker; for now acknowledge receipt.
+  res.json({
+    renderId,
+    status: "accepted",
+    output: outputPath,
+    summary: {
+      resolution: timeline.render.resolution,
+      fps: timeline.render.fps,
+      tracks: timeline.tracks.length,
+      audioBeds: timeline.audio?.length || 0,
+    },
+  });
 });
 
 // Job Logs SSE Endpoint

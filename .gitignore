@@ -4,3 +4,6 @@ dist/
 .DS_Store
 minio
 minio.log
+
+# Ignore Yugioh MP4s
+/frontend/public/*.mp4

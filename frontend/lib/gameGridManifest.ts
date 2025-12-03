@@ -1,0 +1,357 @@
+export type GameGridSpec = {
+  slug: string;
+  title: string;
+  emoji: string;
+  shortDesc: string;
+  playPath?: string;
+  pipPath?: string;
+  specs?: {
+    coreLoop: string;
+    hook: string;
+    fit: string;
+    complexity: string;
+    retention: string;
+  };
+};
+
+export const gameGridManifest: GameGridSpec[] = [
+  {
+    slug: "nebula-runner",
+    title: "Nebula Runner",
+    emoji: "✨",
+    shortDesc: "Endless runner prototype. Arrow keys to dodge meteors.",
+    playPath: "/games/nebula-runner/index.html",
+  },
+  {
+    slug: "lighthouse-defense",
+    title: "Lighthouse Defense",
+    emoji: "🏮",
+    shortDesc: "Quick tower defense on the coast. Click to place beacons.",
+    playPath: "/games/lighthouse-defense/index.html",
+  },
+  {
+    slug: "neon-runner",
+    title: "Neon Runner",
+    emoji: "⚡️",
+    shortDesc: "Dash across a shifting grid; avoid gaps and lasers.",
+    specs: {
+      coreLoop: "Dash across a shifting tile course, avoid gaps and lasers, beat your distance.",
+      hook: "Grid actively reconfigures under the player; plan two moves ahead.",
+      fit: "Grid columns and rows move as a gameplay mechanic.",
+      complexity: "Low to Medium.",
+      retention: "Daily challenges, cosmetic trails/skins, leaderboard.",
+    },
+  },
+  {
+    slug: "bullet-hive",
+    title: "Bullet Hive",
+    emoji: "🐝",
+    shortDesc: "Survive patterned projectiles as tiles bounce shots.",
+    specs: {
+      coreLoop: "Survive waves of patterned projectiles on a small arena grid.",
+      hook: "Bullets bounce off certain tiles and form emergent hazards; short survival rounds.",
+      fit: "Tile properties affect projectile paths.",
+      complexity: "Medium to High.",
+      retention: "Ranked survival modes, unlockable abilities.",
+    },
+  },
+  {
+    slug: "tile-forge",
+    title: "Tile Forge (Match -> Fight)",
+    emoji: "🧪",
+    shortDesc: "Match tiles to craft weapons, then battle in micro rounds.",
+    specs: {
+      coreLoop: "Match tiles to craft temporary weapons or skills, then use them in a combat mini round.",
+      hook: "Alternating puzzle and micro-combat rounds keeps sessions varied.",
+      fit: "Standard match/grid puzzle with combat overlay.",
+      complexity: "Medium.",
+      retention: "Power-up meta, crossover events, cosmetics.",
+    },
+  },
+  {
+    slug: "grid-bomber",
+    title: "Grid Bomber",
+    emoji: "💣",
+    shortDesc: "Place bombs to clear obstacles and rivals fast.",
+    specs: {
+      coreLoop: "Place bombs to destroy obstacles and opponents in short maps.",
+      hook: "Destructible tiles and random arena hazards create tense arcade matches.",
+      fit: "Classic grid-based movement and tile destruction.",
+      complexity: "Medium.",
+      retention: "Quick multiplayer, season battle passes.",
+    },
+  },
+  {
+    slug: "rogue-grid",
+    title: "Rogue Grid",
+    emoji: "🎲",
+    shortDesc: "Quick roguelike rooms with simple turn-based moves.",
+    specs: {
+      coreLoop: "Quick roguelike runs across compact rooms; each run is 3–10 minutes.",
+      hook: "Permadeath but with short loops and powerful unlocks.",
+      fit: "Procedural tile rooms with simple turn-based movement.",
+      complexity: "Medium.",
+      retention: "Meta progression and daily seed runs.",
+    },
+  },
+  {
+    slug: "tile-dominion",
+    title: "Tile Dominion",
+    emoji: "🚩",
+    shortDesc: "Place beacons to flip tiles and hold majority.",
+    specs: {
+      coreLoop: "Place beacons to claim adjacent tiles; hold majority to score.",
+      hook: "Chain conversions flipping tiles in combos for huge scores.",
+      fit: "Pure tile-control mechanics.",
+      complexity: "Low to Medium.",
+      retention: "Ranked matches, seasonal maps.",
+    },
+  },
+  {
+    slug: "circuit-commander",
+    title: "Circuit Commander",
+    emoji: "🔌",
+    shortDesc: "Route power between moving generators before overload.",
+    specs: {
+      coreLoop: "Route power from generators to targets under time pressure, avoid overloads.",
+      hook: "Moving generators and sinks plus short tile hazards create urgency.",
+      fit: "Wiring on grid tiles is very visual.",
+      complexity: "Medium.",
+      retention: "Puzzle packs, timed leaderboard runs.",
+    },
+  },
+  {
+    slug: "grid-kart",
+    title: "Grid Kart",
+    emoji: "🏎️",
+    shortDesc: "Top-down kart laps on tile tracks with hazards.",
+    specs: {
+      coreLoop: "Short top-down kart races on tile tracks with hazards.",
+      hook: "Track tiles alter behavior like speed, drift, jump.",
+      fit: "Tile types create track variety without heavy assets.",
+      complexity: "Medium.",
+      retention: "Time trials, ghost racing, seasonal tracks.",
+    },
+  },
+  {
+    slug: "swipe-snake",
+    title: "Swipe Snake",
+    emoji: "🐍",
+    shortDesc: "Swap tiles to guide your snake through corridors.",
+    specs: {
+      coreLoop: "One-touch snake where you swap tiles to create the path instead of steering.",
+      hook: "Puzzle twist on Snake; swap to guide your tail through corridors.",
+      fit: "Pure tile manipulation.",
+      complexity: "Low.",
+      retention: "Score chains, skins, daily puzzles.",
+    },
+  },
+  {
+    slug: "pixel-puck",
+    title: "Pixel Puck",
+    emoji: "🏒",
+    shortDesc: "Fast 1v1 air-hockey with bumper tiles.",
+    specs: {
+      coreLoop: "Fast 1v1 air-hockey on a grid with bumpers and tile effects.",
+      hook: "Spawnable obstacles and special tiles that alter puck physics.",
+      fit: "Tight arena fits arcade play.",
+      complexity: "Low to Medium.",
+      retention: "Ranked 1v1, cosmetic paddles.",
+    },
+  },
+  {
+    slug: "rhythm-blocks",
+    title: "Rhythm Blocks",
+    emoji: "🎵",
+    shortDesc: "Tap grid notes in time for combos.",
+    specs: {
+      coreLoop: "Notes scroll across a grid; tap tiles in time to score combos.",
+      hook: "Procedural or mapped tracks with combo multipliers for grid patterns.",
+      fit: "Timing plus tile mapping for short play.",
+      complexity: "Low to Medium.",
+      retention: "Track packs, ranked leaderboards, song licensing or upgrades.",
+    },
+  },
+  {
+    slug: "mine-maze",
+    title: "Mine Maze",
+    emoji: "⛏️",
+    shortDesc: "Reveal treasure while avoiding mines with limited moves.",
+    specs: {
+      coreLoop: "Reveal tiles to collect treasure but avoid mines; limited moves.",
+      hook: "Risk/reward as you push farther for bigger rewards.",
+      fit: "Minesweeper plus arcade progression.",
+      complexity: "Low.",
+      retention: "Upgrades that reveal hints, daily mazes.",
+    },
+  },
+  {
+    slug: "terraform",
+    title: "Terraform",
+    emoji: "🌱",
+    shortDesc: "Plant and merge crops before the timer expires.",
+    specs: {
+      coreLoop: "Fast farming loop: plant, combine crops on tiles, harvest before timer.",
+      hook: "Merge tiles to create higher-value crops and chain harvests.",
+      fit: "Tile merging and adjacency mechanics.",
+      complexity: "Medium.",
+      retention: "Cosmetic farm themes, timed events.",
+    },
+  },
+  {
+    slug: "grid-gladiators",
+    title: "Grid Gladiators",
+    emoji: "🛡️",
+    shortDesc: "Arena duels with traps, cover, and bounce tiles.",
+    specs: {
+      coreLoop: "Short arena combat with movement and attack tiles plus powerups.",
+      hook: "Tiles enforce tactical choices: cover, traps, bounce pads.",
+      fit: "Tactical grid combat for short matches.",
+      complexity: "Medium.",
+      retention: "Skins, character unlocks, seasonal arenas.",
+    },
+  },
+  {
+    slug: "mirror-maze",
+    title: "Mirror Maze",
+    emoji: "🪞",
+    shortDesc: "Rotate mirrors to laser targets against the clock.",
+    specs: {
+      coreLoop: "Rotate mirror tiles to direct a laser to targets before time runs out.",
+      hook: "Fast puzzle with combo scoring and moving targets.",
+      fit: "Easy to render and addictive transitions.",
+      complexity: "Low to Medium.",
+      retention: "Puzzle packs and timed leaderboards.",
+    },
+  },
+  {
+    slug: "grid-tycoon",
+    title: "Grid Tycoon",
+    emoji: "🏙️",
+    shortDesc: "Tile city-building against timed demands.",
+    specs: {
+      coreLoop: "Place buildings on tiles to generate income and survive waves of demands.",
+      hook: "Arcade time-attack where you optimize layout for score.",
+      fit: "Tile placement and adjacency bonuses.",
+      complexity: "High.",
+      retention: "Meta progression, weekly competitions.",
+    },
+  },
+  {
+    slug: "time-shift",
+    title: "Time Shift",
+    emoji: "⏪",
+    shortDesc: "Rewind tile states to dodge hazards.",
+    specs: {
+      coreLoop: "Manipulate tiles by rewinding short time windows to solve hazards.",
+      hook: "One simple rewind button replays tiles' last few states for high-skill play.",
+      fit: "Deterministic tile states make time mechanics clean.",
+      complexity: "Medium to High.",
+      retention: "Skill ladders, challenge runs.",
+    },
+  },
+  {
+    slug: "spy-grid",
+    title: "Spy Grid",
+    emoji: "🕵️",
+    shortDesc: "Plan steps to sneak past guards for loot.",
+    specs: {
+      coreLoop: "Plan moves to sneak past patrolling guards and steal items.",
+      hook: "One-screen heists with predictable patrol patterns for leaderboard stealth.",
+      fit: "Turn or step based on tiles with clear rules for arcade clarity.",
+      complexity: "Medium.",
+      retention: "Level editor, leaderboard for stealth efficiency.",
+    },
+  },
+  {
+    slug: "gravity-drop",
+    title: "Gravity Drop",
+    emoji: "🧲",
+    shortDesc: "Drop blocks and rotate gravity for chain reactions.",
+    specs: {
+      coreLoop: "Drop tiles and manipulate gravity or pivots so shapes land in goal zones.",
+      hook: "Satisfying chain reactions and cascade points.",
+      fit: "Tile physics simplified to grid rules.",
+      complexity: "Low.",
+      retention: "Daily puzzles, cosmetic blocks.",
+    },
+  },
+  {
+    slug: "tag-wars",
+    title: "Tag Wars (Multiplayer)",
+    emoji: "🏷️",
+    shortDesc: "Fast tag matches with traps and boosts.",
+    specs: {
+      coreLoop: "Fast tag or mob chase on a grid; it player must tag others before timer.",
+      hook: "Tile friction and traps change speed; powerups to escape or chase.",
+      fit: "Small maps, short runs, social play.",
+      complexity: "Low to Medium.",
+      retention: "Quick lobbies, friends lists, cosmetics.",
+    },
+  },
+  {
+    slug: "higher-or-lower",
+    title: "Higher or Lower",
+    emoji: "📈",
+    shortDesc: "Guess the next card higher or lower for streaks.",
+    specs: {
+      coreLoop: "Reveal a card, guess whether the next card is higher or lower; chain correct guesses.",
+      hook: "Big-risk tiles and streak multipliers make short sessions tense.",
+      fit: "Minimal UI; modifiers can sit on tiles or daily challenges.",
+      complexity: "Very low.",
+      retention: "Daily streak rewards, cosmetic card backs, earnable or purchasable power-ups.",
+    },
+  },
+  {
+    slug: "indian-poker",
+    title: "Indian Poker",
+    emoji: "🃏",
+    shortDesc: "See others' cards and bluff without seeing yours.",
+    specs: {
+      coreLoop: "Short multiplayer bluffing rounds where you see opponents' cards but not your own.",
+      hook: "Pure social psychology with fast pacing and readable tells.",
+      fit: "Grid used to place seats, reveal tiles, and interstitials for short lobbies.",
+      complexity: "Medium with real-time and anti-cheat needs.",
+      retention: "Friends tables, buy-in chips, seat or emoji cosmetics, ranked rooms.",
+    },
+  },
+  {
+    slug: "wheel-of-fortune",
+    title: "Wheel of Fortune",
+    emoji: "🎡",
+    shortDesc: "Spin, pick letters, and solve quick puzzles.",
+    specs: {
+      coreLoop: "Spin a prize wheel then guess letters to solve a word or phrase within the round.",
+      hook: "Balance between big payouts and hitting bankrupt; quick puzzle solves.",
+      fit: "Puzzle board as tiles; wheel UI for fast arcade rounds.",
+      complexity: "Low to Medium (puzzle/content management).",
+      retention: "Puzzle packs, premium spins, daily puzzle leaderboards, cosmetic wheels.",
+    },
+  },
+  {
+    slug: "blackjack",
+    title: "Blackjack",
+    emoji: "🂡",
+    shortDesc: "Snappy 21 hands with arcade modifiers.",
+    specs: {
+      coreLoop: "Classic 21 with quick hands against a dealer or short tournaments.",
+      hook: "Optional side-bets and tile-based modifiers like wild ace tiles.",
+      fit: "Cards laid on tiles; tournaments fit short-session arcade play.",
+      complexity: "Low to Medium.",
+      retention: "Chips, tournaments, VIP tables, cosmetic decks or backings.",
+    },
+  },
+  {
+    slug: "checkers",
+    title: "Checkers",
+    emoji: "⭕",
+    shortDesc: "Quick checkers with variant power tiles.",
+    specs: {
+      coreLoop: "Fast checkers matches on standard or variant boards with timed turns.",
+      hook: "Classic strategy with modern variants like double-jump bonuses or asymmetric tiles.",
+      fit: "Native grid game with minimal barrier to entry.",
+      complexity: "Low to Medium.",
+      retention: "Ranked ladder, casual matches, seasonal boards and piece skins, puzzle challenges.",
+    },
+  },
+];

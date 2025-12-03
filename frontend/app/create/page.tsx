@@ -62,7 +62,11 @@ export default function CreatePage() {
 
   return (
     <div className="max-w-3xl mx-auto p-6">
-      <h2 className="text-2xl font-serif mb-4">Create a New Story</h2>
+      <h2 className="text-2xl font-serif mb-2">Create a New Story</h2>
+      <p className="text-white/70 mb-4">
+        Generate frame sequences with ComfyUI, then send them into the StorySphere timeline for MP4 export.
+        Each job writes frames to <code>/comfyui/output/frames/&lt;jobId&gt;</code>.
+      </p>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
@@ -121,6 +125,11 @@ export default function CreatePage() {
         </div>
 
         {error && <div className="text-red-400">{error}</div>}
+
+        <p className="text-sm text-white/60">
+          When the job queues, you will land on the status page; open <code>/storysphere/editor/&lt;jobId&gt;</code>{" "}
+          to arrange the resulting frames on the timeline.
+        </p>
 
         <div>
           <button type="submit" disabled={submitting} className="btn-primary">

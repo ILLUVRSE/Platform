@@ -1,0 +1,97 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Nebula Runner</title>
+  <style>
+    body, html { margin: 0; padding: 0; background: #0a0f1c; color: #fff; overflow: hidden; font-family: Arial, sans-serif; }
+    #game { display: block; margin: 0 auto; background: radial-gradient(circle at 30% 30%, #223, #0a0f1c); }
+    #hud { position: fixed; top: 8px; left: 8px; font-size: 14px; }
+  </style>
+</head>
+<body>
+  <canvas id="game" width="480" height="320"></canvas>
+  <div id="hud">Score: <span id="score">0</span></div>
+  <script>
+    const canvas = document.getElementById('game');
+    const ctx = canvas.getContext('2d');
+    const scoreEl = document.getElementById('score');
+    let ship = { x: 80, y: canvas.height / 2, r: 12 };
+    let meteors = [];
+    let score = 0;
+    let alive = true;
+
+    function spawnMeteor() {
+      const size = 10 + Math.random() * 20;
+      meteors.push({
+        x: canvas.width + size,
+        y: Math.random() * canvas.height,
+        r: size,
+        speed: 2 + Math.random() * 3,
+      });
+    }
+
+    function update() {
+      if (!alive) return;
+      ctx.fillStyle = '#0a0f1c';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // draw ship
+      ctx.fillStyle = '#7fffd4';
+      ctx.beginPath();
+      ctx.arc(ship.x, ship.y, ship.r, 0, Math.PI * 2);
+      ctx.fill();
+
+      // stars
+      ctx.fillStyle = '#334';
+      for (let i = 0; i < 20; i++) {
+        ctx.fillRect(Math.random() * canvas.width, Math.random() * canvas.height, 1, 1);
+      }
+
+      // meteors
+      ctx.fillStyle = '#ff8c42';
+      meteors.forEach((m) => {
+        m.x -= m.speed;
+        ctx.beginPath();
+        ctx.arc(m.x, m.y, m.r, 0, Math.PI * 2);
+        ctx.fill();
+      });
+      meteors = meteors.filter((m) => m.x > -m.r);
+
+      // collision
+      meteors.forEach((m) => {
+        const dx = m.x - ship.x;
+        const dy = m.y - ship.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < m.r + ship.r) {
+          alive = false;
+          scoreEl.textContent = `${score} (Game Over)`;
+        }
+      });
+
+      score++;
+      scoreEl.textContent = score;
+      if (Math.random() < 0.04) spawnMeteor();
+      requestAnimationFrame(update);
+    }
+
+    const keys = new Set();
+    window.addEventListener('keydown', (e) => keys.add(e.key));
+    window.addEventListener('keyup', (e) => keys.delete(e.key));
+
+    function handleInput() {
+      if (!alive) return;
+      const speed = 4;
+      if (keys.has('ArrowUp')) ship.y -= speed;
+      if (keys.has('ArrowDown')) ship.y += speed;
+      if (keys.has('ArrowLeft')) ship.x -= speed;
+      if (keys.has('ArrowRight')) ship.x += speed;
+      ship.y = Math.max(ship.r, Math.min(canvas.height - ship.r, ship.y));
+      ship.x = Math.max(ship.r, Math.min(canvas.width - ship.r, ship.x));
+      requestAnimationFrame(handleInput);
+    }
+    handleInput();
+    update();
+  </script>
+</body>
+</html>

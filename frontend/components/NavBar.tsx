@@ -10,7 +10,7 @@ const links = [
   { href: "/library", label: "Library" },
   { href: "/series", label: "Series" },
   { href: "/movies", label: "Movies" },
-  { href: "/arcade", label: "Arcade" },
+  { href: "/gamegrid", label: "GameGrid" },
   { href: "/storysphere", label: "StorySphere" },
   { href: "/settings", label: "Settings" },
 ];
