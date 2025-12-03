@@ -75,12 +75,14 @@ export default function Player({
     }
 
     async function setupHls() {
+      if (!video) return;
       if (!source.hlsUrl) {
-        video.src = src!;
+        if (src) video.src = src;
         return;
       }
 
       try {
+        // @ts-ignore
         const mod = await import(/* webpackIgnore: true */ "https://cdn.jsdelivr.net/npm/hls.js@1.5.15/dist/hls.min.js");
         const Hls = (mod as any).default || (mod as any);
         if (Hls?.isSupported?.()) {
@@ -103,11 +105,11 @@ export default function Player({
             }
           });
         } else {
-          video.src = src!;
+          if (src) video.src = src;
         }
       } catch (err) {
         // If remote import fails, fall back to mp4 or native HLS
-        video.src = src!;
+        if (src) video.src = src;
       }
     }
 
@@ -169,13 +171,13 @@ export default function Player({
     const video = videoRef.current;
     if (!video) return;
     try {
-      // @ts-expect-error Picture-in-Picture types
+      // @ts-ignore
       if (document.pictureInPictureElement) {
-        // @ts-expect-error Picture-in-Picture types
+        // @ts-ignore
         await document.exitPictureInPicture();
         setPipActive(false);
       } else if (video.requestPictureInPicture) {
-        // @ts-expect-error Picture-in-Picture types
+        // @ts-ignore
         await video.requestPictureInPicture();
         setPipActive(true);
       }
