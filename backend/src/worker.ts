@@ -3,6 +3,7 @@ import { config } from './config';
 import { generateScript } from "./ollama";
 import { putJson } from "./storage";
 import { logForJob } from "./logging";
+import { generateAudioForJob } from "./tts";
 
 // Define the Job Data Interface
 interface GenerationJobData {
@@ -40,11 +41,11 @@ const worker = new Worker<GenerationJobData>(
       // Advance progress
       await job.updateProgress(15);
 
-      // Step 2: TTS (Mock/Placeholder)
-      console.log(`[Job ${job.id}] Step 2: Generating Audio (Placeholder)...`);
+      // Step 2: TTS
+      await logForJob(job.id!, "Step 2: Generating Audio...");
       await job.updateProgress(30);
-      // TODO: Call ElevenLabs/Local TTS
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const audioKey = await generateAudioForJob(job.id!, script);
+      await logForJob(job.id!, `Audio generated at ${audioKey}`);
 
       // Step 3: Visual Generation (Mock/Placeholder)
       console.log(`[Job ${job.id}] Step 3: Generating Visuals (Placeholder)...`);
@@ -63,6 +64,7 @@ const worker = new Worker<GenerationJobData>(
 
       return {
         preview_url: `http://localhost:9000/storysphere-media/${job.id}/preview.mp4`, // Mock URL
+        audio_url: `/api/v1/jobs/${job.id}/audio`,
         status: 'completed'
       };
 

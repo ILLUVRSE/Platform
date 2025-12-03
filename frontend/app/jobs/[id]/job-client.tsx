@@ -5,6 +5,7 @@ import ScriptViewer from "@/components/ScriptViewer";
 
 interface JobResult {
   preview_url?: string;
+  audio_url?: string;
 }
 
 interface JobData {
@@ -82,6 +83,14 @@ export default function JobClient({ id }: { id: string }) {
 
       <h3 className="mt-4 font-medium">Submitted data</h3>
       <pre className="bg-black/10 p-3 rounded">{JSON.stringify(job.data, null, 2)}</pre>
+
+      {job.result?.audio_url && (
+        <div className="mt-4">
+          <h3 className="font-medium">Audio</h3>
+          <audio controls src={`${BACKEND_URL}/api/v1/jobs/${job.id}/audio`} className="mt-2" />
+          <a className="ml-4 text-sm underline" href={`${BACKEND_URL}/api/v1/jobs/${job.id}/audio`} download={`${job.id}-audio.mp3`}>Download audio</a>
+        </div>
+      )}
 
       {job.result?.preview_url && (
         <div className="mt-4">

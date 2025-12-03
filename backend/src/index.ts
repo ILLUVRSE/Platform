@@ -3,7 +3,7 @@ import cors from 'cors';
 import { createClient } from 'redis';
 import { Queue } from 'bullmq';
 import { config } from './config';
-import { getJson } from "./storage";
+import { getJson, getObjectBuffer } from "./storage";
 
 const app = express();
 app.use(cors());
@@ -111,6 +111,20 @@ app.get("/api/v1/jobs/:id/script", async (req, res) => {
   } catch (err: any) {
     console.error("Error fetching script:", err?.message || err);
     res.status(404).json({ error: "Script not found" });
+  }
+});
+
+// Get Audio Endpoint
+app.get("/api/v1/jobs/:id/audio", async (req, res) => {
+  const key = `audio/${req.params.id}.mp3`;
+  try {
+    const buf = await getObjectBuffer(key);
+    res.setHeader("Content-Type", "audio/mpeg");
+    res.setHeader("Content-Length", String(buf.length));
+    res.end(buf);
+  } catch (err) {
+    console.error("Audio fetch error:", err);
+    res.status(404).json({ error: "Audio not found" });
   }
 });
 

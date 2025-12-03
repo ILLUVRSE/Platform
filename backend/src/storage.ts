@@ -23,6 +23,35 @@ export async function ensureBucketExists(bucket = config.minio.bucket) {
   });
 }
 
+export async function putObject(key: string, buf: Buffer, bucket = config.minio.bucket) {
+  await ensureBucketExists(bucket);
+  return new Promise<string>((resolve, reject) => {
+    minioClient.putObject(bucket, key, buf, (err, etag) => {
+      if (err) return reject(err);
+      resolve((etag as any)?.etag || "");
+    });
+  });
+}
+
+export async function getObjectBuffer(key: string, bucket = config.minio.bucket): Promise<Buffer> {
+  return new Promise<Buffer>((resolve, reject) => {
+    minioClient.getObject(bucket, key, (err, stream) => {
+      if (err) return reject(err);
+      const parts: Buffer[] = [];
+      stream.on("data", (c: Buffer) => parts.push(c));
+      stream.on("end", () => {
+        try {
+          const buf = Buffer.concat(parts);
+          resolve(buf);
+        } catch (e) {
+          reject(e);
+        }
+      });
+      stream.on("error", reject);
+    });
+  });
+}
+
 export async function putJson(key: string, obj: any, bucket = config.minio.bucket) {
   await ensureBucketExists(bucket);
   const body = Buffer.from(JSON.stringify(obj));
