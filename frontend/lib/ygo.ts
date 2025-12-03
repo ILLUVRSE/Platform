@@ -77,7 +77,7 @@ export function loadYuGiOhSeasons(
           FALLBACK_DURATION_SECONDS;
       }
 
-      return {
+      const ep: Episode = {
         productionId: Number(production),
         season: Number(season),
         episode: Number(episode),
@@ -86,8 +86,9 @@ export function loadYuGiOhSeasons(
         url: `/${encodeURI(file)}`,
         durationSeconds,
       };
+      return ep;
     })
-    .filter((item): item is Episode => Boolean(item));
+    .filter((item): item is Episode => item !== null);
 
   const grouped = episodes.reduce<Map<number, Episode[]>>((acc, ep) => {
     if (!acc.has(ep.season)) acc.set(ep.season, []);

@@ -6,6 +6,7 @@ import { randomUUID } from 'crypto';
 import { config } from './config';
 import { getJson, getObjectBuffer, listObjects, getPresignedUrl } from "./storage";
 import { validateTimelineSchema } from './types/timeline';
+import { db } from './db';
 
 const app = express();
 app.use(cors());
@@ -16,9 +17,91 @@ const generationQueue = new Queue('generation-queue', {
   connection: config.redis
 });
 
+// Initialize DB table for Arcade Scores (MVP)
+async function initDb() {
+  if (db.isReady()) {
+    try {
+      await db.query(`
+        CREATE TABLE IF NOT EXISTS arcade_scores (
+          id SERIAL PRIMARY KEY,
+          game TEXT NOT NULL,
+          user_id TEXT,
+          score INTEGER NOT NULL,
+          seed TEXT,
+          duration_ms INTEGER,
+          meta JSONB,
+          created_at TIMESTAMPTZ DEFAULT now()
+        );
+      `);
+      await db.query(`CREATE INDEX IF NOT EXISTS idx_arcade_scores_game_seed_score ON arcade_scores (game, seed, score DESC);`);
+      console.log('Arcade scores table initialized');
+    } catch (err) {
+      console.error('Failed to initialize arcade tables', err);
+    }
+  }
+}
+initDb();
+
 // Health check
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
+// Arcade Score Endpoint
+app.post('/api/v1/arcade/score', async (req, res) => {
+  try {
+    const { game, user_id, score, seed, duration_ms, meta } = req.body;
+
+    if (!game || score === undefined) {
+      return res.status(400).json({ error: 'Missing required fields' });
+    }
+
+    if (db.isReady()) {
+      const result = await db.query(
+        `INSERT INTO arcade_scores (game, user_id, score, seed, duration_ms, meta)
+         VALUES ($1, $2, $3, $4, $5, $6)
+         RETURNING id`,
+        [game, user_id || null, score, seed, duration_ms, meta]
+      );
+      return res.status(201).json({ ok: true, id: result.rows[0].id });
+    } else {
+      // Mock success if DB unavailable
+      console.warn('DB not ready, dropping score');
+      return res.status(200).json({ ok: true, mocked: true });
+    }
+  } catch (error) {
+    console.error('Error saving score:', error);
+    res.status(500).json({ error: 'Failed to save score' });
+  }
+});
+
+// Arcade Leaderboard Endpoint
+app.get('/api/v1/arcade/leaderboard', async (req, res) => {
+  try {
+    const { game, seed, limit } = req.query;
+    if (!db.isReady()) {
+       return res.json({ items: [] });
+    }
+
+    const limitVal = Math.min(100, parseInt((limit as string) || '20', 10));
+
+    let query = `SELECT * FROM arcade_scores WHERE game = $1`;
+    const params: any[] = [game];
+
+    if (seed) {
+      query += ` AND seed = $2`;
+      params.push(seed);
+    }
+
+    query += ` ORDER BY score DESC LIMIT $${params.length + 1}`;
+    params.push(limitVal);
+
+    const result = await db.query(query, params);
+    res.json({ items: result.rows });
+  } catch (error) {
+    console.error('Error fetching leaderboard:', error);
+    res.status(500).json({ error: 'Failed to fetch leaderboard' });
+  }
 });
 
 // Create Job Endpoint

@@ -71,7 +71,7 @@ function buildSchedule(
   if (episodes.length === 0) return [];
 
   const totalDurationMs = episodes.reduce(
-    (sum, ep) => sum + ep.durationSeconds * 1000,
+    (sum, ep) => sum + (ep.durationSeconds || 0) * 1000,
     0,
   );
   const anchor = anchorMs ?? nowMs;
@@ -82,7 +82,7 @@ function buildSchedule(
   let idx = 0;
   let accumulated = 0;
   while (true) {
-    const dur = episodes[idx].durationSeconds * 1000;
+    const dur = (episodes[idx]?.durationSeconds || 0) * 1000;
     if (positionInLoop < accumulated + dur) break;
     accumulated += dur;
     idx = (idx + 1) % episodes.length;
@@ -94,7 +94,7 @@ function buildSchedule(
 
   while (start < nowMs + horizonMs) {
     const episode = episodes[cursor];
-    const end = start + episode.durationSeconds * 1000;
+    const end = start + (episode.durationSeconds || 0) * 1000;
     schedule.push({ episode, start, end });
     start = end;
     cursor = (cursor + 1) % episodes.length;
@@ -110,7 +110,7 @@ function getLivePointer(
 ) {
   if (episodes.length === 0) return null;
   const totalDurationMs = episodes.reduce(
-    (sum, ep) => sum + ep.durationSeconds * 1000,
+    (sum, ep) => sum + (ep.durationSeconds || 0) * 1000,
     0,
   );
   const anchor = anchorMs ?? nowMs;
@@ -121,7 +121,7 @@ function getLivePointer(
   let idx = 0;
   let accumulated = 0;
   while (true) {
-    const dur = episodes[idx].durationSeconds * 1000;
+    const dur = (episodes[idx]?.durationSeconds || 0) * 1000;
     if (positionInLoop < accumulated + dur) {
       return {
         index: idx,
@@ -297,7 +297,7 @@ export default function LiveLoopClient({ seasons }: { seasons: Season[] }) {
               </div>
               {activeEpisode && (
                 <div className="text-xs text-white/60 text-right">
-                  {readableDuration(activeEpisode.durationSeconds)} · #
+                  {readableDuration(activeEpisode.durationSeconds || 0)} · #
                   {activeEpisode.productionId}
                 </div>
               )}
@@ -385,7 +385,7 @@ export default function LiveLoopClient({ seasons }: { seasons: Season[] }) {
                         {entry.episode.title}
                       </div>
                       <div className="text-[11px] text-white/50">
-                        {readableDuration(entry.episode.durationSeconds)}
+                        {readableDuration(entry.episode.durationSeconds || 0)}
                       </div>
                     </button>
                   ))}
@@ -485,7 +485,7 @@ export default function LiveLoopClient({ seasons }: { seasons: Season[] }) {
                             {entry.episode.episode.toString().padStart(2, "0")} · {entry.episode.title}
                           </div>
                           <div className="text-[11px] text-white/60">
-                            {readableDuration(entry.episode.durationSeconds)}
+                            {readableDuration(entry.episode.durationSeconds || 0)}
                           </div>
                           {isLive && (
                             <div className="absolute top-1 right-2 text-[10px] text-[var(--color-accent)]">
