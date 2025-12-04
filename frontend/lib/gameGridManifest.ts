@@ -148,6 +148,7 @@ export const gameGridManifest: GameGridSpec[] = [
     title: "Swipe Snake",
     emoji: "🐍",
     shortDesc: "Swap tiles to guide your snake through corridors.",
+    playPath: "/games/swipe-snake/index.html",
     specs: {
       coreLoop: "One-touch snake where you swap tiles to create the path instead of steering.",
       hook: "Puzzle twist on Snake; swap to guide your tail through corridors.",
