@@ -302,6 +302,7 @@ export const gameGridManifest: GameGridSpec[] = [
     title: "Gravity Drop",
     emoji: "🧲",
     shortDesc: "Drop blocks and rotate gravity for chain reactions.",
+    playPath: "/games/gravity-drop/index.html",
     specs: {
       coreLoop: "Drop tiles and manipulate gravity or pivots so shapes land in goal zones.",
       hook: "Satisfying chain reactions and cascade points.",
