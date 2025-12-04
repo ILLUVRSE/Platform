@@ -121,6 +121,7 @@ export const gameGridManifest: GameGridSpec[] = [
     title: "Circuit Commander",
     emoji: "🔌",
     shortDesc: "Route power between moving generators before overload.",
+    playPath: "/games/circuit-commander/index.html",
     specs: {
       coreLoop: "Route power from generators to targets under time pressure, avoid overloads.",
       hook: "Moving generators and sinks plus short tile hazards create urgency.",

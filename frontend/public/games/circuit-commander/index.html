@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Circuit Commander</title>
+    <style>
+        body {
+            margin: 0;
+            background: #111;
+            color: #eee;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+        #game-container {
+            position: relative;
+            margin-top: 20px;
+        }
+        canvas {
+            border: 2px solid #333;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.1);
+            cursor: crosshair;
+        }
+        #ui-bar {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            background: #222;
+            padding: 10px;
+            border-radius: 8px;
+        }
+        .tool-btn {
+            background: #333;
+            border: 1px solid #444;
+            color: #fff;
+            padding: 8px 12px;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 14px;
+            transition: all 0.1s;
+        }
+        .tool-btn:hover { background: #444; }
+        .tool-btn.active {
+            background: #009688;
+            border-color: #00e5ff;
+            color: #fff;
+            box-shadow: 0 0 8px #009688;
+        }
+        .controls-hint {
+            margin-top: 10px;
+            font-size: 12px;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <canvas id="gameCanvas"></canvas>
+    </div>
+
+    <div id="ui-bar">
+        <button class="tool-btn active" data-type="wire" data-subtype="straight">Line (1)</button>
+        <button class="tool-btn" data-type="wire" data-subtype="corner">Corner (2)</button>
+        <button class="tool-btn" data-type="wire" data-subtype="t_shape">T-Junction (3)</button>
+        <button class="tool-btn" data-type="wire" data-subtype="cross">Cross (4)</button>
+        <button class="tool-btn" data-type="breaker" data-type="breaker">Breaker (5)</button>
+        <button class="tool-btn" data-type="switch" data-type="switch">Switch (6)</button>
+    </div>
+
+    <div class="controls-hint">
+        Left Click: Place/Rotate | Right Click: Delete | R: Rotate Selection
+    </div>
+
+    <script type="module" src="./main.js"></script>
+</body>
+</html>
