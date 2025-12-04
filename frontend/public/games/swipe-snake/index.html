@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Swipe Snake</title>
+    <style>
+        body {
+            margin: 0;
+            background: #071218;
+            color: #fdfbf7;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            overflow: hidden;
+            touch-action: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+        }
+
+        #ui-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        #hud {
+            padding: 20px;
+            font-size: 24px;
+            font-weight: bold;
+            color: #FFD166;
+            text-shadow: 0 2px 0 #000;
+        }
+
+        #game-container {
+            position: relative;
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            max-width: 600px;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        canvas {
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            max-width: 100%;
+            max-height: 100%;
+            touch-action: none;
+        }
+
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(7, 18, 24, 0.9);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            pointer-events: auto;
+            z-index: 10;
+        }
+
+        h1 {
+            font-size: 3rem;
+            margin: 0 0 10px 0;
+            color: #00D1B2;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        p {
+            max-width: 300px;
+            text-align: center;
+            line-height: 1.5;
+            color: #a0aec0;
+            margin-bottom: 30px;
+        }
+
+        button {
+            background: #FFD166;
+            color: #071218;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: transform 0.1s;
+            box-shadow: 0 4px 0 #b38f00;
+        }
+
+        button:active {
+            transform: translateY(4px);
+            box-shadow: 0 0 0 #b38f00;
+        }
+
+        .tutorial-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 20px;
+            text-align: left;
+            font-size: 0.9rem;
+        }
+        .key { color: #7fffd4; font-weight: bold;}
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <canvas id="gameCanvas"></canvas>
+    </div>
+
+    <div id="ui-layer">
+        <div id="hud">
+            SCORE: <span id="scoreVal">0</span>
+        </div>
+    </div>
+
+    <div id="startOverlay" class="overlay">
+        <h1>Swipe Snake</h1>
+        <p>Swap tiles to guide the snake.<br>Collect gold. Avoid walls.</p>
+
+        <div class="tutorial-grid">
+            <div class="key">SWAP</div><div>Tap adjacent tiles</div>
+            <div class="key">GOAL</div><div>Eat & Grow</div>
+            <div class="key">RULE</div><div>Don't swap the snake!</div>
+        </div>
+
+        <button id="startBtn">PLAY</button>
+    </div>
+
+    <div id="gameOverOverlay" class="overlay" style="display: none;">
+        <h1>GAME OVER</h1>
+        <p>Score: <span id="finalScore">0</span></p>
+        <button id="restartBtn">RETRY</button>
+    </div>
+
+    <script type="module" src="main.js"></script>
+</body>
+</html>
