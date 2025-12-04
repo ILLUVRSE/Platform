@@ -330,6 +330,7 @@ export const gameGridManifest: GameGridSpec[] = [
     title: "Higher or Lower",
     emoji: "📈",
     shortDesc: "Guess the next card higher or lower for streaks.",
+    playPath: "/games/higher-or-lower/index.html",
     specs: {
       coreLoop: "Reveal a card, guess whether the next card is higher or lower; chain correct guesses.",
       hook: "Big-risk tiles and streak multipliers make short sessions tense.",
