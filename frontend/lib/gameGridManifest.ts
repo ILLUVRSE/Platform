@@ -107,6 +107,7 @@ export const gameGridManifest: GameGridSpec[] = [
     title: "Tile Dominion",
     emoji: "🚩",
     shortDesc: "Place beacons to flip tiles and hold majority.",
+    playPath: "/games/tile-dominion/index.html",
     specs: {
       coreLoop: "Place beacons to claim adjacent tiles; hold majority to score.",
       hook: "Chain conversions flipping tiles in combos for huge scores.",
