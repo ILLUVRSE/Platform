@@ -316,6 +316,7 @@ export const gameGridManifest: GameGridSpec[] = [
     title: "Tag Wars (Multiplayer)",
     emoji: "🏷️",
     shortDesc: "Fast tag matches with traps and boosts.",
+    playPath: "/games/tag-wars/index.html",
     specs: {
       coreLoop: "Fast tag or mob chase on a grid; it player must tag others before timer.",
       hook: "Tile friction and traps change speed; powerups to escape or chase.",
