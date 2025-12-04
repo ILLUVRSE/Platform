@@ -358,6 +358,7 @@ export const gameGridManifest: GameGridSpec[] = [
     title: "Wheel of Fortune",
     emoji: "🎡",
     shortDesc: "Spin, pick letters, and solve quick puzzles.",
+    playPath: "/games/wheel-of-fortune/index.html",
     specs: {
       coreLoop: "Spin a prize wheel then guess letters to solve a word or phrase within the round.",
       hook: "Balance between big payouts and hitting bankrupt; quick puzzle solves.",
