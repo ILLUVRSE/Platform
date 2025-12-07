@@ -1,0 +1,42 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+
+  body {
+    background-color: #0c161a;
+    color: #f4eee2;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-heading), serif;
+    letter-spacing: -0.01em;
+  }
+
+  p,
+  span,
+  a {
+    font-family: var(--font-body), sans-serif;
+  }
+
+  a {
+    color: #2bb4a8;
+  }
+
+  code {
+    font-family: var(--font-mono), monospace;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}

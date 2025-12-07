@@ -1,0 +1,13 @@
+export type LiveLoopItem = {
+  id: string;
+  title: string;
+  duration: string;
+  status: "On Air" | "Next" | "Queued";
+  sha: string;
+};
+
+export const playlist: LiveLoopItem[] = [
+  { id: "arcadia-dawn", title: "Arcadia Dawn", duration: "00:18", status: "On Air", sha: "9eaf:11d0...bc21" },
+  { id: "neon-harbor", title: "Neon Harbor", duration: "00:21", status: "Next", sha: "c3db:901a...8ff1" },
+  { id: "riverport-highlights", title: "Riverport Highlights", duration: "00:24", status: "Queued", sha: "f41c:0022...aa9b" }
+];

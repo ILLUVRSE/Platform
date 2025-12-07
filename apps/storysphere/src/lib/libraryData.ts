@@ -1,0 +1,71 @@
+export type Episode = {
+  id: string;
+  title: string;
+  duration: string;
+  synopsis?: string;
+};
+
+export type Season = {
+  id: string;
+  title: string;
+  episodes: Episode[];
+};
+
+export type Series = {
+  id: string;
+  title: string;
+  seasons: Season[];
+};
+
+export type Movie = {
+  id: string;
+  title: string;
+  duration: string;
+  synopsis?: string;
+};
+
+export const seriesCatalog: Series[] = [
+  {
+    id: "chronicles-of-the-grid",
+    title: "Chronicles of the Grid",
+    seasons: [
+      {
+        id: "s1",
+        title: "Season 1",
+        episodes: [
+          { id: "s1e1", title: "Pilot: Signal in the Static", duration: "00:11" },
+          { id: "s1e2", title: "Harbor Run", duration: "00:13" },
+          { id: "s1e3", title: "Ghost in the Grid", duration: "00:12" }
+        ]
+      },
+      {
+        id: "s2",
+        title: "Season 2",
+        episodes: [
+          { id: "s2e1", title: "Echoes of Arcadia", duration: "00:12" },
+          { id: "s2e2", title: "Neon Uprising", duration: "00:15" }
+        ]
+      }
+    ]
+  },
+  {
+    id: "neon-harbor-diaries",
+    title: "Neon Harbor Diaries",
+    seasons: [
+      {
+        id: "s1",
+        title: "Season 1",
+        episodes: [
+          { id: "s1e1", title: "Dawnshift", duration: "00:10" },
+          { id: "s1e2", title: "Night Markets", duration: "00:09" }
+        ]
+      }
+    ]
+  }
+];
+
+export const moviesCatalog: Movie[] = [
+  { id: "arcadia-dawn", title: "Arcadia Dawn", duration: "00:24" },
+  { id: "riverport-rivals", title: "Riverport Rivals", duration: "00:18" },
+  { id: "mirror-maze", title: "Mirror Maze", duration: "00:21" }
+];

@@ -1,0 +1,11 @@
+{
+  "name": "@illuvrse/tests",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "test": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.49.0"
+  }
+}
