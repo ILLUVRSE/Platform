@@ -129,7 +129,13 @@ function toWebStream(nodeStream: fs.ReadStream): ReadableStream {
   return new ReadableStream({
     start(controller) {
       nodeStream.on("data", (chunk) => {
-        controller.enqueue(chunk instanceof Uint8Array ? chunk : new Uint8Array(chunk));
+        const bytes =
+          chunk instanceof Uint8Array
+            ? chunk
+            : typeof chunk === "string"
+              ? Buffer.from(chunk)
+              : new Uint8Array(chunk);
+        controller.enqueue(bytes);
       });
       nodeStream.once("end", () => controller.close());
       nodeStream.once("close", () => controller.close());
