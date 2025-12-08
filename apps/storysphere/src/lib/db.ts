@@ -1,15 +1,22 @@
-import { Pool } from "pg";
 import path from "path";
+
+// Lightweight PG type so we don't depend on external typings during build.
+type PgPool = {
+  query: (...args: any[]) => Promise<any>;
+  end: () => Promise<void>;
+};
 
 type DBClient =
   | { type: "sqlite"; db: any }
-  | { type: "pg"; pool: Pool }
+  | { type: "pg"; pool: PgPool }
   | { type: "memory"; kv: Map<string, string> };
 
 function createClient(): DBClient {
   const pgUrl = process.env.DATABASE_URL;
   if (pgUrl) {
-    const pool = new Pool({ connectionString: pgUrl });
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { Pool } = require("pg");
+    const pool: PgPool = new Pool({ connectionString: pgUrl });
     return { type: "pg", pool };
   }
 
