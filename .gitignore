@@ -35,3 +35,5 @@ apps/storysphere/public/*.torrent
 apps/storysphere/public/*.sqlite
 apps/storysphere/public/*.xml
 apps/storysphere/public/*.jpg
+apps/storysphere/public/*.ts
+apps/storysphere/public/*.tsx
