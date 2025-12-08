@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  transpilePackages: ["@illuvrse/ui"],
+  transpilePackages: ["@illuvrse/ui", "@illuvrse/agent-manager", "@illuvrse/contracts"],
   async redirects() {
     return [
       {
