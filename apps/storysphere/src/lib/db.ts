@@ -14,7 +14,6 @@ type DBClient =
 function createClient(): DBClient {
   const pgUrl = process.env.DATABASE_URL;
   if (pgUrl) {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
     const { Pool } = require("pg");
     const pool: PgPool = new Pool({ connectionString: pgUrl });
     return { type: "pg", pool };

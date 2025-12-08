@@ -530,7 +530,7 @@ function LivePlayer({
     return () => {
       if (cleanup) cleanup();
     };
-  }, [streamSrc, embedSrc]);
+  }, [streamSrc, embedSrc, fallbackMp4]);
 
   if (embedSrc) {
     return (
