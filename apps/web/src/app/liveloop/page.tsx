@@ -438,13 +438,15 @@ export default function LiveLoopPage() {
           {comingSoonCards.map((card) => (
             <Card
               key={card.title}
-              title={
-                <div className="flex items-center justify-between gap-2">
-                  <span>{card.title}</span>
-                  <Pill className="bg-slate-700 text-slate-200">Coming Soon</Pill>
+              title={card.title}
+              body={
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between gap-2">
+                    <Pill className="bg-slate-700 text-slate-200">Coming Soon</Pill>
+                  </div>
+                  <p className="text-sm text-slate-200/80">{card.body}</p>
                 </div>
               }
-              body={<p className="text-sm text-slate-200/80">{card.body}</p>}
               footer={
                 <Link
                   href={notifyHref}
