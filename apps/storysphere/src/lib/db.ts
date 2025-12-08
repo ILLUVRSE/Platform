@@ -14,7 +14,6 @@ function createClient(): DBClient {
   }
 
   try {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
     const Database = require("better-sqlite3");
     const dbPath = process.env.SQLITE_PATH ?? path.join(process.cwd(), "apps", "storysphere", "data", "storysphere.db");
     const db = new Database(dbPath);
