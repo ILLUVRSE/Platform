@@ -7,7 +7,9 @@
     "dev": "turbo dev",
     "build": "turbo build",
     "lint": "turbo lint",
-    "test:smoke": "pnpm --filter @illuvrse/tests test"
+    "test:smoke": "pnpm --filter @illuvrse/tests test",
+    "start:ace": "pnpm --filter web start -- --port 3000",
+    "start:storysphere": "pnpm --filter storysphere start -- --port 3001"
   },
   "packageManager": "pnpm@10.24.0",
   "devDependencies": {

@@ -13,6 +13,8 @@ Monorepo for the governed creator platform and StorySphere studio.
 ## Scripts
 - `pnpm dev --filter web` – run illuvrse.com shell.
 - `pnpm dev --filter storysphere` – run StorySphere studio.
+- `pnpm start:ace` – production start for the ACE shell on port 3000 (requires `pnpm build` first).
+- `pnpm start:storysphere` – production start for StorySphere studio on port 3001 (requires `pnpm build` first).
 - `pnpm lint --filter web|storysphere` – lint apps.
 - `pnpm test:smoke` – Playwright smoke tests (skipped by default). Set `RUN_UI_SMOKE=true WEB_URL=http://localhost:3000 STUDIO_URL=http://localhost:3001` and run both dev servers to execute.
   - When `RUN_UI_SMOKE=true`, Playwright can auto-start the dev servers via webServer config; otherwise tests skip.

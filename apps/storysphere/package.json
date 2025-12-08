@@ -9,8 +9,8 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@illuvrse/contracts": "workspace:*",
     "@illuvrse/agent-manager": "workspace:*",
+    "@illuvrse/contracts": "workspace:*",
     "@illuvrse/ui": "workspace:*",
     "better-sqlite3": "^12.5.0",
     "next": "14.2.5",
@@ -22,6 +22,8 @@
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
+    "@typescript-eslint/eslint-plugin": "^8.48.1",
+    "@typescript-eslint/parser": "^8.48.1",
     "eslint": "^8",
     "eslint-config-next": "14.2.5",
     "postcss": "^8",

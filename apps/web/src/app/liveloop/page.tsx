@@ -242,7 +242,7 @@ export default function LiveLoopPage() {
   });
 
   const viewerCount = useMemo(() => 1840 + Math.floor(Math.random() * 140), []);
-  // Use local StorySphere public asset by default; override with HLS/MP4 via env.
+  // Use StorySphere-hosted MP4 by default; override with HLS/MP4 via env.
   const streamSrc = process.env.NEXT_PUBLIC_LIVELOOP_SRC || "/royal_wedding.mp4";
   const embedSrc = process.env.NEXT_PUBLIC_LIVELOOP_EMBED;
   const fallbackMp4 =
