@@ -23,6 +23,15 @@ async function ensureSeeds() {
 ensureSeeds();
 
 async function getKV<T>(key: KVKeys): Promise<T | null> {
+  if (client.type === "memory") {
+    const raw = client.kv.get(key);
+    if (!raw) return null;
+    try {
+      return JSON.parse(raw) as T;
+    } catch {
+      return null;
+    }
+  }
   if (client.type === "sqlite") {
     client.db.exec(
       `CREATE TABLE IF NOT EXISTS kv (
@@ -56,6 +65,10 @@ async function getKV<T>(key: KVKeys): Promise<T | null> {
 
 async function setKV<T>(key: KVKeys, value: T) {
   const serialized = JSON.stringify(value);
+  if (client.type === "memory") {
+    client.kv.set(key, serialized);
+    return;
+  }
   if (client.type === "sqlite") {
     client.db.prepare("INSERT OR REPLACE INTO kv (key, value) VALUES (?, ?)").run(key, serialized);
   } else {
@@ -68,7 +81,7 @@ async function setKV<T>(key: KVKeys, value: T) {
 
 export const store = {
   getJobs: async () => (await getKV<typeof defaultJobs>("jobs")) ?? defaultJobs,
-  addJob: async (job: { id: string; prompt: string; status: string }) => {
+  addJob: async (job: { id: string; prompt: string; status: string; proof?: { sha: string; signer: string; status: string } }) => {
     const jobs = [job, ...((await getKV<typeof defaultJobs>("jobs")) ?? defaultJobs)];
     await setKV("jobs", jobs);
     return jobs;

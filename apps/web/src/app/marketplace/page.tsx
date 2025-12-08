@@ -86,11 +86,11 @@ export default async function MarketplacePage() {
       <PageSection eyebrow="Proofs" title="Show the manifest before checkout">
         <div className="grid gap-6 lg:grid-cols-2">
           <ProofCard
-            sha="d3be:11ff...9ae1"
-            signer="Kernel multisig"
-            timestamp="2025-02-03 14:48 UTC"
+            sha={listing?.proof?.sha256 ?? "d3be:11ff...9ae1"}
+            signer={listing?.proof?.signer ?? "Kernel multisig"}
+            timestamp={listing?.proof?.timestamp ?? "2025-02-03 14:48 UTC"}
             ledgerLink="/developers#ledger"
-            policyVerdict="SentinelNet PASS"
+            policyVerdict={listing?.proof?.policyVerdict ?? "SentinelNet PASS"}
           />
           <Card
             title="Checkout with Finance + ArtifactPublisher"
@@ -102,7 +102,12 @@ export default async function MarketplacePage() {
                   <StatBadge label="Audit per order" value="Yes" variant="neutral" />
                   <StatBadge label="Delivery" value="Encrypted" variant="warning" />
                 </div>
-                {listing && <ManifestViewer sha={listing.sha256} />}
+                {listing?.manifest ? (
+                  // @ts-expect-error Server Component
+                  <ManifestViewer manifest={listing.manifest as any} />
+                ) : (
+                  <div className="text-sm text-slate-200/70">Manifest not available from listing.</div>
+                )}
               </div>
             }
           />

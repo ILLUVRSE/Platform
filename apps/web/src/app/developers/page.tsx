@@ -1,5 +1,22 @@
 import { Card, PageSection, Pill } from "@illuvrse/ui";
 import Link from "next/link";
+import { ManifestViewer } from "../../components/ManifestViewer";
+import type { AceAgentManifest } from "@illuvrse/contracts";
+
+const sampleManifest: AceAgentManifest = {
+  id: "agent.story-weaver.001",
+  name: "StoryWeaver",
+  version: "0.1.0",
+  description: "Generator + catalog agent for StorySphere previews",
+  archetype: "Oracle",
+  capabilities: ["generator", "catalog"],
+  triggers: [{ type: "event", event: "job.requested" }],
+  modelBindings: { llm: { id: "gpt-4o-mini", provider: "openai" }, tts: { id: "eleven.v1", voice: "calm" } },
+  permissions: { storage: { write: ["previews/", "final/"] }, network: { outbound: true } },
+  resources: { cpu: "500m", memory: "1Gi" },
+  runtime: { container: { image: "illuvrse/agent-storyweaver:dev" } },
+  metadata: { owner: "ryan", env: "dev" }
+};
 
 export default function DevelopersPage() {
   return (
@@ -82,6 +99,22 @@ export default function DevelopersPage() {
               </div>
             }
           />
+        </div>
+      </PageSection>
+
+      <PageSection eyebrow="Viewer" title="Validate & inspect a manifest">
+        <div className="grid gap-4 md:grid-cols-2">
+          <Card
+            title="How to use"
+            body={
+              <div className="text-sm text-slate-200/80 space-y-2">
+                <p>Paste your ACE Agent Manifest and ensure it passes validation, signing, and policy verdicts.</p>
+                <p>The viewer computes SHA-256, calls Kernel verify, and shows SentinelNet stub verdicts.</p>
+              </div>
+            }
+          />
+          {/* @ts-expect-error Server Component */}
+          <ManifestViewer manifest={sampleManifest} />
         </div>
       </PageSection>
 

@@ -27,3 +27,11 @@ yarn-error.log*
 .DS_Store
 dist
 build
+
+# media assets (host externally, not in repo)
+apps/storysphere/public/*.mp4
+apps/storysphere/public/*.zip
+apps/storysphere/public/*.torrent
+apps/storysphere/public/*.sqlite
+apps/storysphere/public/*.xml
+apps/storysphere/public/*.jpg

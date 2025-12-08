@@ -18,7 +18,7 @@ export default function ProductsPage() {
         </p>
         <div className="mt-4 flex flex-wrap gap-3">
           <Link
-            href="/playground"
+            href="/ace/create"
             className="rounded-full bg-gradient-to-r from-gold-500 to-teal-500 px-5 py-3 text-sm font-semibold text-slate-900 shadow-card transition hover:opacity-95"
           >
             Start ACE

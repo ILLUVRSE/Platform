@@ -1,0 +1,14 @@
+{
+  "name": "@illuvrse/agent-manager",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "main": "src/index.ts",
+  "scripts": {
+    "test:integration": "node ./src/integration.test.ts",
+    "dev": "node ./src/dev-server.ts"
+  },
+  "dependencies": {
+    "@illuvrse/contracts": "workspace:*"
+  }
+}

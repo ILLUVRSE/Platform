@@ -21,7 +21,21 @@ export async function GET() {
     currency: "USD",
     sha256: "d3be:11ff...9ae1",
     status: "ready",
-    signed: true
+    signed: true,
+    manifest: {
+      id: "agent.bundle.grid.analyst",
+      name: "Grid Analyst Bundle",
+      version: "0.1.0",
+      capabilities: ["generator", "catalog"],
+      runtime: { container: { image: "illuvrse/agent-grid:dev" } }
+    },
+    proof: {
+      sha256: "d3be:11ff...9ae1",
+      signer: "kernel-multisig",
+      timestamp: new Date().toISOString(),
+      policyVerdict: "SentinelNet PASS",
+      ledgerUrl: "/developers#ledger"
+    }
   };
 
   return NextResponse.json(listing);

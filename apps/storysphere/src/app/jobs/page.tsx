@@ -37,9 +37,18 @@ async function JobsSection() {
             key={job.id}
             title={job.id}
             body={
-              <div className="text-sm text-slate-200/80">
+              <div className="text-sm text-slate-200/80 space-y-2">
                 <div className="font-semibold text-cream">{job.prompt}</div>
                 <div>Status: {job.status}</div>
+                {job.proof ? (
+                  <div className="rounded-lg border border-slate-700 bg-slate-900/60 p-2">
+                    <div className="text-[11px] uppercase tracking-[0.2em] text-slate-400">Proof</div>
+                    <div className="text-cream text-[12px] font-mono break-all">{job.proof.sha}</div>
+                    <div className="text-[12px] text-teal-200">Signer: {job.proof.signer} · {job.proof.status}</div>
+                  </div>
+                ) : (
+                  <div className="text-[12px] text-slate-400">Proof pending</div>
+                )}
               </div>
             }
           />

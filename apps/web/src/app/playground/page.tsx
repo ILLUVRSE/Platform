@@ -1,7 +1,42 @@
 import { Card, PageSection, Pill } from "@illuvrse/ui";
 import Link from "next/link";
+import { ManifestViewer } from "../../components/ManifestViewer";
+import type { AceAgentManifest } from "@illuvrse/contracts";
+import { cookies } from "next/headers";
+
+const playgroundManifest: AceAgentManifest = {
+  id: "agent.avatar-demo.001",
+  name: "AvatarDemo",
+  version: "0.1.0",
+  description: "Avatar + generator agent for sandbox previews",
+  archetype: "Performer",
+  capabilities: ["generator", "liveloop"],
+  triggers: [{ type: "http", path: "/hook/generate", method: "POST" }],
+  modelBindings: { llm: { id: "gpt-4o-mini", provider: "openai" }, tts: { id: "eleven.v1", voice: "bright" } },
+  permissions: { storage: { read: ["avatars/"], write: ["previews/"] }, network: { outbound: true } },
+  resources: { cpu: "1", memory: "2Gi", gpu: { count: 0 } },
+  runtime: { container: { image: "illuvrse/agent-avatar-demo:dev" } },
+  avatar: {
+    appearance: { assets: ["s3://avatars/demo"], stylePreset: "stylized" },
+    voice: { activationLine: "Let’s light up the loop." },
+    personality: { traits: ["Curious", "Playful"], archetype: "Guide" }
+  }
+};
 
 export default function PlaygroundPage() {
+  let loadedManifest: AceAgentManifest | null = null;
+  try {
+    const cookieStore = cookies();
+    const stored = cookieStore.get("ace-playground-manifest")?.value ?? "";
+    if (stored) {
+      loadedManifest = JSON.parse(decodeURIComponent(stored)) as AceAgentManifest;
+    }
+  } catch {
+    loadedManifest = null;
+  }
+
+  const manifestToUse = loadedManifest ?? playgroundManifest;
+
   return (
     <div className="space-y-10">
       <section className="rounded-3xl border border-slate-700/70 bg-slate-800/70 px-8 py-10 shadow-card">
@@ -59,6 +94,8 @@ export default function PlaygroundPage() {
             title="Behavior probe"
             body={<p className="text-sm text-slate-200/80">Send scripted prompts to test traits, attributes, and voice style before release.</p>}
           />
+          {/* @ts-expect-error Server Component */}
+          <ManifestViewer manifest={manifestToUse} />
         </div>
       </PageSection>
 

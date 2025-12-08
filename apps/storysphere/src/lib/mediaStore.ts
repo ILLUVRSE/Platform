@@ -4,26 +4,45 @@ import { sha256File } from "./hash";
 
 type MediaFile = { id: string; title: string; path: string; duration?: string; sha256?: string };
 
-const mediaRoot = process.env.MEDIA_ROOT ?? path.join(process.cwd(), "apps/storysphere/data/media");
+const appRoot = process.cwd().includes(`${path.sep}apps${path.sep}storysphere`)
+  ? process.cwd()
+  : path.join(process.cwd(), "apps/storysphere");
+
+const mediaRoots = [
+  process.env.MEDIA_ROOT ?? path.join(appRoot, "data/media"),
+  path.join(appRoot, "src/app/library")
+];
 
 export async function listMedia(): Promise<MediaFile[]> {
-  try {
-    const entries = await fs.readdir(mediaRoot);
-    return entries
-      .filter((f) => f.endsWith(".mp4") || f.endsWith(".mkv") || f.endsWith(".mov"))
-      .map((file) => ({
-        id: file,
-        title: file.replace(/\.[^/.]+$/, ""),
-        path: path.join(mediaRoot, file)
-      }));
-  } catch {
-    return [];
+  const allowedExt = [".mp4", ".mkv", ".mov", ".avi", ".mpeg"];
+  const results: MediaFile[] = [];
+
+  for (const root of mediaRoots) {
+    try {
+      const entries = await fs.readdir(root);
+      const files = entries.filter((f) => allowedExt.some((ext) => f.toLowerCase().endsWith(ext)));
+      results.push(
+        ...files.map((file) => ({
+          id: file,
+          title: file.replace(/\.[^/.]+$/, ""),
+          path: path.join(root, file)
+        }))
+      );
+    } catch {
+      // ignore roots that don't exist
+    }
   }
+
+  return results;
 }
 
 export async function bestFormat(basename: string): Promise<MediaFile | null> {
   const candidates = await listMedia();
-  const filtered = candidates.filter((m) => m.title === basename);
+  const targetSlug = normalizeSlug(basename);
+  const filtered = candidates.filter((m) => {
+    const slug = normalizeSlug(m.title);
+    return slug === targetSlug || slug.startsWith(targetSlug) || targetSlug.startsWith(slug);
+  });
   if (filtered.length === 0) return null;
   // prefer mp4 > mkv > mov
   const preferredOrder = ["mp4", "mkv", "mov"];
@@ -44,4 +63,12 @@ async function shaOrNull(filePath: string): Promise<string | null> {
   } catch {
     return null;
   }
+}
+
+function normalizeSlug(value: string) {
+  return value
+    .toLowerCase()
+    .replace(/\.[^/.]+$/, "")
+    .replace(/^the/, "")
+    .replace(/[^a-z0-9]/g, "");
 }

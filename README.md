@@ -36,3 +36,10 @@ Golden path reminders:
 1. IDEA builds artifact → Kernel signs manifest.
 2. ArtifactPublisher publishes signed manifest → Marketplace lists and completes checkout → Finance issues receipt.
 3. StorySphere prompt → preview → MP4 → publish to LiveLoop with proofs.
+
+## Local dev flow (AgentManager + StorySphere)
+1. Start AgentManager stub: `pnpm --filter @illuvrse/agent-manager test:integration` (or run the server via `createAgentManagerServer` at port 4040).
+2. Run StorySphere: `pnpm dev --filter storysphere` and web shell: `pnpm dev --filter web`.
+3. Use Playground/Developers pages to drop a manifest and verify Kernel + Sentinel proofs (local stubs).
+4. Hit `POST /storysphere/api/v1/generate` to enqueue a job in AgentManager; track it on `/jobs`.
+5. Publish via `POST /storysphere/api/v1/liveloop/publish` to push into playlist with stub proof.

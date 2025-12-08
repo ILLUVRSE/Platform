@@ -2,6 +2,7 @@ export type Episode = {
   id: string;
   title: string;
   duration: string;
+  file?: string;
   synopsis?: string;
 };
 
@@ -21,51 +22,40 @@ export type Movie = {
   id: string;
   title: string;
   duration: string;
+  file?: string;
   synopsis?: string;
 };
 
+const beverlySeason1Episodes: Episode[] = Array.from({ length: 36 }, (_, i) => {
+  const episodeNumber = String(i + 1).padStart(2, "0");
+  return {
+    id: `s1e${episodeNumber}`,
+    title: `Episode ${episodeNumber}`,
+    duration: "00:25"
+  };
+});
+
 export const seriesCatalog: Series[] = [
   {
-    id: "chronicles-of-the-grid",
-    title: "Chronicles of the Grid",
+    id: "beverly-hillbillies",
+    title: "The Beverly Hillbillies",
     seasons: [
       {
-        id: "s1",
+        id: "season-1",
         title: "Season 1",
-        episodes: [
-          { id: "s1e1", title: "Pilot: Signal in the Static", duration: "00:11" },
-          { id: "s1e2", title: "Harbor Run", duration: "00:13" },
-          { id: "s1e3", title: "Ghost in the Grid", duration: "00:12" }
-        ]
-      },
-      {
-        id: "s2",
-        title: "Season 2",
-        episodes: [
-          { id: "s2e1", title: "Echoes of Arcadia", duration: "00:12" },
-          { id: "s2e2", title: "Neon Uprising", duration: "00:15" }
-        ]
-      }
-    ]
-  },
-  {
-    id: "neon-harbor-diaries",
-    title: "Neon Harbor Diaries",
-    seasons: [
-      {
-        id: "s1",
-        title: "Season 1",
-        episodes: [
-          { id: "s1e1", title: "Dawnshift", duration: "00:10" },
-          { id: "s1e2", title: "Night Markets", duration: "00:09" }
-        ]
+        episodes: beverlySeason1Episodes
       }
     ]
   }
 ];
 
 export const moviesCatalog: Movie[] = [
-  { id: "arcadia-dawn", title: "Arcadia Dawn", duration: "00:24" },
-  { id: "riverport-rivals", title: "Riverport Rivals", duration: "00:18" },
-  { id: "mirror-maze", title: "Mirror Maze", duration: "00:21" }
+  {
+    id: "casablanca-color",
+    title: "Casablanca (Color Edition)",
+    duration: "01:42",
+    file: "Casablanca 1942, in color, Humphrey Bogart, Ingrid Bergman, Paul Henreid, Claude Rains, Sydney Greenstreet, Peter Lorre, Dooley Wilson,.mp4"
+  },
+  { id: "royal-wedding", title: "Royal Wedding", duration: "01:33", file: "royal_wedding.mp4" },
+  { id: "gilda-1946", title: "Gilda (Colorized)", duration: "01:50", file: "Gilda 1946.mp4" }
 ];

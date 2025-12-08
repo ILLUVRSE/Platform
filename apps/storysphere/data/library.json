@@ -1,46 +1,216 @@
 {
   "series": [
     {
-      "id": "chronicles-of-the-grid",
-      "title": "Chronicles of the Grid",
+      "id": "beverly-hillbillies",
+      "title": "The Beverly Hillbillies",
       "seasons": [
         {
-          "id": "s1",
+          "id": "season-1",
           "title": "Season 1",
           "episodes": [
-            { "id": "s1e1", "title": "Pilot: Signal in the Static", "duration": "00:11" },
-            { "id": "s1e2", "title": "Harbor Run", "duration": "00:13" },
-            { "id": "s1e3", "title": "Ghost in the Grid", "duration": "00:12" }
-          ]
-        },
-        {
-          "id": "s2",
-          "title": "Season 2",
-          "episodes": [
-            { "id": "s2e1", "title": "Echoes of Arcadia", "duration": "00:12" },
-            { "id": "s2e2", "title": "Neon Uprising", "duration": "00:15" }
-          ]
-        }
-      ]
-    },
-    {
-      "id": "neon-harbor-diaries",
-      "title": "Neon Harbor Diaries",
-      "seasons": [
-        {
-          "id": "s1",
-          "title": "Season 1",
-          "episodes": [
-            { "id": "s1e1", "title": "Dawnshift", "duration": "00:10" },
-            { "id": "s1e2", "title": "Night Markets", "duration": "00:09" }
+            {
+              "id": "s1e01",
+              "title": "Episode 01",
+              "duration": "00:25"
+            },
+            {
+              "id": "s1e02",
+              "title": "Episode 02",
+              "duration": "00:25"
+            },
+            {
+              "id": "s1e03",
+              "title": "Episode 03",
+              "duration": "00:25"
+            },
+            {
+              "id": "s1e04",
+              "title": "Episode 04",
+              "duration": "00:25"
+            },
+            {
+              "id": "s1e05",
+              "title": "Episode 05",
+              "duration": "00:25"
+            },
+            {
+              "id": "s1e06",
+              "title": "Episode 06",
+              "duration": "00:25"
+            },
+            {
+              "id": "s1e07",
+              "title": "Episode 07",
+              "duration": "00:25"
+            },
+            {
+              "id": "s1e08",
+              "title": "Episode 08",
+              "duration": "00:25"
+            },
+            {
+              "id": "s1e09",
+              "title": "Episode 09",
+              "duration": "00:25"
+            },
+            {
+              "id": "s1e10",
+              "title": "Episode 10",
+              "duration": "00:25"
+            },
+            {
+              "id": "s1e11",
+              "title": "Episode 11",
+              "duration": "00:25"
+            },
+            {
+              "id": "s1e12",
+              "title": "Episode 12",
+              "duration": "00:25"
+            },
+            {
+              "id": "s1e13",
+              "title": "Episode 13",
+              "duration": "00:25"
+            },
+            {
+              "id": "s1e14",
+              "title": "Episode 14",
+              "duration": "00:25"
+            },
+            {
+              "id": "s1e15",
+              "title": "Episode 15",
+              "duration": "00:25"
+            },
+            {
+              "id": "s1e16",
+              "title": "Episode 16",
+              "duration": "00:25"
+            },
+            {
+              "id": "s1e17",
+              "title": "Episode 17",
+              "duration": "00:25"
+            },
+            {
+              "id": "s1e18",
+              "title": "Episode 18",
+              "duration": "00:25"
+            },
+            {
+              "id": "s1e19",
+              "title": "Episode 19",
+              "duration": "00:25"
+            },
+            {
+              "id": "s1e20",
+              "title": "Episode 20",
+              "duration": "00:25"
+            },
+            {
+              "id": "s1e21",
+              "title": "Episode 21",
+              "duration": "00:25"
+            },
+            {
+              "id": "s1e22",
+              "title": "Episode 22",
+              "duration": "00:25"
+            },
+            {
+              "id": "s1e23",
+              "title": "Episode 23",
+              "duration": "00:25"
+            },
+            {
+              "id": "s1e24",
+              "title": "Episode 24",
+              "duration": "00:25"
+            },
+            {
+              "id": "s1e25",
+              "title": "Episode 25",
+              "duration": "00:25"
+            },
+            {
+              "id": "s1e26",
+              "title": "Episode 26",
+              "duration": "00:25"
+            },
+            {
+              "id": "s1e27",
+              "title": "Episode 27",
+              "duration": "00:25"
+            },
+            {
+              "id": "s1e28",
+              "title": "Episode 28",
+              "duration": "00:25"
+            },
+            {
+              "id": "s1e29",
+              "title": "Episode 29",
+              "duration": "00:25"
+            },
+            {
+              "id": "s1e30",
+              "title": "Episode 30",
+              "duration": "00:25"
+            },
+            {
+              "id": "s1e31",
+              "title": "Episode 31",
+              "duration": "00:25"
+            },
+            {
+              "id": "s1e32",
+              "title": "Episode 32",
+              "duration": "00:25"
+            },
+            {
+              "id": "s1e33",
+              "title": "Episode 33",
+              "duration": "00:25"
+            },
+            {
+              "id": "s1e34",
+              "title": "Episode 34",
+              "duration": "00:25"
+            },
+            {
+              "id": "s1e35",
+              "title": "Episode 35",
+              "duration": "00:25"
+            },
+            {
+              "id": "s1e36",
+              "title": "Episode 36",
+              "duration": "00:25"
+            }
           ]
         }
       ]
     }
   ],
   "movies": [
-    { "id": "arcadia-dawn", "title": "Arcadia Dawn", "duration": "00:24" },
-    { "id": "riverport-rivals", "title": "Riverport Rivals", "duration": "00:18" },
-    { "id": "mirror-maze", "title": "Mirror Maze", "duration": "00:21" }
+    {
+      "id": "casablanca-color",
+      "title": "Casablanca (Color Edition)",
+      "duration": "01:42",
+      "file": "Casablanca 1942, in color, Humphrey Bogart, Ingrid Bergman, Paul Henreid, Claude Rains, Sydney Greenstreet, Peter Lorre, Dooley Wilson,.mp4"
+    },
+    {
+      "id": "royal-wedding",
+      "title": "Royal Wedding",
+      "duration": "01:33",
+      "file": "royal_wedding.mp4"
+    },
+    {
+      "id": "reefer-madness",
+      "title": "Reefer Madness",
+      "duration": "01:08",
+      "file": "reefer_madness1938.mp4"
+    }
   ]
 }

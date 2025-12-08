@@ -1,0 +1,6 @@
+apps/storysphere/public/*.xml filter=lfs diff=lfs merge=lfs -text
+apps/storysphere/public/*.jpg filter=lfs diff=lfs merge=lfs -text
+apps/storysphere/public/*.mp4 filter=lfs diff=lfs merge=lfs -text
+apps/storysphere/public/*.zip filter=lfs diff=lfs merge=lfs -text
+apps/storysphere/public/*.torrent filter=lfs diff=lfs merge=lfs -text
+apps/storysphere/public/*.sqlite filter=lfs diff=lfs merge=lfs -text

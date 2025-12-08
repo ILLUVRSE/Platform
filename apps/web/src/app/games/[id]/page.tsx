@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { gameGridManifest } from "../../../../../apps/storysphere/src/lib/gameGridManifest";
+import { gameGridManifest } from "../../../lib/gameGridManifest";
 import { PageSection, Pill, Card } from "@illuvrse/ui";
 import Link from "next/link";
 

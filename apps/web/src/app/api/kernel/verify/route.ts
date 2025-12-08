@@ -3,6 +3,7 @@ import type { KernelVerifyRequest, KernelVerifyResponse } from "@illuvrse/contra
 import { callUpstream } from "../../../../lib/upstream";
 import { callUpstream as callFinance } from "../../../../lib/upstream";
 import { loadConfig } from "../../../../lib/config";
+import { emitAudit } from "../../../../lib/audit";
 
 export async function POST(request: Request) {
   const body = (await request.json().catch(() => ({}))) as KernelVerifyRequest;
@@ -18,6 +19,11 @@ export async function POST(request: Request) {
     tokenEnv: "KERNEL_TOKEN"
   });
   if (upstreamRes.ok) {
+    emitAudit({
+      type: "manifest.verify.upstream",
+      message: "Manifest verification delegated to upstream Kernel",
+      data: { sha, valid: upstreamRes.data.valid }
+    });
     return NextResponse.json(upstreamRes.data);
   }
 
@@ -29,6 +35,11 @@ export async function POST(request: Request) {
     body: { receipt: { sha256: sha } }
   });
   if (financeRes.ok) {
+    emitAudit({
+      type: "manifest.verify.finance",
+      message: "Manifest verified via Finance receipt",
+      data: { sha, signer: financeRes.data.proof?.signer }
+    });
     return NextResponse.json({
       sha256: sha,
       signer: financeRes.data.proof?.signer ?? "finance",
@@ -47,6 +58,12 @@ export async function POST(request: Request) {
     ledgerUrl: "/developers#ledger",
     valid: true
   };
+
+  emitAudit({
+    type: "manifest.verify.stub",
+    message: "Manifest verified by stub Kernel",
+    data: { sha, valid: true }
+  });
 
   return NextResponse.json(response);
 }

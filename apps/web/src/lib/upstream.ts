@@ -12,17 +12,21 @@ export async function callUpstream<T>({
   path,
   method = "GET",
   body,
-  tokenEnv
+  tokenEnv,
+  headers
 }: UpstreamOptions): Promise<{ ok: true; data: T } | { ok: false; error: string }> {
   if (!baseUrl) return { ok: false, error: "missing upstream" };
   try {
-    const headers: Record<string, string> = { "Content-Type": "application/json", ...(options.headers ?? {}) };
+    const requestHeaders: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...(headers ?? {})
+    };
     const token = tokenEnv ? process.env[tokenEnv] : undefined;
-    if (token) headers.Authorization = `Bearer ${token}`;
+    if (token) requestHeaders.Authorization = `Bearer ${token}`;
 
     const res = await fetch(`${baseUrl}${path}`, {
       method,
-      headers,
+      headers: requestHeaders,
       body: body ? JSON.stringify(body) : undefined
     });
     if (!res.ok) {

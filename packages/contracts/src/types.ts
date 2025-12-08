@@ -13,6 +13,8 @@ export type KernelSignRequest = {
 
 export type KernelSignResponse = SignatureProof & {
   signature: string;
+  expiry?: string;
+  requestId?: string;
 };
 
 export type KernelVerifyRequest = {
@@ -24,6 +26,248 @@ export type KernelVerifyResponse = SignatureProof & {
   valid: boolean;
 };
 
+export type AceCapability =
+  | "generator"
+  | "catalog"
+  | "scheduler"
+  | "liveloop"
+  | "proof"
+  | "moderator"
+  | "monitor"
+  | "assistant"
+  | "custom";
+
+export type AceTrigger =
+  | { type: "cron"; cron: string; timezone?: string }
+  | { type: "event"; event: string; filter?: Record<string, unknown> }
+  | { type: "http"; path: string; method?: "GET" | "POST" | "PUT" | "DELETE" | "PATCH" };
+
+export type AceModelBindings = {
+  llm?: { id: string; provider?: string; params?: Record<string, unknown> };
+  tts?: { id: string; provider?: string; voice?: string; params?: Record<string, unknown> };
+  vision?: { id: string; provider?: string; params?: Record<string, unknown> };
+};
+
+export type AcePermissions = {
+  storage?: { read?: string[]; write?: string[] };
+  network?: { outbound?: boolean; domains?: string[] };
+  secrets?: string[];
+  scopes?: string[];
+};
+
+export type AceResources = {
+  cpu?: string;
+  memory?: string;
+  gpu?: { count?: number; model?: string };
+  storage?: string;
+};
+
+export type AceRuntime = {
+  container: { image: string; command?: string[]; args?: string[]; env?: Record<string, string> };
+  entrypoint?: string;
+};
+
+export type AceAvatar = {
+  appearance?: { assets?: string[]; stylePreset?: string; rig?: string };
+  voice?: { sampleUrl?: string; configId?: string; activationLine?: string };
+  personality?: { traits?: string[]; archetype?: string; emotionalRange?: string[] };
+};
+
+export type AceAgentManifest = {
+  id: string;
+  name: string;
+  version: string;
+  description?: string;
+  archetype?: string;
+  capabilities: AceCapability[];
+  triggers?: AceTrigger[];
+  modelBindings?: AceModelBindings;
+  permissions?: AcePermissions;
+  resources?: AceResources;
+  runtime: AceRuntime;
+  metadata?: Record<string, unknown>;
+  avatar?: AceAvatar;
+  signing?: {
+    proof?: SignatureProof & { signature?: string };
+    policyVerdict?: string;
+  };
+};
+
+export const aceAgentManifestSchema = {
+  $schema: "http://json-schema.org/draft-07/schema#",
+  title: "AceAgentManifest",
+  type: "object",
+  required: ["id", "name", "version", "capabilities", "runtime"],
+  properties: {
+    id: { type: "string" },
+    name: { type: "string" },
+    version: { type: "string" },
+    description: { type: "string" },
+    archetype: { type: "string" },
+    capabilities: {
+      type: "array",
+      items: {
+        type: "string",
+        enum: ["generator", "catalog", "scheduler", "liveloop", "proof", "moderator", "monitor", "assistant", "custom"],
+      },
+      minItems: 1,
+    },
+    triggers: {
+      type: "array",
+      items: {
+        oneOf: [
+          {
+            type: "object",
+            required: ["type", "cron"],
+            properties: { type: { const: "cron" }, cron: { type: "string" }, timezone: { type: "string" } },
+            additionalProperties: false,
+          },
+          {
+            type: "object",
+            required: ["type", "event"],
+            properties: {
+              type: { const: "event" },
+              event: { type: "string" },
+              filter: { type: "object", additionalProperties: true },
+            },
+            additionalProperties: false,
+          },
+          {
+            type: "object",
+            required: ["type", "path"],
+            properties: {
+              type: { const: "http" },
+              path: { type: "string" },
+              method: { type: "string", enum: ["GET", "POST", "PUT", "DELETE", "PATCH"] },
+            },
+            additionalProperties: false,
+          },
+        ],
+      },
+    },
+    modelBindings: {
+      type: "object",
+      properties: {
+        llm: { type: "object", properties: { id: { type: "string" }, provider: { type: "string" }, params: { type: "object" } } },
+        tts: { type: "object", properties: { id: { type: "string" }, provider: { type: "string" }, voice: { type: "string" }, params: { type: "object" } } },
+        vision: { type: "object", properties: { id: { type: "string" }, provider: { type: "string" }, params: { type: "object" } } },
+      },
+      additionalProperties: false,
+    },
+    permissions: {
+      type: "object",
+      properties: {
+        storage: {
+          type: "object",
+          properties: {
+            read: { type: "array", items: { type: "string" } },
+            write: { type: "array", items: { type: "string" } },
+          },
+          additionalProperties: false,
+        },
+        network: {
+          type: "object",
+          properties: {
+            outbound: { type: "boolean" },
+            domains: { type: "array", items: { type: "string" } },
+          },
+          additionalProperties: false,
+        },
+        secrets: { type: "array", items: { type: "string" } },
+        scopes: { type: "array", items: { type: "string" } },
+      },
+      additionalProperties: false,
+    },
+    resources: {
+      type: "object",
+      properties: {
+        cpu: { type: "string" },
+        memory: { type: "string" },
+        gpu: {
+          type: "object",
+          properties: { count: { type: "number" }, model: { type: "string" } },
+          additionalProperties: false,
+        },
+        storage: { type: "string" },
+      },
+      additionalProperties: false,
+    },
+    runtime: {
+      type: "object",
+      required: ["container"],
+      properties: {
+        container: {
+          type: "object",
+          required: ["image"],
+          properties: {
+            image: { type: "string" },
+            command: { type: "array", items: { type: "string" } },
+            args: { type: "array", items: { type: "string" } },
+            env: { type: "object", additionalProperties: { type: "string" } },
+          },
+          additionalProperties: false,
+        },
+        entrypoint: { type: "string" },
+      },
+      additionalProperties: false,
+    },
+    metadata: { type: "object" },
+    avatar: {
+      type: "object",
+      properties: {
+        appearance: {
+          type: "object",
+          properties: {
+            assets: { type: "array", items: { type: "string" } },
+            stylePreset: { type: "string" },
+            rig: { type: "string" },
+          },
+          additionalProperties: false,
+        },
+        voice: {
+          type: "object",
+          properties: {
+            sampleUrl: { type: "string" },
+            configId: { type: "string" },
+            activationLine: { type: "string" },
+          },
+          additionalProperties: false,
+        },
+        personality: {
+          type: "object",
+          properties: {
+            traits: { type: "array", items: { type: "string" } },
+            archetype: { type: "string" },
+            emotionalRange: { type: "array", items: { type: "string" } },
+          },
+          additionalProperties: false,
+        },
+      },
+      additionalProperties: false,
+    },
+    signing: {
+      type: "object",
+      properties: {
+        proof: {
+          type: "object",
+          properties: {
+            sha256: { type: "string" },
+            signer: { type: "string" },
+            timestamp: { type: "string" },
+            ledgerUrl: { type: "string" },
+            policyVerdict: { type: "string" },
+            signature: { type: "string" },
+          },
+          additionalProperties: false,
+        },
+        policyVerdict: { type: "string" },
+      },
+      additionalProperties: false,
+    },
+  },
+  additionalProperties: false,
+} as const;
+
 export type MarketplaceListing = {
   sku: string;
   price: number;
@@ -31,6 +275,8 @@ export type MarketplaceListing = {
   sha256: string;
   status: "ready" | "canary" | "preview";
   signed: boolean;
+  manifest?: Record<string, unknown>;
+  proof?: SignatureProof;
 };
 
 export type StorySphereGenerateRequest = {
@@ -56,4 +302,26 @@ export type LiveLoopPublishResponse = {
   scheduledFor: string;
   status: string;
   proof: SignatureProof;
+};
+
+export type AgentJobKind = "generate" | "proof" | "schedule";
+
+export type AgentJobStatus = "queued" | "running" | "complete" | "failed";
+
+export type AgentJob = {
+  id: string;
+  kind: AgentJobKind;
+  agentId: string;
+  payload: Record<string, unknown>;
+  status: AgentJobStatus;
+  result?: Record<string, unknown>;
+  error?: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type AgentHeartbeat = {
+  agentId: string;
+  status: "running" | "error" | "stopped";
+  timestamp: string;
 };
