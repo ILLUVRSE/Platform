@@ -375,7 +375,9 @@ export default function LiveLoopRokuPage() {
               return (
                 <button
                   key={slot.id}
-                  ref={(r) => (tileRefs.current[i] = r)}
+                  ref={(r) => {
+                    tileRefs.current[i] = r;
+                  }}
                   tabIndex={isFocused ? 0 : -1}
                   className={`relative overflow-hidden transform rounded-lg p-5 text-left transition-all duration-150 focus:outline-none ${
                     isFocused
