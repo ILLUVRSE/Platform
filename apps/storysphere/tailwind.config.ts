@@ -1,4 +1,5 @@
 import type { Config } from "tailwindcss";
+// @ts-expect-error Tailwind preset is CJS without types
 import sharedPreset from "../../packages/config/tailwind.preset.cjs";
 
 const config: Config = {
