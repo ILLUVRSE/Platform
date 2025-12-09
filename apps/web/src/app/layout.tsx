@@ -33,9 +33,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body
-        className={`${headingFont.variable} ${bodyFont.variable} ${monoFont.variable} bg-slate-800 text-cream antialiased`}
+        className={`${headingFont.variable} ${bodyFont.variable} ${monoFont.variable} bg-[#f4eee2] text-slate-900 antialiased`}
       >
-        <div className="bg-gradient-to-br from-slate-800 via-slate-700/40 to-ink min-h-screen">
+        <div className="min-h-screen bg-[#f4eee2]">
           <TopNav />
           <main className="mx-auto max-w-6xl px-4 pb-16 pt-8">{children}</main>
           <Footer />

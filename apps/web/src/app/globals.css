@@ -4,12 +4,12 @@
 
 @layer base {
   :root {
-    color-scheme: dark;
+    color-scheme: light;
   }
 
   body {
-    background-color: #0c161a;
-    color: #f4eee2;
+    background-color: #f4eee2;
+    color: #0c161a;
   }
 
   h1,
@@ -27,7 +27,7 @@
   }
 
   a {
-    color: #2bb4a8;
+    color: #1a8a7f;
   }
 
   code {

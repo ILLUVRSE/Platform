@@ -10,19 +10,15 @@ const navItems = [
 
 export function TopNav() {
   return (
-    <header className="sticky top-0 z-30 border-b border-slate-700/80 bg-slate-800/80 backdrop-blur">
+    <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/90 backdrop-blur">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
-        <Link href="/" className="flex items-center gap-3 text-lg font-semibold text-cream">
+        <Link href="/" className="flex items-center gap-3 text-lg font-semibold text-slate-900">
           <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-teal-600 to-gold-500 shadow-card" />
           <span>ILLUVRSE</span>
         </Link>
-        <nav className="hidden items-center gap-6 text-sm text-slate-200 md:flex">
+        <nav className="hidden items-center gap-6 text-sm text-slate-700 md:flex">
           {navItems.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="transition hover:text-cream hover:underline underline-offset-4"
-            >
+            <Link key={item.href} href={item.href} className="transition hover:text-teal-700 hover:underline underline-offset-4">
               {item.label}
             </Link>
           ))}
@@ -30,7 +26,7 @@ export function TopNav() {
         <div className="flex items-center gap-2">
           <Link
             href="/signin"
-            className="hidden rounded-full border border-slate-600 px-4 py-2 text-sm text-cream transition hover:border-teal-500/70 hover:text-teal-200 md:inline-flex"
+            className="hidden rounded-full border border-slate-300 px-4 py-2 text-sm text-slate-800 transition hover:border-teal-500/70 hover:text-teal-700 md:inline-flex"
           >
             Sign In
           </Link>

@@ -539,15 +539,15 @@ export default function AceCreatePage() {
           {toast.message}
         </div>
       )}
-      <section className="rounded-3xl border border-slate-700/70 bg-slate-800/70 px-8 py-10 shadow-card">
+      <section className="rounded-3xl border border-slate-200 bg-white px-8 py-10 shadow-card">
         <div className="flex flex-wrap items-start justify-between gap-6">
           <div className="max-w-3xl space-y-4">
-            <Pill className="bg-teal-600/20 text-teal-200">ACE Creation Wizard</Pill>
-            <h1 className="text-4xl font-semibold leading-tight">Identity → Capabilities → Runtime/Models → Avatar → Review</h1>
-            <p className="text-lg text-slate-200/90">
+            <Pill className="bg-teal-50 text-teal-700">ACE Creation Wizard</Pill>
+            <h1 className="text-4xl font-semibold leading-tight text-slate-900">Identity → Capabilities → Runtime/Models → Avatar → Review</h1>
+            <p className="text-lg text-slate-700">
               Build an ACE manifest with live JSON + SHA preview, autosave drafts, policy/proof checks, and one-click handoff to the Playground or Agent Manager.
             </p>
-            <label className="flex items-center gap-2 text-sm text-slate-200/80">
+            <label className="flex items-center gap-2 text-sm text-slate-700">
               <input type="checkbox" checked={playgroundNewTab} onChange={(e) => setPlaygroundNewTab(e.target.checked)} />
               Open Playground in new tab (keep wizard open)
             </label>
@@ -574,7 +574,7 @@ export default function AceCreatePage() {
                 Register with AgentManager
               </button>
             </div>
-            <div className="flex flex-wrap gap-2 text-xs text-slate-200/80">
+            <div className="flex flex-wrap gap-2 text-xs text-slate-600">
               <StatBadge label="Draft" value="Autosave ON" variant="success" />
               <StatBadge label="SHA" value={sha ? `${sha.slice(0, 8)}…` : "computing"} variant="neutral" />
               <StatBadge label="Policy" value={policy?.verdict ?? "not run"} variant={policy?.severity === "high" ? "warning" : "neutral"} />
@@ -583,8 +583,8 @@ export default function AceCreatePage() {
             {registerBlockedReason && <div className="text-xs text-amber-200">{registerBlockedReason}</div>}
             {agentManagerSummary && <div className="text-xs text-teal-300">{agentManagerSummary}</div>}
           </div>
-          <div className="w-full max-w-sm rounded-2xl border border-slate-700 bg-slate-900/60 p-4 shadow-card">
-            <div className="text-xs uppercase tracking-[0.2em] text-slate-200/70">Proof snapshot</div>
+          <div className="w-full max-w-sm rounded-2xl border border-slate-200 bg-white p-4 shadow-card">
+            <div className="text-xs uppercase tracking-[0.2em] text-slate-500">Proof snapshot</div>
             <ProofCard
               sha={proof?.sha256 ?? sha}
               signer={proof?.signer ?? "kernel-multisig"}
@@ -698,12 +698,12 @@ export default function AceCreatePage() {
 
       <PageSection eyebrow="Capabilities" title="Pick what this agent can do" id="capabilities">
         <Card
-          title="Capabilities"
-          body={
-            <div className="space-y-3">
-              <div className="flex flex-wrap gap-2">
-                {allCapabilities.map((cap) => (
-                  <button
+            title="Capabilities"
+            body={
+              <div className="space-y-3">
+                <div className="flex flex-wrap gap-2">
+                  {allCapabilities.map((cap) => (
+                    <button
                     key={cap}
                     type="button"
                     onClick={() => toggleCapability(cap)}
@@ -777,14 +777,14 @@ export default function AceCreatePage() {
           body={
             <div className="space-y-3 text-sm">
               <label className="space-y-1 block">
-                <div className="text-slate-200/80">Trigger (cron:*, event:*, or path)</div>
+                <div className="text-slate-800/80">Trigger (cron:*, event:*, or path)</div>
                 <input className="w-full rounded-lg border border-slate-700 bg-slate-900/70 p-2" value={trigger} onChange={(e) => setTrigger(e.target.value)} />
                 {fieldErrors.trigger && <div className="text-xs text-rose-300">{fieldErrors.trigger}</div>}
-                <div className="text-[11px] text-slate-400">Examples: cron:*/5 * * * * · event:job.requested · /hook/generate</div>
+                <div className="text-[11px] text-slate-500">Examples: cron:*/5 * * * * · event:job.requested · /hook/generate</div>
               </label>
               <div className="flex gap-3">
                 <label className="space-y-1 flex-1">
-                  <div className="text-slate-200/80">LLM ID</div>
+                  <div className="text-slate-800/80">LLM ID</div>
                   <select
                     className="w-full rounded-lg border border-slate-700 bg-slate-900/70 p-2"
                     value={llmId}
@@ -799,7 +799,7 @@ export default function AceCreatePage() {
                   {fieldErrors.llmId && <div className="text-xs text-rose-300">{fieldErrors.llmId}</div>}
                 </label>
                 <label className="space-y-1 flex-1">
-                  <div className="text-slate-200/80">TTS ID</div>
+                  <div className="text-slate-800/80">TTS ID</div>
                   <select
                     className="w-full rounded-lg border border-slate-700 bg-slate-900/70 p-2"
                     value={ttsId}
@@ -816,13 +816,13 @@ export default function AceCreatePage() {
               </div>
               <div className="grid gap-3 md:grid-cols-2">
                 <label className="space-y-1 block">
-                  <div className="text-slate-200/80">CPU</div>
+                  <div className="text-slate-800/80">CPU</div>
                   <input className="w-full rounded-lg border border-slate-700 bg-slate-900/70 p-2" value={cpu} onChange={(e) => setCpu(e.target.value)} placeholder="500m" />
                   {fieldErrors.cpu && <div className="text-xs text-rose-300">{fieldErrors.cpu}</div>}
                   <div className="text-[11px] text-slate-400">Use Kubernetes units (e.g., 500m, 1 for full core).</div>
                 </label>
                 <label className="space-y-1 block">
-                  <div className="text-slate-200/80">Memory</div>
+                  <div className="text-slate-800/80">Memory</div>
                   <input className="w-full rounded-lg border border-slate-700 bg-slate-900/70 p-2" value={memory} onChange={(e) => setMemory(e.target.value)} placeholder="1Gi" />
                   {fieldErrors.memory && <div className="text-xs text-rose-300">{fieldErrors.memory}</div>}
                   <div className="text-[11px] text-slate-400">Examples: 512Mi, 1Gi.</div>
@@ -844,13 +844,13 @@ export default function AceCreatePage() {
                   </button>
                 ))}
               </div>
-              <label className="inline-flex items-center gap-2 text-slate-200/80">
+              <label className="inline-flex items-center gap-2 text-slate-700">
                 <input type="checkbox" checked={publishLiveLoop} onChange={(e) => setPublishLiveLoop(e.target.checked)} />
                 Publish to LiveLoop
               </label>
-              <div className="text-xs text-slate-300/70">
+              <div className="text-xs text-slate-500">
                 Need syntax?{" "}
-                <a href="/developers#ace-spec" className="text-teal-300 underline underline-offset-4">
+                <a href="/developers#ace-spec" className="text-teal-700 underline underline-offset-4">
                   ACE spec docs
                 </a>
               </div>
