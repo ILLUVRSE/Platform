@@ -149,11 +149,23 @@ export default function AceCreatePage() {
       if (fromPlayground) {
         const parsed = JSON.parse(fromPlayground);
         applyManifestFields(parsed);
+        setCurrentStep(stageAnchors.findIndex((s) => s.key === "review"));
+        showToast("Loaded manifest from Playground", "success");
       }
     } catch {
       // ignore
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Load registered badge
+  useEffect(() => {
+    try {
+      const flag = localStorage.getItem("ace-registered-flag");
+      if (flag === "true") setRegisteredOnce(true);
+    } catch {
+      // ignore
+    }
   }, []);
 
   // Load last proof snapshot
@@ -456,6 +468,11 @@ export default function AceCreatePage() {
       setAgentManagerSummary(`Registered. Agents: ${agents.agents.length}`);
       setRegisterStatus("Registered with AgentManager");
       setRegisteredOnce(true);
+      try {
+        localStorage.setItem("ace-registered-flag", "true");
+      } catch {
+        // ignore
+      }
       showToast("Registered with Agent Manager", "success");
     } catch (err) {
       setRegisterStatus(`Failed: ${(err as Error).message}`);
@@ -579,9 +596,9 @@ export default function AceCreatePage() {
               <StatBadge label="SHA" value={sha ? `${sha.slice(0, 8)}…` : "computing"} variant="neutral" />
               <StatBadge label="Policy" value={policy?.verdict ?? "not run"} variant={policy?.severity === "high" ? "warning" : "neutral"} />
             </div>
-            {registerStatus && <div className="text-xs text-slate-200/80">{registerStatus}</div>}
-            {registerBlockedReason && <div className="text-xs text-amber-200">{registerBlockedReason}</div>}
-            {agentManagerSummary && <div className="text-xs text-teal-300">{agentManagerSummary}</div>}
+            {registerStatus && <div className="text-xs text-slate-700">{registerStatus}</div>}
+            {registerBlockedReason && <div className="text-xs text-amber-700">{registerBlockedReason}</div>}
+            {agentManagerSummary && <div className="text-xs text-teal-800">{agentManagerSummary}</div>}
           </div>
           <div className="w-full max-w-sm rounded-2xl border border-slate-200 bg-white p-4 shadow-card">
             <div className="text-xs uppercase tracking-[0.2em] text-slate-500">Proof snapshot</div>
@@ -593,11 +610,11 @@ export default function AceCreatePage() {
               policyVerdict={proof?.policyVerdict ?? policy?.verdict}
               error={!proof && !sha ? "No proof yet" : undefined}
             />
-            {registeredOnce && <div className="text-[11px] text-teal-200">Registered badge: last register succeeded.</div>}
+            {registeredOnce && <div className="text-[11px] text-teal-800">Registered badge: last register succeeded.</div>}
           </div>
         </div>
         {policy && policy.severity && policy.severity !== "low" ? (
-          <div className="mt-4 rounded-xl border border-amber-500/50 bg-amber-500/10 p-3 text-sm text-amber-100">
+          <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
             Policy severity: {policy.severity}. Review rules and trim permissions if possible.
           </div>
         ) : null}
@@ -608,23 +625,23 @@ export default function AceCreatePage() {
               href={`#${stage.key}`}
               onClick={() => goToStep(idx)}
               className={`flex cursor-pointer items-start gap-3 rounded-2xl border px-3 py-3 transition ${
-                currentStep === idx ? "border-teal-500/70 bg-slate-900" : "border-slate-700/70 bg-slate-900/50 hover:border-teal-500/70"
+                currentStep === idx ? "border-teal-500/70 bg-teal-50" : "border-slate-200 bg-white hover:border-teal-300"
               }`}
             >
               <div
                 className={`flex h-9 w-9 items-center justify-center rounded-full text-sm font-semibold ${
-                  currentStep === idx ? "bg-teal-500 text-slate-900" : "bg-teal-600/30 text-teal-200"
+                  currentStep === idx ? "bg-teal-500 text-slate-900" : "bg-teal-100 text-teal-700"
                 }`}
               >
                 {idx + 1}
               </div>
               <div>
-                <div className="flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-slate-200/70">
+                <div className="flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-slate-500">
                   <span>{stage.label}</span>
-                  {stageIsValid(stage.key) && <span className="rounded-full bg-teal-600/30 px-2 py-[2px] text-[11px] font-semibold text-teal-100">✓</span>}
-                  {!stageIsValid(stage.key) && <span className="rounded-full bg-rose-600/30 px-2 py-[2px] text-[11px] font-semibold text-rose-100">Incomplete</span>}
+                  {stageIsValid(stage.key) && <span className="rounded-full bg-teal-50 px-2 py-[2px] text-[11px] font-semibold text-teal-700">✓</span>}
+                  {!stageIsValid(stage.key) && <span className="rounded-full bg-rose-100 px-2 py-[2px] text-[11px] font-semibold text-rose-700">Incomplete</span>}
                 </div>
-                <div className="text-sm text-slate-200/80">{stage.desc}</div>
+                <div className="text-sm text-slate-700">{stage.desc}</div>
               </div>
             </a>
           ))}
@@ -655,26 +672,26 @@ export default function AceCreatePage() {
           body={
             <div className="space-y-3 text-sm">
               <label className="space-y-1 block">
-                <div className="text-slate-200/80">Agent ID</div>
-                <input className="w-full rounded-lg border border-slate-700 bg-slate-900/70 p-2" value={id} onChange={(e) => setId(e.target.value)} />
-                {fieldErrors.id && <div className="field-error text-xs text-rose-300">{fieldErrors.id}</div>}
-                <div className="text-[11px] text-slate-400">Allowed: lowercase letters, numbers, dots, underscores, hyphens.</div>
+                <div className="text-slate-800/80">Agent ID</div>
+                <input className="w-full rounded-lg border border-slate-300 bg-white p-2" value={id} onChange={(e) => setId(e.target.value)} />
+                {fieldErrors.id && <div className="field-error text-xs text-rose-600">{fieldErrors.id}</div>}
+                <div className="text-[11px] text-slate-500">Allowed: lowercase letters, numbers, dots, underscores, hyphens.</div>
               </label>
               <label className="space-y-1 block">
-                <div className="text-slate-200/80">Name</div>
-                <input className="w-full rounded-lg border border-slate-700 bg-slate-900/70 p-2" value={name} onChange={(e) => setName(e.target.value)} />
-                {fieldErrors.name && <div className="field-error text-xs text-rose-300">{fieldErrors.name}</div>}
+                <div className="text-slate-800/80">Name</div>
+                <input className="w-full rounded-lg border border-slate-300 bg-white p-2" value={name} onChange={(e) => setName(e.target.value)} />
+                {fieldErrors.name && <div className="field-error text-xs text-rose-600">{fieldErrors.name}</div>}
               </label>
               <div className="flex gap-3">
                 <label className="space-y-1 flex-1">
-                  <div className="text-slate-200/80">Version</div>
-                  <input className="w-full rounded-lg border border-slate-700 bg-slate-900/70 p-2" value={version} onChange={(e) => setVersion(e.target.value)} />
-                  {fieldErrors.version && <div className="field-error text-xs text-rose-300">{fieldErrors.version}</div>}
+                  <div className="text-slate-800/80">Version</div>
+                  <input className="w-full rounded-lg border border-slate-300 bg-white p-2" value={version} onChange={(e) => setVersion(e.target.value)} />
+                  {fieldErrors.version && <div className="field-error text-xs text-rose-600">{fieldErrors.version}</div>}
                 </label>
                 <label className="space-y-1 flex-1">
-                  <div className="text-slate-200/80">Runtime image</div>
+                  <div className="text-slate-800/80">Runtime image</div>
                   <select
-                    className="w-full rounded-lg border border-slate-700 bg-slate-900/70 p-2"
+                    className="w-full rounded-lg border border-slate-300 bg-white p-2"
                     value={runtimeImage}
                     onChange={(e) => setRuntimeImage(e.target.value)}
                   >
@@ -684,12 +701,12 @@ export default function AceCreatePage() {
                       </option>
                     ))}
                   </select>
-                  {fieldErrors.runtimeImage && <div className="field-error text-xs text-rose-300">{fieldErrors.runtimeImage}</div>}
+                  {fieldErrors.runtimeImage && <div className="field-error text-xs text-rose-600">{fieldErrors.runtimeImage}</div>}
                 </label>
               </div>
               <label className="space-y-1 block">
-                <div className="text-slate-200/80">Description</div>
-                <textarea className="w-full rounded-lg border border-slate-700 bg-slate-900/70 p-2" rows={2} value={description} onChange={(e) => setDescription(e.target.value)} />
+                <div className="text-slate-800/80">Description</div>
+                <textarea className="w-full rounded-lg border border-slate-300 bg-white p-2" rows={2} value={description} onChange={(e) => setDescription(e.target.value)} />
               </label>
             </div>
           }
@@ -698,12 +715,12 @@ export default function AceCreatePage() {
 
       <PageSection eyebrow="Capabilities" title="Pick what this agent can do" id="capabilities">
         <Card
-            title="Capabilities"
-            body={
-              <div className="space-y-3">
-                <div className="flex flex-wrap gap-2">
-                  {allCapabilities.map((cap) => (
-                    <button
+          title="Capabilities"
+          body={
+            <div className="space-y-3">
+              <div className="flex flex-wrap gap-2">
+                {allCapabilities.map((cap) => (
+                  <button
                     key={cap}
                     type="button"
                     onClick={() => toggleCapability(cap)}
@@ -786,7 +803,7 @@ export default function AceCreatePage() {
                 <label className="space-y-1 flex-1">
                   <div className="text-slate-800/80">LLM ID</div>
                   <select
-                    className="w-full rounded-lg border border-slate-700 bg-slate-900/70 p-2"
+                    className="w-full rounded-lg border border-slate-300 bg-white p-2"
                     value={llmId}
                     onChange={(e) => setLlmId(e.target.value)}
                   >
@@ -801,7 +818,7 @@ export default function AceCreatePage() {
                 <label className="space-y-1 flex-1">
                   <div className="text-slate-800/80">TTS ID</div>
                   <select
-                    className="w-full rounded-lg border border-slate-700 bg-slate-900/70 p-2"
+                    className="w-full rounded-lg border border-slate-300 bg-white p-2"
                     value={ttsId}
                     onChange={(e) => setTtsId(e.target.value)}
                   >
@@ -817,14 +834,14 @@ export default function AceCreatePage() {
               <div className="grid gap-3 md:grid-cols-2">
                 <label className="space-y-1 block">
                   <div className="text-slate-800/80">CPU</div>
-                  <input className="w-full rounded-lg border border-slate-700 bg-slate-900/70 p-2" value={cpu} onChange={(e) => setCpu(e.target.value)} placeholder="500m" />
-                  {fieldErrors.cpu && <div className="text-xs text-rose-300">{fieldErrors.cpu}</div>}
+                  <input className="w-full rounded-lg border border-slate-300 bg-white p-2" value={cpu} onChange={(e) => setCpu(e.target.value)} placeholder="500m" />
+                  {fieldErrors.cpu && <div className="text-xs text-rose-600">{fieldErrors.cpu}</div>}
                   <div className="text-[11px] text-slate-400">Use Kubernetes units (e.g., 500m, 1 for full core).</div>
                 </label>
                 <label className="space-y-1 block">
                   <div className="text-slate-800/80">Memory</div>
-                  <input className="w-full rounded-lg border border-slate-700 bg-slate-900/70 p-2" value={memory} onChange={(e) => setMemory(e.target.value)} placeholder="1Gi" />
-                  {fieldErrors.memory && <div className="text-xs text-rose-300">{fieldErrors.memory}</div>}
+                  <input className="w-full rounded-lg border border-slate-300 bg-white p-2" value={memory} onChange={(e) => setMemory(e.target.value)} placeholder="1Gi" />
+                  {fieldErrors.memory && <div className="text-xs text-rose-600">{fieldErrors.memory}</div>}
                   <div className="text-[11px] text-slate-400">Examples: 512Mi, 1Gi.</div>
                 </label>
               </div>
