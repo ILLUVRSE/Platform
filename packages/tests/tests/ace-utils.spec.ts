@@ -2,6 +2,8 @@ import { test, expect } from "@playwright/test";
 import type { AceAgentManifest } from "@illuvrse/contracts";
 import { computeStageErrors, summarizeDiff, type StageFormState } from "../../../apps/web/src/app/ace/create/utils";
 
+test.skip(({ }, testInfo) => testInfo.project.name !== "web", "Run ACE utils tests only in web project");
+
 const baseState: StageFormState = {
   id: "agent.story-weaver.001",
   name: "StoryWeaver",
