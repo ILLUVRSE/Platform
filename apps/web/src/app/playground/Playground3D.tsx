@@ -108,6 +108,24 @@ export function Playground3D() {
     };
   }, []);
 
+  // Auto-select if Playground manifest matches a tutorial node
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem("ace-playground-manifest");
+      if (!raw) return;
+      const parsed = JSON.parse(raw) as AceAgentManifest;
+      const match = tutorialManifests.find((m) => m.manifest.id === parsed.id);
+      if (match) {
+        setSelected(match.manifest);
+        setStatusLabel("loaded from Playground");
+        setToast(`Selected ${match.manifest.name} from Playground manifest`);
+        setTimeout(() => setToast(null), 2500);
+      }
+    } catch {
+      // ignore
+    }
+  }, []);
+
   const positions: [number, number, number][] = [
     [-3, 0.4, -2],
     [3, 0.6, -1],

@@ -452,7 +452,14 @@ export default function AceCreatePage() {
         body: JSON.stringify({ sha256: sha, manifest })
       });
       if (!signRes.ok) {
-        throw new Error(`Kernel sign failed (${signRes.status})`);
+        let msg = `Kernel sign failed (${signRes.status})`;
+        try {
+          const errJson = await signRes.json();
+          msg = errJson.error ?? msg;
+        } catch {
+          // ignore
+        }
+        throw new Error(msg);
       }
       const signed = await signRes.json();
       const latencyMs = Math.round(performance.now() - start);
@@ -715,21 +722,21 @@ export default function AceCreatePage() {
 
       <PageSection eyebrow="Capabilities" title="Pick what this agent can do" id="capabilities">
         <Card
-          title="Capabilities"
-          body={
-            <div className="space-y-3">
-              <div className="flex flex-wrap gap-2">
-                {allCapabilities.map((cap) => (
-                  <button
-                    key={cap}
-                    type="button"
-                    onClick={() => toggleCapability(cap)}
-                    className={`rounded-full px-3 py-1 text-sm transition ${capabilities.includes(cap) ? "bg-teal-600 text-slate-900" : "bg-slate-700 text-slate-200"}`}
-                  >
-                    {cap}
-                  </button>
-                ))}
-              </div>
+            title="Capabilities"
+            body={
+              <div className="space-y-3">
+                <div className="flex flex-wrap gap-2">
+                  {allCapabilities.map((cap) => (
+                    <button
+                      key={cap}
+                      type="button"
+                      onClick={() => toggleCapability(cap)}
+                      className={`rounded-full px-3 py-1 text-sm transition ${capabilities.includes(cap) ? "bg-teal-100 text-teal-800 border border-teal-200" : "bg-slate-100 text-slate-800 border border-slate-200"}`}
+                    >
+                      {cap}
+                    </button>
+                  ))}
+                </div>
               {fieldErrors.capabilities && <div className="text-xs text-rose-300">{fieldErrors.capabilities}</div>}
               <div className="rounded-xl border border-slate-700 bg-slate-900/60 p-3">
                 <div className="mb-2 text-xs uppercase tracking-[0.2em] text-slate-200/70">Presets</div>
