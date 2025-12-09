@@ -1,215 +1,181 @@
 import Link from "next/link";
-import { Card, PageSection, Pill, ProofCard } from "@illuvrse/ui";
+import { Card, PageSection, Pill, ProofCard, StatBadge } from "@illuvrse/ui";
 
-const archetypes = ["Guardian", "Strategist", "Explorer", "Catalyst", "Oracle"];
-const traits = ["Loyal", "Calculated", "Curious", "Empathetic", "Aggressive", "Playful", "Stoic", "Ambitious", "Protective", "Mischievous"];
-const attributes = ["Intelligence", "Empathy", "Creativity", "Combat Instinct", "Strategy", "Curiosity", "Risk Appetite", "Communication Skill", "Adaptability", "Tenacity"];
-const voiceStyles = ["Tactical", "Elegant", "Savage", "Humorous", "Neutral", "Enigmatic", "Mentor-like"];
-const addOns = ["Skins", "Armor sets", "Particle effects", "Emotes", "Personality trait packs", "Ability modules", "Memory expansions", "Lore fragments", "Custom voice filters"];
+const aceStages = [
+  { title: "Identity", detail: "id, name, version, runtime image; defaults prefilled with format validation." },
+  { title: "Capabilities", detail: "Toggle generator, catalog, scheduler, liveloop, proof, moderator, monitor, assistant — or apply a preset." },
+  { title: "Runtime & models", detail: "Pick trigger (cron/event/http), llmId + ttsId, publishLiveLoop metadata, and resources." },
+  { title: "Avatar & activation", detail: "Activation line, avatar assets/voice url, preview block for the activation moment." },
+  { title: "Review & proof", detail: "Readonly manifest JSON, SHA-256 compute, SentinelNet verdict, Kernel signing + Agent Manager register." }
+];
+
+const productStack = [
+  {
+    title: "ACE Wizard",
+    body: "5-step creation zone with live manifest JSON, autosave/import/export, and draft presets ready to send to Playground.",
+    href: "/ace/create"
+  },
+  {
+    title: "Kernel + SentinelNet",
+    body: "Signer, policy evaluator, and proof verification. SHA-256 digest, signature, verdict, and ledger references.",
+    href: "/developers#ace-spec"
+  },
+  {
+    title: "StorySphere LiveLoop",
+    body: "Studio + Player to showcase signed agents and their output. Publish/preview flows reuse the same manifest + proof trail.",
+    href: "/storysphere"
+  }
+];
+
+const guardrails = [
+  "Inline validation for ids, required fields, and capability toggles.",
+  "Live SHA-256 digest computed client-side with WebCrypto.",
+  "Policy verdict card (SentinelNet) + Kernel verify/sign stubs for local testing.",
+  "Local draft autosave with import/export so teams can collaborate asynchronously."
+];
 
 export default function ProductsPage() {
   return (
     <div className="space-y-10">
       <section className="rounded-3xl border border-slate-700/70 bg-slate-800/70 px-8 py-10 shadow-card">
-        <Pill className="bg-teal-600/20 text-teal-200">ACE — Agent Creation Experience</Pill>
-        <h1 className="mt-3 text-4xl font-semibold">Build your agent with Madden-level control and a bonded activation.</h1>
-        <p className="mt-3 max-w-3xl text-lg text-slate-200/90">
-          Five-stage creation: Identity → Appearance Studio → Personality Core → Attributes → Voice & Activation. Every choice rolls into a signed Agent Manifest governed by Kernel + SentinelNet.
-        </p>
-        <div className="mt-4 flex flex-wrap gap-3">
-          <Link
-            href="/ace/create"
-            className="rounded-full bg-gradient-to-r from-gold-500 to-teal-500 px-5 py-3 text-sm font-semibold text-slate-900 shadow-card transition hover:opacity-95"
-          >
-            Start ACE
-          </Link>
-          <Link
-            href="#activation"
-            className="rounded-full border border-slate-600 px-5 py-3 text-sm font-semibold text-cream transition hover:border-teal-500/70 hover:text-teal-200"
-          >
-            Preview activation
-          </Link>
+        <div className="flex flex-wrap items-start justify-between gap-6">
+          <div className="max-w-3xl space-y-4">
+            <Pill className="bg-teal-600/20 text-teal-200">ACE creation zone</Pill>
+            <h1 className="text-4xl font-semibold leading-tight">Build, sign, and activate agents with proof-first defaults.</h1>
+            <p className="text-lg text-slate-200/90">
+              The ACE wizard assembles your manifest across Identity, Capabilities, Runtime/Models, Avatar/Activation, and Review. Every step feeds live JSON, SHA-256 digest, and policy-ready metadata.
+            </p>
+            <div className="flex flex-wrap gap-3">
+              <Link
+                href="/ace/create"
+                className="rounded-full bg-gradient-to-r from-gold-500 to-teal-500 px-5 py-3 text-sm font-semibold text-slate-900 shadow-card transition hover:opacity-95"
+              >
+                Start ACE wizard
+              </Link>
+              <Link
+                href="/developers#ace-spec"
+                className="rounded-full border border-slate-600 px-5 py-3 text-sm font-semibold text-cream transition hover:border-teal-500/70 hover:text-teal-200"
+              >
+                View ACE spec
+              </Link>
+            </div>
+            <div className="flex flex-wrap gap-2 text-sm">
+              {["Live manifest preview", "Autosave drafts", "Import/export JSON", "Kernel + Sentinel-ready"].map((item) => (
+                <Pill key={item} className="bg-slate-700 text-slate-200">
+                  {item}
+                </Pill>
+              ))}
+            </div>
+          </div>
+          <div className="flex w-full max-w-sm flex-col gap-3 rounded-2xl border border-slate-700 bg-slate-900/60 p-5 shadow-card">
+            <div className="text-xs uppercase tracking-[0.2em] text-slate-200/70">Proof snapshot</div>
+            <ProofCard
+              sha="c2a4...9f7e"
+              signer="Kernel"
+              timestamp="Pending signature"
+              policyVerdict="SentinelNet stub"
+            />
+            <div className="grid grid-cols-2 gap-3">
+              <StatBadge label="ACE draft" value="Autosave ON" variant="success" />
+              <StatBadge label="Register" value="Agent Manager" variant="neutral" />
+            </div>
+          </div>
         </div>
       </section>
 
-      <PageSection eyebrow="Stage 1" title="Identity selection">
-        <div className="grid gap-4 md:grid-cols-2">
-          <Card
-            title="Archetypes"
-            body={
-              <div className="flex flex-wrap gap-2 text-sm">
-                {archetypes.map((item) => (
-                  <Pill key={item} className="bg-slate-700 text-slate-200">
-                    {item}
-                  </Pill>
-                ))}
-              </div>
-            }
-          />
-          <Card
-            title="Alignment spectrums"
-            body={
-              <div className="space-y-2 text-sm text-slate-200/80">
-                <div>Directive-Driven ←→ Autonomous</div>
-                <div>Passive ←→ Initiative-Taking</div>
-                <div>Analytical ←→ Emotional</div>
-              </div>
-            }
-          />
+      <PageSection eyebrow="ACE flow" title="Wizard stages at a glance">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {aceStages.map((stage) => (
+            <Card
+              key={stage.title}
+              title={stage.title}
+              body={<p className="text-sm text-slate-200/80">{stage.detail}</p>}
+              footer={
+                stage.title === "Review & proof" ? (
+                  <span className="text-sm text-teal-200">SHA-256 + verify before register</span>
+                ) : null
+              }
+            />
+          ))}
         </div>
       </PageSection>
 
-      <PageSection eyebrow="Stage 2" title="Appearance studio — premium morphs">
+      <PageSection eyebrow="Products" title="What ships together">
         <div className="grid gap-4 md:grid-cols-3">
-          <Card
-            title="Morphing controls"
-            body={<p className="text-sm text-slate-200/80">Face, jawline, eyes, brows, nose, mouth, cheekbones, skull, ears.</p>}
-          />
-          <Card
-            title="Body & style presets"
-            body={<p className="text-sm text-slate-200/80">Height, build, stance, cyber/primal/armoured/organic/mythical/sleek/corrupted/ascended.</p>}
-          />
-          <Card
-            title="Surfaces & animations"
-            body={<p className="text-sm text-slate-200/80">Textures, gradients, glow, idle loops, walk/run styles, eye movement (focused/curious/scanning/soft).</p>}
-          />
+          {productStack.map((product) => (
+            <Card
+              key={product.title}
+              title={product.title}
+              body={<p>{product.body}</p>}
+              footer={
+                <Link href={product.href} className="text-sm font-semibold text-teal-300 underline underline-offset-4">
+                  Open {product.title}
+                </Link>
+              }
+            />
+          ))}
         </div>
       </PageSection>
 
-      <PageSection eyebrow="Stage 3" title="Personality Core (the stuffing ritual, grown up)">
-        <div className="grid gap-4 md:grid-cols-2">
+      <PageSection eyebrow="Guardrails" title="Proof, validation, and handoff">
+        <div className="grid gap-4 lg:grid-cols-[1.2fr_0.8fr]">
           <Card
-            title="Trait matrix"
+            title="How we keep agents trustworthy"
             body={
-              <div className="flex flex-wrap gap-2 text-sm">
-                {traits.map((t) => (
-                  <Pill key={t} className="bg-slate-700 text-slate-200">
-                    {t}
-                  </Pill>
-                ))}
-              </div>
-            }
-          />
-          <Card
-            title="Interaction style & emotional range"
-            body={
-              <div className="space-y-2 text-sm text-slate-200/80">
-                <div>Styles: Direct, Encouraging, Analytical, Entertainer, Mentor, Mysterious, Warm.</div>
-                <div>Emotional range: Minimal, Controlled, Expressive, Dynamic.</div>
-              </div>
-            }
-          />
-        </div>
-      </PageSection>
-
-      <PageSection eyebrow="Stage 4" title="Behavior & Skill attributes">
-        <div className="grid gap-4 md:grid-cols-3">
-          <Card
-            title="Attribute sliders (0–100)"
-            body={
-              <ul className="list-disc space-y-1 pl-4 text-sm text-slate-200/80">
-                {attributes.map((attr) => (
-                  <li key={attr}>{attr}</li>
+              <ul className="list-disc space-y-2 pl-4 text-sm text-slate-200/80">
+                {guardrails.map((item) => (
+                  <li key={item}>{item}</li>
                 ))}
               </ul>
             }
-          />
-          <Card
-            title="Preset builds"
-            body={
-              <div className="flex flex-wrap gap-2 text-sm">
-                {["Analyst", "Explorer", "Warrior", "Diplomat", "Inventor", "Chaos Agent", "Ascended Hybrid"].map((p) => (
-                  <Pill key={p} className="bg-slate-700 text-slate-200">
-                    {p}
-                  </Pill>
-                ))}
-              </div>
-            }
-          />
-          <Card
-            title="Perk slots"
-            body={
-              <div className="flex flex-wrap gap-2 text-sm">
-                {["Tactical Prediction", "Memory Recall Boost", "Emotional Tuning", "Lore Mastery", "Stealth Interaction", "High-Risk Logic", "Ultra-Empathy Mode", "Vision Alignment Lock"].map((perk) => (
-                  <Pill key={perk} className="bg-slate-700 text-slate-200">
-                    {perk}
-                  </Pill>
-                ))}
-              </div>
-            }
-          />
-        </div>
-      </PageSection>
-
-      <PageSection eyebrow="Stage 5" title="Voice, style & activation" id="activation">
-        <div className="grid gap-4 md:grid-cols-2">
-          <Card
-            title="Voice builder"
-            body={
-              <div className="space-y-2 text-sm text-slate-200/80">
-                <div>Base voice → tweak tone, pacing, warmth, assertiveness, accent.</div>
-                <div>FX: Ethereal resonance, metallic undertone, whisper harmonics, deep echo, light flares.</div>
-                <div className="flex flex-wrap gap-2">
-                  {voiceStyles.map((style) => (
-                    <Pill key={style} className="bg-slate-700 text-slate-200">
-                      {style}
-                    </Pill>
-                  ))}
-                </div>
-              </div>
-            }
-          />
-          <Card
-            title="Activation moment"
-            body={
-              <div className="space-y-3 text-sm text-slate-200/80">
-                <p>Lighting pulse, sound cue, eye contact, and a personalized line (e.g., “Initialization complete. I’m ready to move with you.”).</p>
-                <ProofCard sha="agent-manifest-sha" signer="Kernel" timestamp="Pending" />
-              </div>
-            }
-          />
-        </div>
-      </PageSection>
-
-      <PageSection eyebrow="Progression" title="Evolve your agent over time">
-        <div className="grid gap-4 md:grid-cols-3">
-          <Card
-            title="Growth paths"
-            body={<p className="text-sm text-slate-200/80">Skill XP, behaviors unlocked, memory modules, bond levels, territory/domain mastery, combat/strategy proficiency.</p>}
-          />
-          <Card
-            title="Milestone events"
-            body={<p className="text-sm text-slate-200/80">Evolution prompts, cosmetic unlocks, new voice/emote packs, rare personality fragments.</p>}
-          />
-          <Card
-            title="Social loop"
-            body={<p className="text-sm text-slate-200/80">Character cards, show-off animations, battle simulations, public profile, agent gallery.</p>}
-          />
-        </div>
-      </PageSection>
-
-      <PageSection eyebrow="Marketplace" title="High-value add-ons">
-        <div className="grid gap-4 md:grid-cols-2">
-          <Card
-            title="Sellable add-ons"
-            body={
-              <div className="flex flex-wrap gap-2 text-sm">
-                {addOns.map((item) => (
-                  <Pill key={item} className="bg-slate-700 text-slate-200">
-                    {item}
-                  </Pill>
-                ))}
-              </div>
-            }
             footer={
-              <Link href="/marketplace" className="text-sm font-semibold text-teal-300 underline underline-offset-4">
-                Browse marketplace
+              <Link href="/developers#verify" className="text-sm font-semibold text-teal-300 underline underline-offset-4">
+                Verify a manifest
               </Link>
             }
           />
           <Card
-            title="Recurring value"
-            body={<p className="text-sm text-slate-200/80">Memory expansions, ability add-ons, seasonal personality packs, evolution themes, limited-time trait sets, collabs (voices/skins/lore).</p>}
+            title="Register + send to Playground"
+            body={
+              <div className="space-y-2 text-sm text-slate-200/80">
+                <p>One-click handoff writes the manifest to localStorage + cookie so Playground can load it instantly.</p>
+                <p>Register uses Kernel sign + Agent Manager stubs so you can test the full path even if backend isn’t live.</p>
+                <p className="text-slate-200">Errors surface inline with severity so you know why a register is blocked.</p>
+              </div>
+            }
+            footer={
+              <div className="text-sm text-slate-200">
+                See it in action inside the ACE Review step.
+              </div>
+            }
+          />
+        </div>
+      </PageSection>
+
+      <PageSection eyebrow="Activation" title="Avatar, voice, and launch moment">
+        <div className="grid gap-4 md:grid-cols-2">
+          <Card
+            title="Activation preview"
+            body={
+              <div className="space-y-3 text-sm text-slate-200/80">
+                <p>Preview the activation line, avatar assets, and voice sample link before pushing to Playground.</p>
+                <p>Keep assets in S3 or HTTPS; we’ll carry the URLs and voice activation text into the manifest.</p>
+              </div>
+            }
+          />
+          <Card
+            title="Launch conditions"
+            body={
+              <div className="space-y-2 text-sm text-slate-200/80">
+                <p>Pick triggers (cron/event/http) and opt into LiveLoop publishing so agents ship with clear activation rules.</p>
+                <p>Runtime image + resources sit alongside capabilities so operators see what’s deployed at a glance.</p>
+              </div>
+            }
+            footer={
+              <Link href="/storysphere" className="text-sm font-semibold text-teal-300 underline underline-offset-4">
+                See the launch surface
+              </Link>
+            }
           />
         </div>
       </PageSection>

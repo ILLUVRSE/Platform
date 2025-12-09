@@ -1,466 +1,123 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Card, PageSection, Pill, StatBadge } from "@illuvrse/ui";
 
-type SlotStatus = "live" | "upcoming";
-
-type LiveLoopSlot = {
+type Slot = {
+  id: string;
   window: string;
   title: string;
   focus: string;
   proof: string;
+  asset: string;
+  thumbnail?: string;
   status?: "on-air" | "next";
+  startMinutes: number;
+  endMinutes: number;
 };
 
-type GuideEvent = {
-  id: string;
-  time: string;
-  title: string;
-  description: string;
-  status: SlotStatus;
+const BEVERLY_ASSETS = [
+  "/00efdd5717132ce3a95944dd2f83dba6-360p.mp4",
+  "/0570d5a39fca358ee78cd3a7e3b1b30e-360p.mp4",
+  "/10ad753894979bff8863a9b94d63b770-360p.mp4",
+  "/24e066e09cdc6be412932c8d4931be82-360p.mp4",
+  "/2fcaae33bcc4b2493c90edf2d409888a-360p.mp4",
+  "/3073e2bea35d23e0a2c9f271223a7dcb-360p.mp4"
+];
+
+const MOVIE_ASSETS = {
+  gilda: encodeURI("/Gilda 1946.mp4"),
+  royalWedding: "/royal_wedding.mp4",
+  casablanca: encodeURI(
+    "/Casablanca 1942, in color, Humphrey Bogart, Ingrid Bergman, Paul Henreid, Claude Rains, Sydney Greenstreet, Peter Lorre, Dooley Wilson,.mp4"
+  )
 };
 
-type ChannelGuide = {
-  id: string;
-  name: string;
-  description: string;
-  schedule: GuideEvent[];
-};
-
-const liveLoopSchedule: { day: string; slots: LiveLoopSlot[] }[] = [
+const COMING_SOON = [
   {
-    day: "Day 1 · Beverly Hills Marathon (UTC)",
-    slots: [
-      {
-        window: "00:00–06:00",
-        title: "Beverly Hillbillies S1 E01–E12",
-        focus: "Nonstop, no commercials; captions + dub tracks.",
-        proof: "bh:0001...bh12",
-        status: "on-air"
-      },
-      {
-        window: "06:00–12:00",
-        title: "Beverly Hillbillies S1 E13–E24",
-        focus: "No ads; GameGrid PIP enabled.",
-        proof: "bh:0013...bh24",
-        status: "next"
-      },
-      {
-        window: "12:00–15:00",
-        title: "Beverly Hillbillies S1 E25–E36",
-        focus: "Midday run with inline proofs.",
-        proof: "bh:0025...bh36"
-      },
-      {
-        window: "15:00–18:00",
-        title: "Beverly Hillbillies S1 E37–E48",
-        focus: "Daytime wrap; zero commercials.",
-        proof: "bh:0037...bh48"
-      },
-      {
-        window: "18:00–20:00",
-        title: "Movie: Gilda (1946)",
-        focus: "Prime-time feature; signed manifest, captions, dub tracks.",
-        proof: "mv:gilda...1946"
-      },
-      {
-        window: "20:00–22:00",
-        title: "Movie: Royal Wedding (1951)",
-        focus: "Fred Astaire + Jane Powell — uninterrupted.",
-        proof: "mv:royal...1951"
-      },
-      {
-        window: "22:00–24:00",
-        title: "Movie: Casablanca (Color)",
-        focus: "Color transfer; Kernel + SentinelNet proofs.",
-        proof: "mv:casa...color"
-      }
-    ]
+    title: "LiveLoop 4K",
+    body: "Upgrade the channel to 4K + HDR with per-slot stream variants.",
+    eta: "Q3"
   },
   {
-    day: "Day 2 · Beverly Hills Marathon (UTC)",
-    slots: [
-      {
-        window: "00:00–06:00",
-        title: "Beverly Hillbillies S1 E49–E60",
-        focus: "Overnight loop; no ads.",
-        proof: "bh:0049...0060"
-      },
-      {
-        window: "06:00–12:00",
-        title: "Beverly Hillbillies S1 E61–E72",
-        focus: "Morning run with PIP Arcade.",
-        proof: "bh:0061...0072"
-      },
-      {
-        window: "12:00–15:00",
-        title: "Beverly Hillbillies S1 E73–E84",
-        focus: "Midday reruns; proofs inline.",
-        proof: "bh:0073...0084"
-      },
-      {
-        window: "15:00–18:00",
-        title: "Beverly Hillbillies S1 E85–E96",
-        focus: "Daytime wrap, zero commercials.",
-        proof: "bh:0085...0096"
-      },
-      {
-        window: "18:00–20:00",
-        title: "Movie: Gilda (encore)",
-        focus: "Signed encore for new viewers.",
-        proof: "mv:gilda...encore"
-      },
-      {
-        window: "20:00–22:00",
-        title: "Movie: Royal Wedding (encore)",
-        focus: "Second showing; captioned + dubbed.",
-        proof: "mv:royal...encore"
-      },
-      {
-        window: "22:00–24:00",
-        title: "Movie: Casablanca (Color) encore",
-        focus: "Final feature before next 48h refresh.",
-        proof: "mv:casa...encore"
-      }
-    ]
+    title: "Alt audio & captions",
+    body: "Multiple language tracks, descriptive audio, and burnt-in proof badges.",
+    eta: "Q3"
+  },
+  {
+    title: "Companion chat",
+    body: "Optional sidecar chat overlay with operator-level safety controls.",
+    eta: "Q4"
   }
 ];
 
-const onAirSlot = liveLoopSchedule.flatMap((day) => day.slots).find((slot) => slot.status === "on-air");
-const nextSlot = liveLoopSchedule.flatMap((day) => day.slots).find((slot) => slot.status === "next");
+const minutesToLabel = (minutes: number) => {
+  const h = Math.floor(minutes / 60) % 24;
+  const m = minutes % 60;
+  return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+};
 
-const notifyHref = "/contact?topic=notify-liveloop";
+function makeSlot(startMinutes: number, endMinutes: number, overrides: Partial<Slot> = {}): Slot {
+  return {
+    id: `slot-${startMinutes}`,
+    startMinutes,
+    endMinutes,
+    window: `${minutesToLabel(startMinutes)}–${minutesToLabel(endMinutes % (24 * 60))}`,
+    title: "LiveLoop Block",
+    focus: "Featured content",
+    proof: `lv:${startMinutes}`,
+    asset: "",
+    ...overrides
+  };
+}
 
-export default function LiveLoopPage() {
-  const [viewMode, setViewMode] = useState<"schedule" | "timeline">("schedule");
-  const [selectedChannelId, setSelectedChannelId] = useState("liveloop");
-  const [search, setSearch] = useState("");
+function generateLiveLoopSchedule(): Slot[] {
+  const GILDA_DURATION_MIN = 110;
+  const ROYAL_DURATION_MIN = 93;
+  const CASABLANCA_DURATION_MIN = 102;
 
-  const liveLoopEvents: GuideEvent[] = useMemo(() => mapLiveLoopEvents(liveLoopSchedule), []);
+  const gildaStart = 18 * 60; // local 18:00
+  const gildaEnd = gildaStart + GILDA_DURATION_MIN; // 19:50
+  const royalStart = gildaEnd; // immediately after Gilda
+  const royalEnd = royalStart + ROYAL_DURATION_MIN; // 21:23
+  const casaStart = royalEnd; // immediately after Royal Wedding
+  const casaEnd = casaStart + CASABLANCA_DURATION_MIN; // 23:05
 
-  const channels: ChannelGuide[] = useMemo(
-    () => [
-      {
-        id: "liveloop",
-        name: "LiveLoop",
-        description: "24/7 playlist stream with proofs and GameGrid PIP.",
-        schedule: liveLoopEvents
-      },
-      {
-        id: "arcade",
-        name: "GameGrid Arcade",
-        description: "Play while you watch; latency probes and overlays.",
-        schedule: [
-          {
-            id: "arcade-1",
-            time: "Daily · 18:00 UTC",
-            title: "Neon Runner Championship",
-            description: "Live bracket with PIP caster desk and live leaderboard.",
-            status: "upcoming"
-          },
-          {
-            id: "arcade-2",
-            time: "Daily · 20:30 UTC",
-            title: "Grid Kart Drift Trials",
-            description: "Arcade finals with signed inputs and latency stats.",
-            status: "upcoming"
-          },
-          {
-            id: "arcade-3",
-            time: "24/7 filler",
-            title: "Arcade Mix",
-            description: "B-roll gameplay loops when the main bracket is offline.",
-            status: "upcoming"
-          }
-        ]
-      },
-      {
-        id: "premieres",
-        name: "StorySphere Premieres",
-        description: "New MP4 drops from creators and partners.",
-        schedule: [
-          {
-            id: "prem-1",
-            time: "Tue · 19:00 UTC",
-            title: "Nebula Harbor · Episode 07",
-            description: "Premiere with captions and dub tracks; signed manifest.",
-            status: "live"
-          },
-          {
-            id: "prem-2",
-            time: "Wed · 21:00 UTC",
-            title: "ACE Activation: ORACLE",
-            description: "Agent debut with voice pack and Kernel + SentinelNet proofs.",
-            status: "upcoming"
-          },
-          {
-            id: "prem-3",
-            time: "Thu · 17:30 UTC",
-            title: "Creator Spotlight",
-            description: "Live Q&A overlay while the new reel airs.",
-            status: "upcoming"
-          }
-        ]
-      },
-      {
-        id: "ops",
-        name: "Ops & Policy",
-        description: "Control-Panel briefings and ledger walkthroughs.",
-        schedule: [
-          {
-            id: "ops-1",
-            time: "Daily · 12:00 UTC",
-            title: "Kernel + SentinelNet Signing Hour",
-            description: "On-air manifest verifications and proof badge explainer.",
-            status: "upcoming"
-          },
-          {
-            id: "ops-2",
-            time: "Fri · 16:00 UTC",
-            title: "Audit & Rollback Review",
-            description: "Operators explain verdicts with deterministic traces.",
-            status: "upcoming"
-          }
-        ]
-      }
-    ],
-    [liveLoopEvents]
-  );
+  const slots: Slot[] = [
+    makeSlot(0, gildaStart, {
+      title: "The Beverly Hillbillies — Marathon",
+      focus: "Nonstop episodes — no commercials",
+      proof: "bh:day",
+      asset: BEVERLY_ASSETS[0]
+    }),
+    makeSlot(gildaStart, gildaEnd, {
+      title: "Gilda (1946)",
+      focus: "Prime-time feature — uninterrupted",
+      proof: "mv:gilda",
+      asset: MOVIE_ASSETS.gilda,
+      thumbnail: "/Gilda_itemimage.jpg"
+    }),
+    makeSlot(royalStart, royalEnd, {
+      title: "The Royal Wedding (1951)",
+      focus: "Prime-time feature — uninterrupted",
+      proof: "mv:royal-wedding",
+      asset: MOVIE_ASSETS.royalWedding
+    }),
+    makeSlot(casaStart, casaEnd, {
+      title: "Casablanca (Color Edition)",
+      focus: "Prime-time feature — uninterrupted",
+      proof: "mv:casablanca",
+      asset: MOVIE_ASSETS.casablanca,
+      thumbnail: encodeURI("/__ia_thumb.jpg")
+    }),
+    makeSlot(casaEnd, 24 * 60, {
+      title: "The Beverly Hillbillies — Overnight",
+      focus: "Wind down with the Clampetts",
+      proof: "bh:overnight",
+      asset: BEVERLY_ASSETS[1 % BEVERLY_ASSETS.length]
+    })
+  ];
 
-  const selectedChannel = channels.find((c) => c.id === selectedChannelId) ?? channels[0];
-
-  const filteredSchedule = selectedChannel.schedule.filter((event) => {
-    if (!search.trim()) return true;
-    const q = search.toLowerCase();
-    return (
-      event.title.toLowerCase().includes(q) ||
-      event.description.toLowerCase().includes(q) ||
-      event.time.toLowerCase().includes(q)
-    );
-  });
-
-  const viewerCount = useMemo(() => 1840 + Math.floor(Math.random() * 140), []);
-  // Use local StorySphere public asset by default; override with HLS/MP4 via env.
-  const streamSrc = process.env.NEXT_PUBLIC_LIVELOOP_SRC || "/royal_wedding.mp4";
-  const embedSrc = process.env.NEXT_PUBLIC_LIVELOOP_EMBED;
-  const fallbackMp4 =
-    process.env.NEXT_PUBLIC_LIVELOOP_FALLBACK_MP4 ||
-    "/Gilda 1946.mp4";
-
-  return (
-    <div className="space-y-10">
-      <section className="rounded-3xl border border-slate-700/70 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-800/60 px-8 py-10 shadow-card">
-        <div className="flex flex-wrap items-start justify-between gap-6">
-          <div className="max-w-3xl space-y-3">
-            <Pill className="bg-teal-600/25 text-teal-100">LiveLoop</Pill>
-            <h1 className="text-4xl font-semibold leading-tight md:text-5xl">
-              48-hour Beverly Hillbillies + triple-feature — no commercials
-            </h1>
-            <p className="text-lg text-slate-200/90">
-              Nonstop Beverly Hillbillies episodes with nightly Gilda, Royal Wedding, and Casablanca. Live
-              player up top; searchable guide in the middle; product intros + notify buttons at the bottom.
-            </p>
-            <div className="flex flex-wrap gap-3">
-              <Link
-                href="/player"
-                className="rounded-full bg-gradient-to-r from-gold-500 to-teal-500 px-5 py-3 text-sm font-semibold text-slate-900 shadow-card transition hover:opacity-95"
-              >
-                Watch Live
-              </Link>
-              <Link
-                href="/developers#liveloop"
-                className="rounded-full border border-slate-600 px-5 py-3 text-sm font-semibold text-cream transition hover:border-teal-500/70 hover:text-teal-200"
-              >
-                Publish API
-              </Link>
-            </div>
-          </div>
-          <div className="grid gap-3 sm:grid-cols-2">
-            <StatBadge label="Live" value={onAirSlot ? onAirSlot.title : "LiveLoop"} variant="success" />
-            <StatBadge label="Next" value={nextSlot ? nextSlot.title : "Locked"} variant="warning" />
-            <StatBadge label="Window" value="48h schedule sealed" />
-            <StatBadge label="Viewers" value={`${viewerCount.toLocaleString()} watching`} />
-          </div>
-        </div>
-      </section>
-
-      <section className="rounded-3xl border border-slate-700/70 bg-slate-900/70 px-6 py-6 shadow-card md:px-8">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div>
-            <div className="text-xs uppercase tracking-[0.2em] text-slate-200/70">On-air player</div>
-            <div className="text-2xl font-semibold text-cream">LiveLoop stream</div>
-            <p className="text-sm text-slate-200/80">
-              Uses <code>NEXT_PUBLIC_LIVELOOP_SRC</code>; falls back to the embed URL if provided. Native HLS where
-              supported; otherwise use an MP4 feed or the embed fallback.
-            </p>
-          </div>
-          <div className="flex items-center gap-2 text-xs">
-            <Pill className="bg-teal-600/30 text-teal-100">LIVE</Pill>
-            <Pill className="bg-slate-700 text-slate-200">HLS/MP4</Pill>
-          </div>
-        </div>
-        <LivePlayer streamSrc={streamSrc} embedSrc={embedSrc} fallbackMp4={fallbackMp4} />
-      </section>
-
-      <PageSection
-        eyebrow="Guide"
-        title="Channel guide + schedule"
-        cta={
-          <Pill className="bg-slate-700 text-teal-100">
-            <span className="h-2 w-2 rounded-full bg-emerald-400" />
-            Search, filter, and scroll
-          </Pill>
-        }
-      >
-        <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-          <div className="text-sm text-slate-200/80">
-            Browse the 48-hour LiveLoop lineup plus Arcade, Premieres, and Ops channels. Type to filter titles
-            or descriptions.
-          </div>
-          <div className="flex flex-wrap gap-2 text-xs">
-            <Pill className="bg-teal-600/30 text-teal-100">Live</Pill>
-            <Pill className="bg-gold-500/25 text-gold-100">Upcoming</Pill>
-          </div>
-        </div>
-
-        <div className="flex flex-col gap-4 md:flex-row">
-          <div className="md:w-64">
-            <div className="mb-2 text-xs uppercase tracking-[0.2em] text-slate-300/80">Channels</div>
-            <div className="flex w-full gap-2 overflow-x-auto md:flex-col md:overflow-visible">
-              {channels.map((channel) => (
-                <button
-                  key={channel.id}
-                  onClick={() => setSelectedChannelId(channel.id)}
-                  className={`min-w-[140px] rounded-xl border px-4 py-3 text-left transition ${
-                    selectedChannelId === channel.id
-                      ? "border-teal-500/70 bg-teal-900/20 text-cream"
-                      : "border-slate-700 bg-slate-900/60 text-slate-200 hover:border-slate-500"
-                  }`}
-                >
-                  <div className="text-sm font-semibold">{channel.name}</div>
-                  <div className="text-xs text-slate-300/80">{channel.description}</div>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="flex-1 space-y-4">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <input
-                type="search"
-                placeholder="Search shows, times, descriptions"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="w-full rounded-xl border border-slate-700 bg-slate-900/60 px-4 py-3 text-sm text-cream shadow-inner focus:border-teal-500 focus:outline-none sm:max-w-md"
-              />
-              <div className="inline-flex rounded-full border border-slate-700 bg-slate-900 p-1 text-xs">
-                <button
-                  className={`rounded-full px-3 py-1 font-semibold transition ${viewMode === "schedule" ? "bg-teal-600/30 text-teal-100" : "text-slate-200"}`}
-                  onClick={() => setViewMode("schedule")}
-                >
-                  List
-                </button>
-                <button
-                  className={`rounded-full px-3 py-1 font-semibold transition ${viewMode === "timeline" ? "bg-teal-600/30 text-teal-100" : "text-slate-200"}`}
-                  onClick={() => setViewMode("timeline")}
-                >
-                  Timeline
-                </button>
-              </div>
-            </div>
-
-            {viewMode === "schedule" ? (
-              <div className="space-y-3">
-                {filteredSchedule.map((event) => (
-                  <div
-                    key={event.id}
-                    className="rounded-xl border border-slate-700 bg-slate-900/60 p-4 shadow-card"
-                  >
-                    <div className="flex flex-wrap items-center justify-between gap-2">
-                      <div className="text-sm font-semibold text-cream">{event.time}</div>
-                      <Pill
-                        className={
-                          event.status === "live"
-                            ? "bg-teal-600/30 text-teal-100"
-                            : "bg-gold-500/25 text-gold-100"
-                        }
-                      >
-                        {event.status === "live" ? "Live" : "Upcoming"}
-                      </Pill>
-                    </div>
-                    <div className="mt-1 text-base font-semibold text-cream">{event.title}</div>
-                    <div className="text-sm text-slate-200/80">{event.description}</div>
-                  </div>
-                ))}
-                {!filteredSchedule.length && (
-                  <div className="rounded-xl border border-slate-700 bg-slate-900/60 p-4 text-sm text-slate-200/80">
-                    No results. Try a different term or channel.
-                  </div>
-                )}
-              </div>
-            ) : (
-              <div className="rounded-2xl border border-slate-700 bg-slate-900/50 p-4">
-                <div className="mb-3 text-xs text-slate-200/80">
-                  Horizontal timeline — scroll to see the next 48 hours.
-                </div>
-                <div className="flex min-w-[720px] gap-3 overflow-x-auto">
-                  {filteredSchedule.map((event, idx) => (
-                    <div
-                      key={event.id}
-                      className={`min-w-[240px] flex-1 rounded-xl border p-3 shadow-card ${
-                        event.status === "live"
-                          ? "border-teal-500/70 bg-teal-900/15"
-                          : "border-slate-700 bg-slate-900/60"
-                      }`}
-                      style={{ marginLeft: idx === 0 ? 0 : idx * 4 }}
-                    >
-                      <div className="flex items-center justify-between gap-2 text-xs">
-                        <span className="font-semibold uppercase tracking-[0.15em] text-slate-200/80">
-                          {event.status === "live" ? "Live" : "Upcoming"}
-                        </span>
-                        <span className="text-slate-300/80">{event.time}</span>
-                      </div>
-                      <div className="mt-2 text-base font-semibold text-cream">{event.title}</div>
-                      <div className="text-sm text-slate-200/80">{event.description}</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      </PageSection>
-
-      <PageSection eyebrow="Coming soon" title="ILLUVRSE surfaces">
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {comingSoonCards.map((card) => (
-            <Card
-              key={card.title}
-              title={card.title}
-              body={
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between gap-2">
-                    <Pill className="bg-slate-700 text-slate-200">Coming Soon</Pill>
-                  </div>
-                  <p className="text-sm text-slate-200/80">{card.body}</p>
-                </div>
-              }
-              footer={
-                <Link
-                  href={notifyHref}
-                  className="inline-flex w-full items-center justify-center rounded-full border border-teal-500/60 px-4 py-2 text-sm font-semibold text-teal-100 transition hover:border-teal-300 hover:text-cream"
-                >
-                  Notify me
-                </Link>
-              }
-            />
-          ))}
-        </div>
-      </PageSection>
-    </div>
-  );
+  return slots;
 }
 
 function LivePlayer({
@@ -473,27 +130,15 @@ function LivePlayer({
   fallbackMp4?: string | null;
 }) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
-  const [nativeHls, setNativeHls] = useState(false);
-  const [unsupportedHls, setUnsupportedHls] = useState(false);
-  const [usingHlsHelper, setUsingHlsHelper] = useState(false);
-  const [usingFallbackMp4, setUsingFallbackMp4] = useState(false);
+  const [unsupported, setUnsupported] = useState(false);
 
   useEffect(() => {
     const video = videoRef.current;
-    if (!video || (!streamSrc && !fallbackMp4) || embedSrc) return;
+    if (!video) return;
+    if (embedSrc) return;
+
     const isHls = Boolean(streamSrc?.includes(".m3u8"));
     const supportsHls = streamSrc ? video.canPlayType("application/vnd.apple.mpegurl") !== "" : false;
-    let cleanup: (() => void) | undefined;
-
-    const attachNative = () => {
-      if (streamSrc) {
-        setNativeHls(supportsHls);
-        video.src = streamSrc;
-      } else if (fallbackMp4) {
-        video.src = fallbackMp4;
-        setUsingFallbackMp4(true);
-      }
-    };
 
     if (isHls && streamSrc && !supportsHls) {
       loadHlsFromCdn()
@@ -502,99 +147,58 @@ function LivePlayer({
             const hls = new Hls();
             hls.loadSource(streamSrc);
             hls.attachMedia(video);
-            setUsingHlsHelper(true);
-            cleanup = () => hls.destroy();
+            return;
+          }
+          if (fallbackMp4) {
+            video.src = fallbackMp4;
           } else {
-            if (fallbackMp4) {
-              setUsingFallbackMp4(true);
-              video.src = fallbackMp4;
-            } else {
-              setUnsupportedHls(true);
-            }
+            setUnsupported(true);
           }
         })
         .catch(() => {
-          if (fallbackMp4) {
-            setUsingFallbackMp4(true);
-            video.src = fallbackMp4;
-          } else {
-            setUnsupportedHls(true);
-          }
+          if (fallbackMp4) video.src = fallbackMp4;
+          else setUnsupported(true);
         });
-
-      return () => {
-        if (cleanup) cleanup();
-      };
+      return;
     }
 
-    attachNative();
-
-    return () => {
-      if (cleanup) cleanup();
-    };
+    if (streamSrc) {
+      video.src = streamSrc;
+    } else if (fallbackMp4) {
+      video.src = fallbackMp4;
+    }
   }, [streamSrc, embedSrc, fallbackMp4]);
 
   if (embedSrc) {
     return (
-      <div className="relative mt-4 overflow-hidden rounded-2xl border border-slate-700/70 bg-slate-950">
+      <div className="relative w-full overflow-hidden rounded-lg bg-black">
         <iframe
           src={embedSrc}
-          className="aspect-video w-full"
+          title="LiveLoop embed player"
+          className="block aspect-video w-full"
           allow="autoplay; fullscreen; picture-in-picture"
-          allowFullScreen
-          title="LiveLoop stream"
         />
-        <LivePlayerOverlay nativeHls={false} />
-      </div>
-    );
-  }
-
-  if (unsupportedHls) {
-    return (
-      <div className="relative mt-4 overflow-hidden rounded-2xl border border-slate-700/70 bg-slate-950 p-6 text-center text-sm text-slate-100">
-        HLS isn&apos;t supported in this browser. Provide an MP4 feed via <code>NEXT_PUBLIC_LIVELOOP_SRC</code> or
-        set <code>NEXT_PUBLIC_LIVELOOP_EMBED</code> to an iframe-friendly player. If you keep HLS, add
-        <code>hls.js</code> as a dependency so the helper can run on browsers without native support.
-      </div>
-    );
-  }
-
-  return (
-    <div className="relative mt-4 overflow-hidden rounded-2xl border border-slate-700/70 bg-slate-950">
-      <video
-        ref={videoRef}
-        className="h-full w-full max-h-[520px] bg-slate-950 object-cover"
-        controls
-        playsInline
-        preload="auto"
-        autoPlay
-        muted
-      />
-      <LivePlayerOverlay nativeHls={nativeHls} usingHlsHelper={usingHlsHelper} usingFallbackMp4={usingFallbackMp4} />
-    </div>
-  );
-}
-
-function LivePlayerOverlay({
-  nativeHls,
-  usingHlsHelper,
-  usingFallbackMp4
-}: {
-  nativeHls: boolean;
-  usingHlsHelper: boolean;
-  usingFallbackMp4: boolean;
-}) {
-  return (
-    <div className="pointer-events-none absolute inset-0 flex items-start justify-between p-3 text-[11px]">
-      <div className="flex items-center gap-2">
-        <span className="rounded-full bg-red-500 px-3 py-1 font-semibold uppercase tracking-[0.15em] text-cream">
+        <div className="absolute left-3 top-3 rounded px-2 py-1 text-xs font-semibold text-white bg-emerald-600/80">
           LIVE
-        </span>
-        <span className="rounded-full bg-slate-900/80 px-2 py-1 text-slate-100">
-          {nativeHls ? "Native HLS" : usingHlsHelper ? "HLS helper" : usingFallbackMp4 ? "Fallback MP4" : "MP4/iframe fallback"}
-        </span>
+        </div>
       </div>
-      <span className="rounded-full bg-slate-900/80 px-3 py-1 text-slate-100">Fullscreen available</span>
+    );
+  }
+
+  if (unsupported) {
+    return (
+      <div className="rounded-lg bg-black p-6 text-center text-white">
+        HLS not supported. Provide an MP4 fallback or include hls.js in production.
+      </div>
+    );
+  }
+
+  return (
+    <div className="relative w-full overflow-hidden rounded-lg bg-black">
+      <video ref={videoRef} className="aspect-video w-full object-cover" controls playsInline autoPlay muted />
+      <div className="absolute left-3 top-3 rounded px-2 py-1 text-xs font-semibold text-white bg-rose-600/80">
+        LIVE
+      </div>
     </div>
   );
 }
@@ -612,33 +216,228 @@ function loadHlsFromCdn(): Promise<any> {
   });
 }
 
-function mapLiveLoopEvents(schedule: { day: string; slots: LiveLoopSlot[] }[]): GuideEvent[] {
-  return schedule.flatMap((day) =>
-    day.slots.map((slot, idx) => ({
-      id: `liveloop-${day.day}-${idx}`,
-      time: `${day.day} · ${slot.window}`,
-      title: slot.title,
-      description: slot.focus,
-      status: slot.status === "on-air" ? "live" : "upcoming"
-    }))
+export default function LiveLoopRokuPage() {
+  const slots = useMemo(() => generateLiveLoopSchedule(), []);
+
+  const [nowMinutes, setNowMinutes] = useState(() => {
+    const d = new Date();
+    return d.getHours() * 60 + d.getMinutes();
+  });
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const d = new Date();
+      setNowMinutes(d.getHours() * 60 + d.getMinutes());
+    }, 10_000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const inkedSlots = useMemo(
+    () =>
+      slots.map((s, idx) => {
+        const isOnAir = nowMinutes >= s.startMinutes && nowMinutes < s.endMinutes;
+        const prevEnd = slots[idx === 0 ? slots.length - 1 : idx - 1].endMinutes;
+        const isNext = !isOnAir && nowMinutes >= prevEnd && nowMinutes < s.startMinutes;
+        return { ...s, status: isOnAir ? "on-air" : isNext ? "next" : undefined };
+      }),
+    [slots, nowMinutes]
+  );
+
+  const [cols, setCols] = useState(6);
+  useEffect(() => {
+    const setForWidth = () => {
+      const width = window.innerWidth;
+      if (width < 640) setCols(2);
+      else if (width < 1024) setCols(3);
+      else setCols(6);
+    };
+    setForWidth();
+    window.addEventListener("resize", setForWidth);
+    return () => window.removeEventListener("resize", setForWidth);
+  }, []);
+
+  const [focused, setFocused] = useState(0);
+  const tileRefs = useRef<Array<HTMLButtonElement | null>>([]);
+  useEffect(() => {
+    const el = tileRefs.current[focused];
+    if (el) el.focus();
+  }, [focused]);
+
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (!["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Enter"].includes(e.key)) return;
+      e.preventDefault();
+      if (e.key === "ArrowRight") {
+        setFocused((f) => Math.min(f + 1, inkedSlots.length - 1));
+      } else if (e.key === "ArrowLeft") {
+        setFocused((f) => Math.max(f - 1, 0));
+      } else if (e.key === "ArrowDown") {
+        setFocused((f) => Math.min(f + cols, inkedSlots.length - 1));
+      } else if (e.key === "ArrowUp") {
+        setFocused((f) => Math.max(f - cols, 0));
+      } else if (e.key === "Enter") {
+        const target = document.getElementById("livePlayer");
+        if (target) {
+          target.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+      }
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [inkedSlots.length, cols, focused]);
+
+  tileRefs.current = Array(inkedSlots.length)
+    .fill(null)
+    .map((_, i) => tileRefs.current[i] || null);
+
+  const liveFeedSrc = process.env.NEXT_PUBLIC_LIVELOOP_SRC || null;
+  const embedSrc = process.env.NEXT_PUBLIC_LIVELOOP_EMBED || null;
+  const fallbackMp4 = process.env.NEXT_PUBLIC_LIVELOOP_FALLBACK_MP4 || null;
+  const [playerSrc, setPlayerSrc] = useState<string | null>(liveFeedSrc);
+  const playerSrcRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (liveFeedSrc) {
+      // In live-feed mode, stay on the single HLS/DASH URL and skip local asset switching
+      playerSrcRef.current = liveFeedSrc;
+      setPlayerSrc(liveFeedSrc);
+      return;
+    }
+
+    function syncPlayerToSlot() {
+      const now = new Date();
+      const minutes = now.getHours() * 60 + now.getMinutes();
+      const currentSlot = slots.find((s) => minutes >= s.startMinutes && minutes < s.endMinutes) ?? slots[0];
+      if (!currentSlot?.asset) return;
+      if (currentSlot.asset !== playerSrcRef.current) {
+        playerSrcRef.current = currentSlot.asset;
+        setPlayerSrc(currentSlot.asset);
+      }
+    }
+
+    syncPlayerToSlot();
+    const timer = setInterval(syncPlayerToSlot, 15000);
+    return () => clearInterval(timer);
+  }, [slots, liveFeedSrc]);
+
+  const streamSrc = playerSrc;
+
+  const onAirSlot = inkedSlots.find((s) => s.status === "on-air") ?? inkedSlots[0];
+  const nextSlot = inkedSlots.find((s) => s.status === "next");
+  const onAirTitle = onAirSlot?.title ?? "Live";
+  const nextTitle = nextSlot ? `${nextSlot.title} · ${nextSlot.window.split("–")[0]}` : "Next";
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 p-6 text-white">
+      <div className="mx-auto max-w-7xl space-y-6">
+        <header className="flex flex-wrap items-center justify-between gap-4">
+          <div className="space-y-2">
+            <p className="text-xs uppercase tracking-[0.3em] text-teal-200/80">ILLUVRSE LiveLoop</p>
+            <h1 className="text-4xl font-extrabold tracking-tight">All-day stream, prime-time classics</h1>
+            <p className="max-w-3xl text-slate-200/90">
+              Beverly Hillbillies all day. At 6 PM local: Gilda → The Royal Wedding → Casablanca, each rolling immediately after the last frame. Clean, verified playback with channel proofs.
+            </p>
+            <div className="flex flex-wrap gap-3">
+              <a
+                href="#livePlayer"
+                className="rounded-full bg-gradient-to-r from-gold-500 to-teal-500 px-5 py-3 text-sm font-semibold text-slate-900 shadow-card transition hover:opacity-95"
+              >
+                Watch live
+              </a>
+              <a
+                href="#schedule"
+                className="rounded-full border border-slate-600 px-5 py-3 text-sm font-semibold text-cream transition hover:border-teal-500/70 hover:text-teal-200"
+              >
+                View schedule
+              </a>
+            </div>
+          </div>
+          <div className="text-right">
+            <div className="text-xs uppercase tracking-[0.2em] text-slate-400">Now playing</div>
+            <div className="text-lg font-bold">{onAirTitle}</div>
+            <div className="text-xs text-slate-400">Next: {nextTitle}</div>
+          </div>
+        </header>
+
+        <div id="livePlayer" className="overflow-hidden rounded-xl">
+          <LivePlayer streamSrc={streamSrc} embedSrc={embedSrc} fallbackMp4={fallbackMp4} />
+        </div>
+
+        <section id="schedule" aria-label="LiveLoop Grid" className="rounded-lg bg-slate-900/60 p-4">
+          <div className="mb-3 text-sm text-slate-300">Keyboard/remote arrows supported. Enter recenters the player.</div>
+          <div
+            className="grid gap-4"
+            style={{
+              gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`
+            }}
+          >
+            {inkedSlots.map((slot, i) => {
+              const isFocused = i === focused;
+              return (
+                <button
+                  key={slot.id}
+                  ref={(r) => (tileRefs.current[i] = r)}
+                  tabIndex={isFocused ? 0 : -1}
+                  className={`relative overflow-hidden transform rounded-lg p-5 text-left transition-all duration-150 focus:outline-none ${
+                    isFocused
+                      ? "scale-105 bg-teal-900/40 ring-4 ring-teal-400 ring-offset-2"
+                      : "bg-slate-800/60 hover:bg-slate-800/40"
+                  }`}
+                  onClick={() => setFocused(i)}
+                  aria-current={slot.status === "on-air" ? "true" : undefined}
+                  style={
+                    slot.thumbnail
+                      ? {
+                          backgroundImage: `linear-gradient(180deg, rgba(15,23,42,0.8) 0%, rgba(15,23,42,0.9) 40%, rgba(15,23,42,0.95) 100%), url(${slot.thumbnail})`,
+                          backgroundSize: "cover",
+                          backgroundPosition: "center"
+                        }
+                      : undefined
+                  }
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="text-lg font-semibold">{slot.title}</div>
+                      <div className="text-sm text-slate-300">{slot.focus}</div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-xs text-slate-400">{slot.window}</div>
+                      {slot.status === "on-air" && <div className="mt-2 text-sm font-bold text-emerald-300">ON AIR</div>}
+                      {slot.status === "next" && <div className="mt-2 text-sm font-semibold text-amber-300">NEXT</div>}
+                    </div>
+                  </div>
+                  <div className="mt-3 text-xs text-slate-400">proof: {slot.proof}</div>
+                </button>
+              );
+            })}
+          </div>
+        </section>
+
+        <section className="rounded-2xl border border-slate-800 bg-slate-900/70 p-6">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <div className="text-xs uppercase tracking-[0.2em] text-slate-400">Future line-up</div>
+              <h2 className="text-2xl font-semibold text-cream">Coming soon to LiveLoop</h2>
+              <p className="text-sm text-slate-300">Roadmap items ready for the next deploys.</p>
+            </div>
+            <span className="rounded-full bg-teal-600/20 px-3 py-1 text-xs font-semibold text-teal-200">Channel roadmap</span>
+          </div>
+          <div className="mt-4 grid gap-3 md:grid-cols-3">
+            {COMING_SOON.map((item) => (
+              <div key={item.title} className="rounded-xl border border-slate-800 bg-slate-800/60 p-4 shadow-card">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-semibold text-cream">{item.title}</h3>
+                  <span className="text-xs text-teal-200">ETA {item.eta}</span>
+                </div>
+                <p className="mt-2 text-sm text-slate-300">{item.body}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <footer className="text-sm text-slate-400">
+          Built for big screens — keyboard and remote friendly. Extend slot objects with manifests or proofs as needed.
+        </footer>
+      </div>
+    </div>
   );
 }
-
-const comingSoonCards = [
-  {
-    title: "ILLUVRSE",
-    body: "Governed platform for signed artifacts, live media, and Marketplace delivery."
-  },
-  {
-    title: "ACE — Agent Creation Experience",
-    body: "Five-stage builder for identity, appearance, personality, attributes, and activation."
-  },
-  {
-    title: "StorySphere",
-    body: "Prompt → preview → MP4 → LiveLoop with proofs, captions, and dub tracks."
-  },
-  {
-    title: "LiveLoop",
-    body: "24/7 playlist stream with Player embeds, GameGrid PIP, and verifiable manifests."
-  }
-];

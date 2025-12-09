@@ -11,6 +11,8 @@
   "dependencies": {
     "@illuvrse/ui": "workspace:*",
     "@illuvrse/contracts": "workspace:*",
+    "@illuvrse/agent-manager": "workspace:*",
+    "hls.js": "^1.5.17",
     "react": "^18",
     "react-dom": "^18",
     "next": "14.2.5"

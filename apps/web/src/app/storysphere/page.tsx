@@ -36,7 +36,7 @@ export default function StorySpherePage() {
             Generate a 7s preview
           </Link>
           <Link
-            href="/liveloop"
+            href="#liveloop"
             className="rounded-full border border-slate-600 px-5 py-3 text-sm font-semibold text-cream transition hover:border-teal-500/70 hover:text-teal-200"
           >
             View LiveLoop

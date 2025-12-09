@@ -25,7 +25,7 @@ const productTiles = [
   {
     title: "LiveLoop",
     body: "24/7 playlist stream; publish generated media with proofs and PIP Arcade.",
-    href: "/liveloop"
+    href: "/storysphere#liveloop"
   },
   {
     title: "Control-Panel",
@@ -71,7 +71,7 @@ export default function Home() {
                 Get started in IDEA
               </Link>
               <Link
-                href="/liveloop"
+                href="/storysphere#liveloop"
                 className="rounded-full border border-slate-600 px-5 py-3 text-sm font-semibold text-cream transition hover:border-teal-500/70 hover:text-teal-200"
               >
                 Try StorySphere LiveLoop

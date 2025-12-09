@@ -3,6 +3,8 @@ import Link from "next/link";
 import { ManifestViewer } from "../../components/ManifestViewer";
 import type { AceAgentManifest } from "@illuvrse/contracts";
 import { cookies } from "next/headers";
+import { TutorialManifests } from "./TutorialManifests";
+import { Playground3D } from "./Playground3D";
 
 const playgroundManifest: AceAgentManifest = {
   id: "agent.avatar-demo.001",
@@ -82,6 +84,12 @@ export default function PlaygroundPage() {
             </div>
           }
         />
+        <div className="mt-4 space-y-2">
+          <Pill className="bg-slate-700 text-teal-200">Tutorial agents</Pill>
+          <p className="text-sm text-slate-200/80">Load a ready-made tutorial agent into Playground as a guided example.</p>
+          {/* @ts-expect-error Client Component */}
+          <TutorialManifests />
+        </div>
       </PageSection>
 
       <PageSection eyebrow="2. Preview" title="Sandbox activation">
@@ -97,6 +105,11 @@ export default function PlaygroundPage() {
           {/* @ts-expect-error Server Component */}
           <ManifestViewer manifest={manifestToUse} />
         </div>
+      </PageSection>
+
+      <PageSection eyebrow="2B" title="3D / VR prototype">
+        {/* @ts-expect-error Client Component */}
+        <Playground3D />
       </PageSection>
 
       <PageSection eyebrow="3. Publish" title="Push to Marketplace or LiveLoop">

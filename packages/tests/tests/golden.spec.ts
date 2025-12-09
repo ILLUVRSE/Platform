@@ -33,6 +33,49 @@ test.describe("ILLUVRSE golden paths (smoke)", () => {
     await expect(page.getByText("Marketplace").first()).toBeVisible();
   });
 
+  test("LiveLoop on-air badge tracks mocked UTC hour", async ({ browser }) => {
+    test.skip(!webAvailable, `Web server not running at ${webBase}`);
+
+    const hoursToCheck = [3, 9];
+    for (const hour of hoursToCheck) {
+      const context = await browser.newContext();
+      await context.addInitScript(({ fixed }) => {
+        const fixedMs = fixed;
+        const OriginalDate = Date;
+        class MockDate extends OriginalDate {
+          constructor(...args: any[]) {
+            if (args.length === 0) {
+              return new OriginalDate(fixedMs);
+            }
+            return new OriginalDate(...args);
+          }
+          static now() {
+            return fixedMs;
+          }
+        }
+        MockDate.parse = OriginalDate.parse;
+        MockDate.UTC = OriginalDate.UTC;
+        // @ts-ignore
+        window.Date = MockDate as DateConstructor;
+      }, { fixed: Date.UTC(2024, 0, 1, hour, 0, 0) });
+
+      const page = await context.newPage();
+      await page.goto(`${webBase}/liveloop`);
+
+      const hourLabel = `LiveLoop · ${String(hour).padStart(2, "0")}:00`;
+      const windowLabel = `${String(hour).padStart(2, "0")}:00–${String((hour + 1) % 24).padStart(2, "0")}:00`;
+
+      await expect(page.getByText(hourLabel)).toBeVisible();
+
+      const onAirEvent = page.locator("div", {
+        hasText: `Day 1 · LiveLoop (UTC) · ${windowLabel}`
+      }).first();
+      await expect(onAirEvent.getByText("Live")).toBeVisible();
+
+      await context.close();
+    }
+  });
+
   test("web API kernel verify returns proof", async ({ request }) => {
     test.skip(!webAvailable, `Web server not running at ${webBase}`);
     const res = await request.post(`${webBase}/api/kernel/verify`, {
