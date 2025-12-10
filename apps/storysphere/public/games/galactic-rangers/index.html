@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Galactic Rangers</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="game-container">
+        <canvas id="gameCanvas"></canvas>
+        <div id="ui-layer">
+            <div id="score-board">SCORE: <span id="score">0</span></div>
+            <div id="start-screen" class="screen active">
+                <h1>GALACTIC RANGERS</h1>
+                <p>WASD / ARROWS to Move</p>
+                <p>SPACE to Shoot</p>
+                <button id="start-btn">START MISSION</button>
+            </div>
+            <div id="game-over-screen" class="screen">
+                <h1>MISSION FAILED</h1>
+                <p>FINAL SCORE: <span id="final-score">0</span></p>
+                <button id="restart-btn">RETRY</button>
+            </div>
+        </div>
+    </div>
+    <script src="game.js"></script>
+</body>
+</html>
