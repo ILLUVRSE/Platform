@@ -8,6 +8,13 @@ export type GameEntry = {
 
 export const gameGridManifest: GameEntry[] = [
   {
+    id: "galactic-rangers",
+    title: "Galactic Rangers",
+    description: "A neon-infused remix of the classic space shooter. Defend the galaxy!",
+    playPath: "/games/galactic-rangers/index.html",
+    genre: "shooter"
+  },
+  {
     id: "riverport",
     title: "Riverport Baseball League",
     description: "Arcade baseball on a tile grid with quickfire innings.",

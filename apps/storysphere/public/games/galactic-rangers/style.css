@@ -1,0 +1,114 @@
+:root {
+    --neon-blue: #00f3ff;
+    --neon-pink: #ff00ff;
+    --neon-green: #00ff9d;
+    --dark-bg: #050510;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    background-color: #000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    font-family: 'Courier New', Courier, monospace;
+    overflow: hidden;
+}
+
+#game-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    max-width: 800px;
+    max-height: 900px;
+    background: var(--dark-bg);
+    box-shadow: 0 0 20px rgba(0, 243, 255, 0.2);
+    border: 1px solid #333;
+}
+
+canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+#ui-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+#score-board {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    color: var(--neon-green);
+    font-size: 24px;
+    font-weight: bold;
+    text-shadow: 0 0 5px var(--neon-green);
+}
+
+.screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.85);
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+}
+
+.screen.active {
+    opacity: 1;
+    pointer-events: all;
+}
+
+h1 {
+    font-size: 48px;
+    color: var(--neon-blue);
+    text-shadow: 0 0 10px var(--neon-blue), 0 0 20px var(--neon-pink);
+    margin-bottom: 20px;
+    text-align: center;
+    letter-spacing: 4px;
+}
+
+p {
+    color: #fff;
+    font-size: 18px;
+    margin-bottom: 10px;
+}
+
+button {
+    margin-top: 30px;
+    padding: 15px 40px;
+    font-size: 20px;
+    font-family: inherit;
+    font-weight: bold;
+    color: var(--dark-bg);
+    background: var(--neon-blue);
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 0 10px var(--neon-blue);
+    transition: transform 0.1s, box-shadow 0.1s;
+}
+
+button:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 20px var(--neon-blue);
+    background: #fff;
+}
+
+button:active {
+    transform: scale(0.95);
+}
