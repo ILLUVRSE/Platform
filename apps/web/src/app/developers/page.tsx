@@ -99,6 +99,19 @@ export default function DevelopersPage() {
               </div>
             }
           />
+            <Card
+              title="Agent / Playground"
+              body={
+                <div className="space-y-2 text-sm">
+                  <code>POST /api/agent/exec</code> – enqueue actions (preview/publish/verify).<br />
+                  <code>GET /api/agent/stream</code> – SSE with status, proofSha, policyVerdict, latencyMs.<br />
+                  <code>AGENT_BACKEND_URL</code> – AgentManager base URL for exec/status/stream polling.<br />
+                  <code>approvedBy</code> – required on exec when <code>AGENT_APPROVAL_REQUIRED</code> is not <code>false</code>.<br />
+                  <code>GET /api/agent/requests</code> – approval queue for operators.<br />
+                  <code>POST /api/agent/approve</code> – approve or reject pending requests.
+                </div>
+              }
+            />
         </div>
       </PageSection>
 
@@ -110,6 +123,7 @@ export default function DevelopersPage() {
               <div className="text-sm text-slate-200/80 space-y-2">
                 <p>Paste your ACE Agent Manifest and ensure it passes validation, signing, and policy verdicts.</p>
                 <p>The viewer computes SHA-256, calls Kernel verify, and shows SentinelNet stub verdicts.</p>
+                <p>Handoff: build in ACE, click “Send to Playground” to store manifest (cookie + localStorage), then open `/playground?source=ace` to preview actions.</p>
               </div>
             }
           />

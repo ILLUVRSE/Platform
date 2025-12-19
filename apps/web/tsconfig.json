@@ -16,6 +16,12 @@
     "paths": {
       "@/*": [
         "./src/*"
+      ],
+      "@studio/*": [
+        "./src/app/studio/*"
+      ],
+      "@news/*": [
+        "./src/news/*"
       ]
     },
     "isolatedModules": true

@@ -2,6 +2,7 @@ import { Card, PageSection, Pill, StatBadge, ProofCard } from "@illuvrse/ui";
 import Link from "next/link";
 import { TraceViewer } from "./trace-viewer";
 import { AuditLog } from "./audit-log";
+import { ApprovalQueue } from "./approval-queue";
 
 export default function ControlPanelPage() {
   const gated = process.env.NODE_ENV === "production";
@@ -64,6 +65,18 @@ export default function ControlPanelPage() {
                 </div>
               }
             />
+          </div>
+        </PageSection>
+
+        <PageSection eyebrow="Approvals" title="Ryan Twin approval queue">
+          <ApprovalQueue />
+          <div className="mt-4">
+            <Link
+              href="/control-panel/approvals"
+              className="text-sm font-semibold text-teal-300 underline underline-offset-4"
+            >
+              Open approval ledger
+            </Link>
           </div>
         </PageSection>
 

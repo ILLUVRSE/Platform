@@ -1,25 +1,29 @@
 import type { Metadata } from "next";
-import { Playfair_Display, Manrope, JetBrains_Mono } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
+import { PlatformBar } from "../components/PlatformBar";
 import { TopNav } from "../components/TopNav";
 import { Footer } from "../components/Footer";
 
-const headingFont = Playfair_Display({
-  subsets: ["latin"],
+const headingFont = localFont({
+  src: "../fonts/Heading.ttf",
   variable: "--font-heading",
-  weight: ["600", "700"]
+  weight: "700",
+  display: "swap"
 });
 
-const bodyFont = Manrope({
-  subsets: ["latin"],
+const bodyFont = localFont({
+  src: "../fonts/Body.ttf",
   variable: "--font-body",
-  weight: ["400", "500", "600", "700"]
+  weight: "400",
+  display: "swap"
 });
 
-const monoFont = JetBrains_Mono({
-  subsets: ["latin"],
+const monoFont = localFont({
+  src: "../fonts/Mono.ttf",
   variable: "--font-mono",
-  weight: ["400", "600"]
+  weight: "400",
+  display: "swap"
 });
 
 export const metadata: Metadata = {
@@ -33,9 +37,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body
-        className={`${headingFont.variable} ${bodyFont.variable} ${monoFont.variable} bg-[#f4eee2] text-slate-900 antialiased`}
+        className={`${headingFont.variable} ${bodyFont.variable} ${monoFont.variable} bg-[color:var(--bg-cream)] text-[color:var(--text)] antialiased`}
       >
-        <div className="min-h-screen bg-[#f4eee2]">
+        <div className="min-h-screen" style={{ background: "var(--bg-cream)" }}>
+          <PlatformBar />
           <TopNav />
           <main className="mx-auto max-w-6xl px-4 pb-16 pt-8">{children}</main>
           <Footer />

@@ -10,9 +10,17 @@ Use this checklist to get the platform running locally and to align on workstrea
 ## Core dev commands
 - Web app: `pnpm --filter web dev` (runs Next on :3000)
 - StorySphere app: `pnpm --filter storysphere dev` (Next on :3001)
+- Food app: `cd Food/apps/moms-kitchen && PORT=4001 pnpm dev`
+- GridStock app: `cd GridStock && PORT=4002 npm run dev`
 - Lint: `pnpm lint`
 - Build (CI parity): `pnpm build --filter '!@illuvrse/tests'`
 - Tests (Playwright unit/integration): `pnpm --filter @illuvrse/tests test` (UI smoke requires RUN_UI_SMOKE=true and servers running)
+
+## Local routing
+To serve Food/GridStock under the main platform routes:
+- Set `FOOD_UPSTREAM_URL=http://localhost:4001`
+- Set `GRIDSTOCK_UPSTREAM_URL=http://localhost:4002`
+- Keep platform links using `/food` and `/gridstock` (default).
 
 ## Apps & routes
 - Web (apps/web):
@@ -32,14 +40,18 @@ Use this checklist to get the platform running locally and to align on workstrea
 - Needs: unify light theme across sections; integrate real queue/backend for register/exec; fix Playwright worker exit for unit tests.
 
 ## Playground status
-- Tutorial manifests (StoryWeaver, Scheduler, Proof Guardian, Asset Curator, Voice Stylist, Engagement Monitor) load to storage/cookie.
-- 3D scene (react-three-fiber + XR) with VR toggle; nodes show status badges via SSE `/api/agent/stream`; actions: Send to ACE, Generate preview (exec).
-- Needs: replace in-memory exec/stream with real queue/backend; add more commands (publish/verify) and status edges; lighten remaining dark UI.
+- Tutorial manifests (StoryWeaver, Scheduler, Proof Guardian, Asset Curator, Voice Stylist, Engagement Monitor) load to storage/cookie; upload accepts signed manifests and stores to cookie/localStorage.
+- 3D scene (react-three-fiber + XR) with VR toggle; nodes show status badges via SSE `/api/agent/stream`; actions: Send to ACE, Generate preview (exec), Publish (stub), Verify (stub); history panel shows proof/policy fields plus action/timestamps.
+- Lightened HUD/tooltips; stored manifest controls (reload/clear); publish drawer triggers checkout/publish/verify stubs.
+- Needs: replace in-memory exec/stream with real queue/backend; add more commands (publish/verify) and status edges; continue theme alignment across 3D panel.
 
 ## Agent APIs (stubs)
-- `/api/agent/exec`: enqueues command in-memory, simulates queued→running→completed, emits SSE.
+- `/api/agent/exec`: enqueues command in-memory, simulates queued→running→completed, emits SSE. If `AGENT_BACKEND_URL` is set, registers/enqueues jobs with AgentManager before falling back to stub.
 - `/api/agent/status`: returns per-agent status history.
-- `/api/agent/stream`: SSE for live status (consumed by 3D nodes).
+- `/api/agent/stream`: SSE for live status (consumed by 3D nodes), includes action, proofSha, policyVerdict, latency when present; proxies to backend when `AGENT_BACKEND_URL` is set.
+- `/api/agent/requests`: approval queue (pending + history).
+- `/api/agent/approve`: approve/reject pending requests and execute on approval.
+- Approval gate: `/api/agent/exec` requires `approvedBy` when `AGENT_APPROVAL_REQUIRED` is not `false`.
 - Needs: hook to real bus/queue and executor; stream proof/policy data from backend.
 
 ## StorySphere status
@@ -54,6 +66,7 @@ Use this checklist to get the platform running locally and to align on workstrea
 - Theme: align light theme across TopNav/Footer/cards/wizard/playground; many components still dark.
 - Tests: Playwright unit runner exits unexpectedly; fix config or move utils to a Jest/Vitest harness.
 - Agent backend: replace in-memory exec/stream with real queue (Redis/NATS) and executor service; add proof/policy fields in status.
+- Agent approvals: persist to Postgres by running `pnpm --filter @illuvrse/db prisma:migrate:dev` and `pnpm --filter @illuvrse/db prisma:generate`.
 - CI warnings: git gc warnings (unreachable loose objects) on local; Tailwind preset typing still has @ts-expect-error.
 - Clean artifacts: `packages/tests/test-results/.last-run.json` is a test artifact.
 

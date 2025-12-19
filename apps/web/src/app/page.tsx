@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Card, PageSection, Pill, ProofCard, StatBadge } from "@illuvrse/ui";
+import { surfaceUrls } from "../lib/navigation";
 
 const productTiles = [
   {
@@ -31,6 +32,16 @@ const productTiles = [
     title: "Control-Panel",
     body: "Operator surface with policy verdicts, audit log explorer, and maintenance toggles.",
     href: "/control-panel"
+  },
+  {
+    title: "Food",
+    body: "FoodNetwork-style kitchen and recipes hub with AI-assisted menus.",
+    href: surfaceUrls.food
+  },
+  {
+    title: "GridStock",
+    body: "CNBC/Bloomberg-style market terminal with live dashboards and trading play.",
+    href: surfaceUrls.gridstock
   }
 ];
 

@@ -55,3 +55,41 @@ export function summarizeDiff(current: AceAgentManifest, next: AceAgentManifest)
 export function stageComplete(stageKey: string, data: StageFormState) {
   return Object.keys(computeStageErrors(stageKey, data)).length === 0;
 }
+
+export function parseAvatarAssets(raw: string): string[] {
+  return raw
+    .split(/[\n,]/)
+    .map((s) => s.trim())
+    .filter(Boolean);
+}
+
+export function validateAvatarFields(rawAssets: string, voiceUrl: string) {
+  const errors: Record<string, string> = {};
+  const assets = parseAvatarAssets(rawAssets);
+  if (!assets.length) {
+    errors.avatarAssets = "Add at least one avatar asset URL";
+  } else if (assets.some((url) => !/^(https?:\/\/|s3:\/\/)/.test(url))) {
+    errors.avatarAssets = "Use http(s) or s3 URLs for assets";
+  }
+  if (voiceUrl && !voiceUrl.startsWith("http")) {
+    errors.avatarVoiceUrl = "Voice sample must be an http(s) URL";
+  }
+  return errors;
+}
+
+export function normalizeCpu(value: string) {
+  const trimmed = value.trim();
+  if (!trimmed) return trimmed;
+  if (trimmed.endsWith("m")) return trimmed;
+  const num = Number(trimmed);
+  if (!Number.isNaN(num) && num > 0 && num < 10 && trimmed.includes(".")) {
+    return `${Math.round(num * 1000)}m`;
+  }
+  return trimmed;
+}
+
+export function normalizeMemory(value: string) {
+  const trimmed = value.trim();
+  if (!trimmed) return trimmed;
+  return trimmed.toUpperCase().replace("MIB", "Mi").replace("GIB", "Gi");
+}

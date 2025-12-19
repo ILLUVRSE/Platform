@@ -1,6 +1,14 @@
 import { test, expect } from "@playwright/test";
 import type { AceAgentManifest } from "@illuvrse/contracts";
-import { computeStageErrors, summarizeDiff, type StageFormState } from "../../../apps/web/src/app/ace/create/utils";
+import {
+  computeStageErrors,
+  summarizeDiff,
+  parseAvatarAssets,
+  validateAvatarFields,
+  normalizeCpu,
+  normalizeMemory,
+  type StageFormState
+} from "../../../apps/web/src/app/ace/create/utils";
 
 test.skip(({ }, testInfo) => testInfo.project.name !== "web", "Run ACE utils tests only in web project");
 
@@ -68,4 +76,26 @@ test("summarizeDiff reports changed fields", () => {
   expect(summary.join(" ")).toContain("version: 0.1.0 → 0.2.0");
   expect(summary.some((s) => s.includes("capabilities"))).toBeTruthy();
   expect(summary.some((s) => s.includes("runtime image"))).toBeTruthy();
+});
+
+test("avatar helpers parse and validate assets/voice", () => {
+  const parsed = parseAvatarAssets("s3://a, https://cdn.com/b.png");
+  expect(parsed).toHaveLength(2);
+
+  const ok = validateAvatarFields("s3://a,https://cdn.com/b.png", "https://cdn.com/voice.wav");
+  expect(ok.avatarAssets).toBeUndefined();
+  expect(ok.avatarVoiceUrl).toBeUndefined();
+
+  const badAssets = validateAvatarFields("ftp://bad", "");
+  expect(badAssets.avatarAssets).toContain("http");
+
+  const badVoice = validateAvatarFields("s3://good", "file://clip.wav");
+  expect(badVoice.avatarVoiceUrl).toContain("http");
+});
+
+test("resource normalization converts decimals to milli and uppercases mem units", () => {
+  expect(normalizeCpu("0.5")).toBe("500m");
+  expect(normalizeCpu("500m")).toBe("500m");
+  expect(normalizeMemory("1gi")).toBe("1GI");
+  expect(normalizeMemory("256MiB")).toContain("Mi");
 });

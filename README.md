@@ -3,21 +3,48 @@
 Monorepo for the governed creator platform and StorySphere studio.
 
 ## Apps
-- `apps/web` – public www.illuvrse.com shell (Home, Products, StorySphere landing, Marketplace, Developers, Control-Panel, etc.).
-- `apps/storysphere` – personal studio: prompt→MP4, LiveLoop, Player, GameGrid, Library, Settings.
+- `apps/web` – unified ILLUVRSE Platform hosting all surfaces:
+  - `/` marketing shell (Home, Products, Marketplace, Developers, Control-Panel, etc.).
+  - `/studio` StorySphere studio (prompt→MP4, LiveLoop, Player, GameGrid, Library, Settings).
+  - `/news` ILLUVRSE News (articles, features, video, radio, admin).
+- `Food/apps/moms-kitchen` – FoodNetwork-style kitchen app (recipes, menus, meal planning).
+- `GridStock` – CNBC/Bloomberg-style market terminal (dashboard, portfolio, games).
 
 ## Shared packages
 - `@illuvrse/ui` – design tokens and shared UI primitives.
 - `@illuvrse/config` – shared tsconfig and Tailwind preset.
 
 ## Scripts
-- `pnpm dev --filter web` – run illuvrse.com shell.
-- `pnpm dev --filter storysphere` – run StorySphere studio.
-- `pnpm start:ace` – production start for the ACE shell on port 3000 (requires `pnpm build` first).
-- `pnpm start:storysphere` – production start for StorySphere studio on port 3001 (requires `pnpm build` first).
-- `pnpm lint --filter web|storysphere` – lint apps.
-- `pnpm test:smoke` – Playwright smoke tests (skipped by default). Set `RUN_UI_SMOKE=true WEB_URL=http://localhost:3000 STUDIO_URL=http://localhost:3001` and run both dev servers to execute.
-  - When `RUN_UI_SMOKE=true`, Playwright can auto-start the dev servers via webServer config; otherwise tests skip.
+- `pnpm dev` – start the unified platform (Next.js) on port 3000.
+- `pnpm build` – build the unified platform.
+- `pnpm start:platform` – start the production build on port 3000 (requires `pnpm build` first).
+- `pnpm lint` – lint the unified platform.
+- `pnpm test:smoke` – Playwright smoke tests (skipped by default). Set `RUN_UI_SMOKE=true WEB_URL=http://localhost:3000 STUDIO_URL=http://localhost:3000/news` and run `pnpm dev`.
+
+## Local operator (RYAN)
+RYAN runs offline and logs actions in `.ryan/audit.log`. Memory is stored locally in `.ryan/memory.db` (via `better-sqlite3`).
+
+Examples:
+- `./ryan ask "What should I tackle next?"`
+- `./ryan do "Run lint checks" --dry-run`
+- `./ryan do "Investigate failing tests" --test`
+- `./ryan index build`
+- `./ryan index show --services`
+- `./ryan map generate`
+- `./ryan memory add "Decision: keep local operator offline-first."`
+- `./ryan memory list --limit 20`
+- `./ryan memory get <memory-id>`
+- `./ryan memory delete <memory-id>`
+- `./ryan log --tail 50`
+
+## Local control (illuvrse)
+Examples:
+- `./illuvrse up`
+- `./illuvrse down`
+- `./illuvrse status`
+- `./illuvrse doctor`
+- `./illuvrse logs web --tail 200`
+- `./illuvrse test`
 
 ## Environment
 - `KERNEL_URL` – forward Kernel sign/verify requests to a real Kernel endpoint (defaults to stub).
@@ -25,7 +52,19 @@ Monorepo for the governed creator platform and StorySphere studio.
 - `STORYSPHERE_BACKEND_URL` – forward generate/publish to a StorySphere backend (defaults to stub).
 - `FINANCE_URL` – forward Finance receipt/verify to a Finance service.
 - `ARTIFACT_PUBLISHER_URL` – forward artifact publish to a publisher service.
-- If unset, all routes return local stub data suitable for localhost:3000/3001.
+- `AGENT_BACKEND_URL` – AgentManager base URL for `/api/agent/*` (exec/status/stream polling).
+- `AGENT_APPROVAL_REQUIRED` – set to `false` to bypass operator approval gating (defaults to required).
+- `AGENT_APPROVER` – comma-separated list of approved operator names (defaults to `Ryan Lueckenotte`).
+- `DATABASE_URL` – Postgres connection for News (required for `/news`).
+- `NEXTAUTH_URL` / `NEXTAUTH_SECRET` – required for News auth (`/news/api/auth`).
+- `INTERNAL_API_TOKEN` – shared secret for `/news/api/internal/*`.
+- `NEXT_PUBLIC_PLATFORM_URL` – base URL used by Food/GridStock platform bar links.
+- `NEXT_PUBLIC_FOOD_URL` – optional Food app URL for cross-linking.
+- `NEXT_PUBLIC_GRIDSTOCK_URL` – optional GridStock app URL for cross-linking.
+- `FOOD_UPSTREAM_URL` – upstream base for `/food` rewrites (e.g., `http://localhost:4001`).
+- `GRIDSTOCK_UPSTREAM_URL` – upstream base for `/gridstock` rewrites (e.g., `http://localhost:4002`).
+- Agent approvals persist to Postgres when `DATABASE_URL` is set; run `pnpm --filter @illuvrse/db prisma:migrate:dev` and `pnpm --filter @illuvrse/db prisma:generate`.
+- If unset, all routes return local stub data suitable for localhost:3000.
 
 ## API stubs
 - `POST /api/kernel/verify` – stub signature verification.

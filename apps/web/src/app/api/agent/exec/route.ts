@@ -1,47 +1,40 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
-import { queue, pushStatus, type AgentStatus } from "../store";
+import { approvalRequired, isValidApprover } from "../approval";
+import { createApprovalRequest } from "../approval-repo";
+import { queue, statusByAgent } from "../store";
+import { executeAgentAction, type AgentExecRequest } from "./execute";
 
 export async function POST(req: NextRequest) {
   try {
-    const body = (await req.json()) as { agentId: string; action: string; payload?: Record<string, unknown> };
+    const body = (await req.json()) as AgentExecRequest;
     if (!body.agentId || !body.action) {
       return NextResponse.json({ error: "agentId and action required" }, { status: 400 });
     }
-    queue.push(body);
-    const entry: AgentStatus = {
-      id: `${body.agentId}-${Date.now()}`,
-      action: body.action,
-      status: "queued",
-      agentId: body.agentId,
-      timestamp: Date.now(),
-      message: "Queued in demo executor"
-    };
-    pushStatus(body.agentId, entry);
-    // Simulate async completion
-    setTimeout(() => {
-      const running: AgentStatus = {
-        ...entry,
-        status: "running",
+
+    const approvedBy = typeof body.approvedBy === "string" ? body.approvedBy.trim() : "";
+    const requestedBy = (typeof body.requestedBy === "string" ? body.requestedBy.trim() : "") || approvedBy || "unknown";
+    if (approvalRequired() && !isValidApprover(approvedBy)) {
+      const request = await createApprovalRequest({
         agentId: body.agentId,
-        timestamp: Date.now(),
-        message: "Processing…"
-      };
-      pushStatus(body.agentId, running);
-    }, 300);
-    setTimeout(() => {
-      const done: AgentStatus = {
-        ...entry,
-        status: "completed",
-        agentId: body.agentId,
-        timestamp: Date.now(),
-        message: "Completed in demo executor",
-        proofSha: `demo-sha-${body.agentId.slice(0, 4)}`,
-        policyVerdict: "PASS"
-      };
-      pushStatus(body.agentId, done);
-    }, 900);
-    return NextResponse.json({ ok: true, enqueued: entry });
+        action: body.action,
+        payload: body.payload ?? {},
+        manifest: body.manifest,
+        requestedBy
+      });
+      return NextResponse.json(
+        {
+          ok: true,
+          status: "pending",
+          requestId: request.id,
+          message: "Approval required. Request queued for operator review."
+        },
+        { status: 202 }
+      );
+    }
+
+    const result = await executeAgentAction(body);
+    return NextResponse.json(result.body, { status: result.status });
   } catch (err) {
     return NextResponse.json({ error: (err as Error).message }, { status: 500 });
   }

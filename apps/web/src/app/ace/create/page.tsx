@@ -6,7 +6,17 @@ import type { AceAgentManifest } from "@illuvrse/contracts";
 import { validateAceAgentManifest } from "@illuvrse/contracts";
 import { Card, PageSection, Pill, ProofCard, StatBadge } from "@illuvrse/ui";
 import { AgentManagerClient } from "@illuvrse/agent-manager";
-import { computeStageErrors, summarizeDiff, stageComplete, type StageFormState } from "./utils";
+import {
+  computeStageErrors,
+  summarizeDiff,
+  stageComplete,
+  parseAvatarAssets,
+  validateAvatarFields,
+  normalizeCpu,
+  normalizeMemory,
+  type StageFormState
+} from "./utils";
+import { HandoffDiff } from "./HandoffDiff";
 
 const STORAGE_KEY = "ace-wizard-draft";
 const PLAYGROUND_KEY = "ace-playground-manifest";
@@ -48,6 +58,15 @@ const stageAnchors = [
 
 type Verdict = { verdict: string; severity?: string; rules?: { id: string; result: string; message?: string }[] } | null;
 
+function bumpVersion(v: string) {
+  const parts = v.split(".").map((p) => Number(p));
+  if (parts.length === 3 && parts.every((n) => !Number.isNaN(n))) {
+    parts[2] += 1;
+    return parts.join(".");
+  }
+  return v;
+}
+
 export default function AceCreatePage() {
   const [id, setId] = useState("agent.story-weaver.001");
   const [name, setName] = useState("StoryWeaver");
@@ -84,6 +103,8 @@ export default function AceCreatePage() {
   const [playgroundNewTab, setPlaygroundNewTab] = useState(false);
 
   const manifest: AceAgentManifest = useMemo(() => {
+    const cpuValue = normalizeCpu(cpu);
+    const memValue = normalizeMemory(memory);
     const triggerObj =
       trigger.startsWith("cron:") ?
         { type: "cron", cron: trigger.replace("cron:", "") } :
@@ -107,11 +128,11 @@ export default function AceCreatePage() {
         storage: { write: ["previews/", "final/"] },
         network: { outbound: true }
       },
-      resources: { cpu, memory },
+      resources: { cpu: cpuValue, memory: memValue },
       runtime: { container: { image: runtimeImage } },
       metadata: { publishToLiveLoop: publishLiveLoop },
       avatar: {
-        appearance: { assets: avatarAssets ? avatarAssets.split(",").map((s) => s.trim()).filter(Boolean) : [] },
+        appearance: { assets: parseAvatarAssets(avatarAssets) },
         voice: { activationLine: avatarActivation, sampleUrl: avatarVoiceUrl || undefined },
         personality: { traits: ["Curious", "Protective"], archetype: "Guide" }
       }
@@ -409,7 +430,23 @@ export default function AceCreatePage() {
     scrollToStage(stageAnchors[prev].key);
   }
 
+  function duplicateAsNewAgent() {
+    setId((prev) => `${prev}-copy`);
+    setVersion((prev) => bumpVersion(prev));
+    showToast("Duplicated as new agent id with bumped version", "success");
+  }
+
   function sendToPlayground() {
+    let diffSummary: string[] = [];
+    try {
+      const existingRaw = localStorage.getItem(PLAYGROUND_KEY);
+      if (existingRaw) {
+        const existing = JSON.parse(existingRaw) as AceAgentManifest;
+        diffSummary = summarizeDiff(existing, manifest);
+      }
+    } catch {
+      diffSummary = [];
+    }
     try {
       localStorage.setItem(PLAYGROUND_KEY, manifestJson);
     } catch {
@@ -418,11 +455,12 @@ export default function AceCreatePage() {
     }
     document.cookie = `${PLAYGROUND_KEY}=${encodeURIComponent(manifestJson)}; path=/; max-age=600`;
     const payloadBytes = new TextEncoder().encode(manifestJson).length;
-    showToast(`Sent to Playground (${payloadBytes} bytes stored)`, "success");
+    const diffNote = diffSummary.length ? ` · Diff: ${diffSummary.slice(0, 2).join("; ")}` : "";
+    showToast(`Sent to Playground (${payloadBytes} bytes stored)${diffNote}`, "success");
     if (playgroundNewTab) {
-      window.open("/playground", "_blank");
+      window.open("/playground?source=ace", "_blank");
     } else {
-      window.location.href = "/playground";
+      window.location.href = "/playground?source=ace";
     }
   }
 
@@ -441,6 +479,19 @@ export default function AceCreatePage() {
       setRegisterBlockedReason(`Blocked by policy severity: ${policy.severity}. Resolve Sentinel findings before registering.`);
       setRegisterStatus(null);
       showToast(`Register blocked: ${policy.severity} severity`, "error");
+      return;
+    }
+
+    if (!manifest.triggers?.length) {
+      setRegisterBlockedReason("Add at least one trigger before registering.");
+      setRegisterStatus(null);
+      showToast("Trigger required before register", "error");
+      return;
+    }
+    if (!manifest.permissions?.storage?.write?.length) {
+      setRegisterBlockedReason("Add storage permissions before registering.");
+      setRegisterStatus(null);
+      showToast("Storage permission required", "error");
       return;
     }
 
@@ -514,6 +565,8 @@ export default function AceCreatePage() {
     if (!ttsId.trim()) nextErrors.ttsId = "Required";
     if (!cpu.trim()) nextErrors.cpu = "Required";
     if (!memory.trim()) nextErrors.memory = "Required";
+    const avatarErrors = validateAvatarFields(avatarAssets, avatarVoiceUrl);
+    Object.assign(nextErrors, avatarErrors);
     setFieldErrors(nextErrors);
     if (Object.keys(nextErrors).length) return;
 
@@ -596,6 +649,13 @@ export default function AceCreatePage() {
                 className="rounded-full border border-teal-500/60 px-5 py-3 text-sm font-semibold text-teal-200 transition hover:bg-teal-500/10"
               >
                 Register with AgentManager
+              </button>
+              <button
+                type="button"
+                onClick={duplicateAsNewAgent}
+                className="rounded-full border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-800 transition hover:border-teal-500/70"
+              >
+                Duplicate as new agent
               </button>
             </div>
             <div className="flex flex-wrap gap-2 text-xs text-slate-600">
@@ -841,13 +901,25 @@ export default function AceCreatePage() {
               <div className="grid gap-3 md:grid-cols-2">
                 <label className="space-y-1 block">
                   <div className="text-slate-800/80">CPU</div>
-                  <input className="w-full rounded-lg border border-slate-300 bg-white p-2" value={cpu} onChange={(e) => setCpu(e.target.value)} placeholder="500m" />
+                  <input
+                    className="w-full rounded-lg border border-slate-300 bg-white p-2"
+                    value={cpu}
+                    onChange={(e) => setCpu(e.target.value)}
+                    onBlur={(e) => setCpu(normalizeCpu(e.target.value))}
+                    placeholder="500m"
+                  />
                   {fieldErrors.cpu && <div className="text-xs text-rose-600">{fieldErrors.cpu}</div>}
                   <div className="text-[11px] text-slate-400">Use Kubernetes units (e.g., 500m, 1 for full core).</div>
                 </label>
                 <label className="space-y-1 block">
                   <div className="text-slate-800/80">Memory</div>
-                  <input className="w-full rounded-lg border border-slate-300 bg-white p-2" value={memory} onChange={(e) => setMemory(e.target.value)} placeholder="1Gi" />
+                  <input
+                    className="w-full rounded-lg border border-slate-300 bg-white p-2"
+                    value={memory}
+                    onChange={(e) => setMemory(e.target.value)}
+                    onBlur={(e) => setMemory(normalizeMemory(e.target.value))}
+                    placeholder="1Gi"
+                  />
                   {fieldErrors.memory && <div className="text-xs text-rose-600">{fieldErrors.memory}</div>}
                   <div className="text-[11px] text-slate-400">Examples: 512Mi, 1Gi.</div>
                 </label>
@@ -901,6 +973,7 @@ export default function AceCreatePage() {
                   onChange={(e) => setAvatarAssets(e.target.value)}
                   placeholder="s3://avatars/demo1, https://cdn.example.com/avatar2.png"
                 />
+                {fieldErrors.avatarAssets && <div className="field-error text-xs text-rose-300">{fieldErrors.avatarAssets}</div>}
                 <button
                   type="button"
                   className="rounded-lg border border-slate-700 px-3 py-1 text-[12px] font-semibold text-cream transition hover:border-teal-500/70"
@@ -920,6 +993,7 @@ export default function AceCreatePage() {
               <label className="space-y-1 block">
                 <div className="text-slate-200/80">Voice sample URL</div>
                 <input className="w-full rounded-lg border border-slate-700 bg-slate-900/70 p-2" value={avatarVoiceUrl} onChange={(e) => setAvatarVoiceUrl(e.target.value)} />
+                {fieldErrors.avatarVoiceUrl && <div className="field-error text-xs text-rose-300">{fieldErrors.avatarVoiceUrl}</div>}
               </label>
               <div className="rounded-xl border border-slate-700 bg-slate-900/60 p-3">
                 <div className="text-xs uppercase tracking-[0.2em] text-slate-200/70">Preview</div>
@@ -1019,6 +1093,8 @@ export default function AceCreatePage() {
             }
           />
         </div>
+        {/* @ts-expect-error Client Component */}
+        <HandoffDiff current={manifest} storageKey={PLAYGROUND_KEY} />
         <div className="mt-4 grid gap-4 md:grid-cols-2">
           <Card
             title="Stage summary"

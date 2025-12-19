@@ -5,6 +5,10 @@ import type { AceAgentManifest } from "@illuvrse/contracts";
 import { cookies } from "next/headers";
 import { TutorialManifests } from "./TutorialManifests";
 import { Playground3D } from "./Playground3D";
+import { ManifestUpload } from "./ManifestUpload";
+import { PlaygroundStorageControls } from "./PlaygroundStorageControls";
+import { PublishDrawer } from "./PublishDrawer";
+import { RecentManifests } from "./RecentManifests";
 
 const playgroundManifest: AceAgentManifest = {
   id: "agent.avatar-demo.001",
@@ -25,7 +29,7 @@ const playgroundManifest: AceAgentManifest = {
   }
 };
 
-export default function PlaygroundPage() {
+export default function PlaygroundPage({ searchParams }: { searchParams?: { source?: string } }) {
   let loadedManifest: AceAgentManifest | null = null;
   try {
     const cookieStore = cookies();
@@ -38,15 +42,21 @@ export default function PlaygroundPage() {
   }
 
   const manifestToUse = loadedManifest ?? playgroundManifest;
+  const fromAce = searchParams?.source === "ace";
 
   return (
     <div className="space-y-10">
-      <section className="rounded-3xl border border-slate-700/70 bg-slate-800/70 px-8 py-10 shadow-card">
-        <Pill className="bg-teal-600/20 text-teal-200">Playground</Pill>
-        <h1 className="mt-3 text-4xl font-semibold">Deploy and preview ACE agents</h1>
-        <p className="mt-3 max-w-2xl text-lg text-slate-200/90">
+      <section className="rounded-3xl border border-slate-200 bg-white px-8 py-10 shadow-card">
+        <Pill className="bg-teal-100 text-teal-800">Playground</Pill>
+        <h1 className="mt-3 text-4xl font-semibold text-slate-900">Deploy and preview ACE agents</h1>
+        <p className="mt-3 max-w-2xl text-lg text-slate-700">
           Drop in your ACE Agent Manifest, spin up a sandbox, and preview activation before you publish to Marketplace or LiveLoop. All runs in isolated demo mode.
         </p>
+        {fromAce ? (
+          <div className="mt-3 rounded-xl border border-teal-200 bg-teal-50 px-4 py-3 text-sm text-teal-800">
+            Manifest sent from ACE wizard loaded. You can preview or run actions immediately.
+          </div>
+        ) : null}
         <div className="mt-4 flex gap-3">
           <Link
             href="/products"
@@ -56,7 +66,7 @@ export default function PlaygroundPage() {
           </Link>
           <Link
             href="/checkout"
-            className="rounded-full border border-slate-600 px-5 py-3 text-sm font-semibold text-cream transition hover:border-teal-500/70 hover:text-teal-200"
+            className="rounded-full border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-800 transition hover:border-teal-500/70 hover:text-teal-700"
           >
             Publish after preview
           </Link>
@@ -67,11 +77,13 @@ export default function PlaygroundPage() {
         <Card
           title="Manifest upload"
           body={
-            <div className="space-y-3 text-sm text-slate-200/80">
+            <div className="space-y-3 text-sm text-slate-700">
               <p>Upload the signed ACE manifest (Kernel-signed) to start a sandbox preview.</p>
-              <div className="rounded-xl border border-slate-700 bg-slate-900/60 p-3">
-                <div className="text-[12px] text-slate-200/70">Example</div>
-                <pre className="mt-2 overflow-auto rounded-lg bg-slate-800 p-3 text-[12px] leading-relaxed text-cream">
+              {/* @ts-expect-error Client Component */}
+              <ManifestUpload />
+              <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+                <div className="text-[12px] text-slate-600">Example</div>
+                <pre className="mt-2 overflow-auto rounded-lg bg-white p-3 text-[12px] leading-relaxed text-slate-900">
 {`{
   "agentId": "ace-001",
   "sha256": "...",
@@ -89,6 +101,10 @@ export default function PlaygroundPage() {
           <p className="text-sm text-slate-200/80">Load a ready-made tutorial agent into Playground as a guided example.</p>
           {/* @ts-expect-error Client Component */}
           <TutorialManifests />
+          {/* @ts-expect-error Client Component */}
+          <PlaygroundStorageControls />
+          {/* @ts-expect-error Client Component */}
+          <RecentManifests />
         </div>
       </PageSection>
 
@@ -113,7 +129,7 @@ export default function PlaygroundPage() {
       </PageSection>
 
       <PageSection eyebrow="3. Publish" title="Push to Marketplace or LiveLoop">
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid gap-4 md:grid-cols-3">
           <Card
             title="Marketplace publish"
             body={<p className="text-sm text-slate-200/80">When satisfied, publish to Marketplace with Finance receipt + ArtifactPublisher delivery proofs.</p>}
@@ -124,6 +140,8 @@ export default function PlaygroundPage() {
             body={<p className="text-sm text-slate-200/80">Add the agent’s activation or cinematic to LiveLoop playlists with proofs.</p>}
             footer={<Link href="/storysphere" className="text-teal-300 underline underline-offset-4 text-sm">Open StorySphere</Link>}
           />
+          {/* @ts-expect-error Client Component */}
+          <PublishDrawer />
         </div>
       </PageSection>
     </div>

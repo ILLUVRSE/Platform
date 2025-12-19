@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Card, PageSection } from "@illuvrse/ui";
-import { gameGridManifest } from "../../../storysphere/src/lib/gameGridManifest";
+import { gameGridManifest } from "../app/studio/lib/gameGridManifest";
 
 export function GameGridListing() {
   return (

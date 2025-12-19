@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Card, PageSection, Pill, ProofCard, StatBadge } from "@illuvrse/ui";
+import { surfaceUrls } from "../../lib/navigation";
 
 const aceStages = [
   { title: "Identity", detail: "id, name, version, runtime image; defaults prefilled with format validation." },
@@ -32,6 +33,19 @@ const guardrails = [
   "Live SHA-256 digest computed client-side with WebCrypto.",
   "Policy verdict card (SentinelNet) + Kernel verify/sign stubs for local testing.",
   "Local draft autosave with import/export so teams can collaborate asynchronously."
+];
+
+const surfaceStack = [
+  {
+    title: "Food",
+    body: "FoodNetwork-style surface for recipes, menus, and creator cooking workflows.",
+    href: surfaceUrls.food
+  },
+  {
+    title: "GridStock",
+    body: "CNBC/Bloomberg-style terminal for markets, research, and trading play.",
+    href: surfaceUrls.gridstock
+  }
 ];
 
 export default function ProductsPage() {
@@ -110,6 +124,23 @@ export default function ProductsPage() {
               footer={
                 <Link href={product.href} className="text-sm font-semibold text-teal-300 underline underline-offset-4">
                   Open {product.title}
+                </Link>
+              }
+            />
+          ))}
+        </div>
+      </PageSection>
+
+      <PageSection eyebrow="Surfaces" title="New destinations inside ILLUVRSE">
+        <div className="grid gap-4 md:grid-cols-2">
+          {surfaceStack.map((surface) => (
+            <Card
+              key={surface.title}
+              title={surface.title}
+              body={<p>{surface.body}</p>}
+              footer={
+                <Link href={surface.href} className="text-sm font-semibold text-teal-300 underline underline-offset-4">
+                  Open {surface.title}
                 </Link>
               }
             />

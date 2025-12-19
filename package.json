@@ -4,12 +4,11 @@
   "private": true,
   "description": "ILLUVRSE platform monorepo",
   "scripts": {
-    "dev": "turbo dev",
-    "build": "turbo build",
-    "lint": "turbo lint",
+    "dev": "pnpm --filter web dev",
+    "build": "pnpm --filter web build",
+    "lint": "pnpm --filter web lint",
     "test:smoke": "pnpm --filter @illuvrse/tests test",
-    "start:ace": "pnpm --filter web start -- --port 3000",
-    "start:storysphere": "pnpm --filter storysphere start -- --port 3001"
+    "start:platform": "pnpm --filter web start -- --port 3000"
   },
   "packageManager": "pnpm@10.24.0",
   "devDependencies": {
@@ -18,6 +17,7 @@
     "turbo": "2.0.6"
   },
   "dependencies": {
+    "better-sqlite3": "^12.5.0",
     "@react-three/drei": "^9.92.6",
     "@react-three/fiber": "^8.15.16",
     "@react-three/xr": "5.0.3",

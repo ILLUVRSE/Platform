@@ -1,0 +1,386 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum ArticleStatus {
+  draft
+  scheduled
+  published
+}
+
+enum SourceType {
+  government
+  public_broadcaster
+  community
+  ngo
+  wire
+  independent
+  other
+}
+
+enum AvailabilityStatus {
+  unknown
+  online
+  offline
+}
+
+enum ProposalStatus {
+  pending
+  approved
+  rejected
+}
+
+enum AgentApprovalStatus {
+  pending
+  approved
+  rejected
+  executed
+  failed
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String?
+  role      String   @default("admin") // "admin", "writer"
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  articles  Article[]
+}
+
+model Article {
+  id          String   @id @default(uuid())
+  title       String
+  slug        String   @unique
+  content     String   // Markdown content
+  summary     String?
+  excerpt     String?
+  coverImage  String?
+  pullQuote   String?
+  locale      String?  // e.g., "en-US"
+  countryCode String?  // ISO 3166-1 alpha-2
+  region      String?  // e.g., "EU", "NA"
+  license     String?  // e.g., CC-BY-4.0
+  sourceReliability Int?
+  sourceUrl   String?
+  originId    String?  @unique // upstream GUID/ID to dedupe
+  sources     Json?
+  published   Boolean  @default(false)
+  publishedAt DateTime?
+  scheduledFor DateTime?
+  status      ArticleStatus @default(draft)
+
+  sourceId    String?
+  source      Source?  @relation(fields: [sourceId], references: [id])
+  
+  authorId    String
+  author      User     @relation(fields: [authorId], references: [id])
+
+  categoryId  String?
+  category    Category? @relation(fields: [categoryId], references: [id])
+
+  tags        Tag[]
+  factCheckTasks   FactCheckTask[]
+  translationTasks TranslationTask[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Category {
+  id        String    @id @default(uuid())
+  name      String    @unique
+  slug      String    @unique
+  articles  Article[]
+}
+
+model Tag {
+  id        String    @id @default(uuid())
+  name      String    @unique
+  slug      String    @unique
+  articles  Article[]
+}
+
+model Person {
+  id        String   @id @default(uuid())
+  name      String
+  slug      String   @unique
+  bio       String?
+  birthDate DateTime?
+  photoUrl  String?
+  
+  // Relations
+  credits   Credit[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Title {
+  id          String   @id @default(uuid())
+  name        String
+  slug        String   @unique
+  type        String   // "movie", "show", "game"
+  description String?
+  releaseDate DateTime?
+  posterUrl   String?
+  genres      String?
+  whereToWatch String?
+  
+  // Relations
+  credits     Credit[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// Join table for Person <-> Title relationships (e.g. Actor in Movie)
+model Credit {
+  id        String   @id @default(uuid())
+  role      String   // "Actor", "Director", "Writer"
+  character String?  // "Iron Man"
+  notes     String?
+  
+  personId  String
+  person    Person   @relation(fields: [personId], references: [id])
+  
+  titleId   String
+  title     Title    @relation(fields: [titleId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model MediaAsset {
+  id        String   @id @default(uuid())
+  title     String
+  url       String
+  createdAt DateTime @default(now())
+}
+
+model Video {
+  id          String   @id @default(uuid())
+  title       String
+  slug        String   @unique
+  description String?
+  thumbnail   String?
+  hlsUrl      String?   // HLS manifest
+  mp4Url      String?   // fallback MP4
+  live        Boolean   @default(false)
+  liveUrl     String?
+  tags        String?
+  locale      String?
+  countryCode String?
+  region      String?
+  license     String?
+  captionsUrl String?
+  published   Boolean   @default(false)
+  publishedAt DateTime? @default(now())
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Source {
+  id            String      @id @default(uuid())
+  name          String
+  slug          String      @unique
+  type          SourceType  @default(other)
+  homepageUrl   String?
+  feedUrl       String?
+  countryCode   String?     // ISO 3166-1 alpha-2
+  region        String?
+  language      String?     // ISO 639-1
+  timezone      String?
+  reliability   Int?        // 0-100 score
+  lastFetchedAt DateTime?
+  fetchInterval Int?        // minutes
+  active        Boolean     @default(true)
+  notes         String?
+  failureCount  Int         @default(0)
+
+  articles      Article[]
+  streams       Stream[]
+  ingestLogs    IngestLog[]
+
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+}
+
+model Station {
+  id             String             @id @default(uuid())
+  name           String
+  slug           String             @unique
+  countryCode    String?            // ISO 3166-1 alpha-2
+  region         String?
+  city           String?
+  latitude       Float?
+  longitude      Float?
+  language       String?            // ISO 639-1
+  genre          String?
+  streamUrl      String
+  websiteUrl     String?
+  logoUrl        String?
+  bitrate        Int?
+  codec          String?
+  status         AvailabilityStatus @default(unknown)
+  lastCheckedAt  DateTime?
+  failureCount   Int               @default(0)
+  isPublic       Boolean           @default(true)
+  notes          String?
+
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+}
+
+model Stream {
+  id             String             @id @default(uuid())
+  name           String
+  slug           String             @unique
+  locationName   String?
+  countryCode    String?
+  region         String?
+  city           String?
+  latitude       Float?
+  longitude      Float?
+  language       String?
+  embedUrl       String
+  posterImage    String?
+  attribution    String?
+  licenseNote    String?
+  status         AvailabilityStatus @default(unknown)
+  lastCheckedAt  DateTime?
+  failureCount   Int               @default(0)
+  sourceId       String?
+  source         Source?            @relation(fields: [sourceId], references: [id])
+  isPublic       Boolean            @default(true)
+  notes          String?
+
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+}
+
+model IngestLog {
+  id         String   @id @default(uuid())
+  sourceId   String?
+  source     Source?  @relation(fields: [sourceId], references: [id])
+  status     String   // "success" | "error"
+  message    String?
+  createdAt  DateTime @default(now())
+}
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  actor      String?  // user email or agent id
+  action     String   // e.g., "ingest.run", "stream.health", "publish.proposed"
+  entityId   String?  // optional foreign reference
+  entityType String?  // "article", "source", "station", etc.
+  summary    String
+  metadata   Json?
+  createdAt  DateTime @default(now())
+}
+
+model Proposal {
+  id                String          @id @default(uuid())
+  type              String          // e.g., "publish.article", "alert"
+  entityId          String?
+  region            String?
+  language          String?
+  severity          String?
+  status            ProposalStatus  @default(pending)
+  requiredApprovals Int             @default(1)
+  approvers         String[]        @default([])
+  data              Json?
+  reason            String?
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+}
+
+model AgentApproval {
+  id          String               @id @default(uuid())
+  agentId     String
+  action      String
+  payload     Json?
+  manifest    Json?
+  status      AgentApprovalStatus  @default(pending)
+  requestedBy String?
+  approvedBy  String?
+  reason      String?
+  execution   Json?
+  createdAt   DateTime             @default(now())
+  decidedAt   DateTime?
+  updatedAt   DateTime             @updatedAt
+}
+
+enum AlertStatus {
+  draft
+  pending
+  approved
+  published
+}
+
+model Alert {
+  id          String      @id @default(uuid())
+  message     String
+  region      String?     @default("WORLD")
+  language    String?     @default("en")
+  severity    String?     @default("info")
+  status      AlertStatus @default(draft)
+  createdAt   DateTime    @default(now())
+  publishedAt DateTime?
+}
+
+enum TaskStatus {
+  pending
+  in_progress
+  completed
+  failed
+}
+
+model FactCheckTask {
+  id        String     @id @default(uuid())
+  articleId String
+  article   Article    @relation(fields: [articleId], references: [id])
+  status    TaskStatus @default(pending)
+  notes     String?
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+model TranslationTask {
+  id          String     @id @default(uuid())
+  articleId   String
+  article     Article    @relation(fields: [articleId], references: [id])
+  targetLang  String
+  status      TaskStatus @default(pending)
+  machine     Boolean    @default(true)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
+
+model ApiToken {
+  id          String   @id @default(uuid())
+  token       String   @unique
+  label       String?
+  rateLimit   Int      @default(1000)
+  usageCount  Int      @default(0)
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Setting {
+  id       String  @id @default(uuid())
+  key      String  @unique
+  value    String?
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+}

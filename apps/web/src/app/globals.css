@@ -5,11 +5,21 @@
 @layer base {
   :root {
     color-scheme: light;
+    --bg-cream: #f7f3eb;
+    --panel: #f0f0e8;
+    --forest: #2f6b58;
+    --sage: #5b8f7b;
+    --text: #21312d;
+    --muted: #7b746e;
+    --black: #0b0b0b;
+    --white: #ffffff;
+    --border: #dcd6c9;
+    --focus: #0f766e;
   }
 
   body {
-    background-color: #f4eee2;
-    color: #0c161a;
+    background-color: var(--bg-cream);
+    color: var(--text);
   }
 
   h1,
@@ -27,7 +37,7 @@
   }
 
   a {
-    color: #1a8a7f;
+    color: var(--forest);
   }
 
   code {
