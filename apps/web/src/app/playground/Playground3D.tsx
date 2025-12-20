@@ -101,9 +101,9 @@ export function Playground3D() {
   const [toast, setToast] = useState<string | null>(null);
   const [statusLabel, setStatusLabel] = useState<string>("idle");
   const [approvedBy, setApprovedBy] = useState<string>("Ryan Lueckenotte");
-  const [statusMap, setStatusMap] = useState<Record<string, { text: string; status: string; action?: string; proofSha?: string; policyVerdict?: string; timestamp?: number }>>({});
+  const [statusMap, setStatusMap] = useState<Record<string, { text: string; status: string; action?: string; proofSha?: string; policyVerdict?: string; timestamp?: number; latencyMs?: number }>>({});
   const [historyMap, setHistoryMap] = useState<
-    Record<string, { status: string; action?: string; message?: string; proofSha?: string; policyVerdict?: string; timestamp?: number }[]>
+    Record<string, { status: string; action?: string; message?: string; proofSha?: string; policyVerdict?: string; timestamp?: number; latencyMs?: number }[]>
   >({});
   const [filterAction, setFilterAction] = useState<string>("all");
 
@@ -190,9 +190,21 @@ export function Playground3D() {
           proofSha?: string;
           action?: string;
           timestamp?: number;
+          latencyMs?: number;
         };
         const text = data.message ? `${data.status} · ${data.message}` : data.status;
-        setStatusMap((prev) => ({ ...prev, [data.agentId]: { text, status: data.status, action: data.action, proofSha: data.proofSha, policyVerdict: data.policyVerdict, timestamp: data.timestamp } }));
+        setStatusMap((prev) => ({
+          ...prev,
+          [data.agentId]: {
+            text,
+            status: data.status,
+            action: data.action,
+            proofSha: data.proofSha,
+            policyVerdict: data.policyVerdict,
+            timestamp: data.timestamp,
+            latencyMs: data.latencyMs
+          }
+        }));
         setHistoryMap((prev) => {
           const next = [...(prev[data.agentId] ?? [])];
           next.unshift({
@@ -201,7 +213,8 @@ export function Playground3D() {
             message: data.message,
             proofSha: data.proofSha,
             policyVerdict: data.policyVerdict,
-            timestamp: data.timestamp ?? Date.now()
+            timestamp: data.timestamp ?? Date.now(),
+            latencyMs: data.latencyMs
           });
           return { ...prev, [data.agentId]: next.slice(0, 12) };
         });
@@ -274,20 +287,20 @@ export function Playground3D() {
           placeholder="Approver name"
         />
       </div>
-      <div className="flex flex-wrap items-center gap-2 text-[12px] text-slate-200/80">
+      <div className="flex flex-wrap items-center gap-2 text-[12px] text-slate-600">
         {xrSupported ? (
           <>
             <button
               type="button"
               onClick={() => setXrEnabled((prev) => !prev)}
-              className="rounded-full border border-slate-700 px-3 py-1 text-[12px] font-semibold text-cream transition hover:border-teal-500/70"
+              className="rounded-full border border-slate-300 px-3 py-1 text-[12px] font-semibold text-slate-700 transition hover:border-teal-500/70"
             >
               {xrEnabled ? "Exit VR mode" : "Enter VR mode"}
             </button>
             {xrEnabled && <VRButton />}
           </>
         ) : (
-          <span className="rounded-full border border-slate-800 px-3 py-1 text-[12px] text-slate-400">VR not supported in this browser</span>
+          <span className="rounded-full border border-slate-300 px-3 py-1 text-[12px] text-slate-400">VR not supported in this browser</span>
         )}
         {selected ? (
           <button
@@ -326,7 +339,7 @@ export function Playground3D() {
               }
               window.location.href = "/ace/create#review";
             }}
-            className="rounded-full border border-teal-500/60 px-3 py-1 text-[12px] font-semibold text-teal-200 transition hover:bg-teal-500/10"
+            className="rounded-full border border-teal-300 px-3 py-1 text-[12px] font-semibold text-teal-700 transition hover:bg-teal-50"
           >
             Open in ACE wizard
           </button>
@@ -344,31 +357,38 @@ export function Playground3D() {
           <>
             <button
               type="button"
-              onClick={() => runAction("publish.manifest", { destination: "marketplace" })}
+              onClick={() => runAction("publish.marketplace", { destination: "marketplace" })}
               className="rounded-full border border-teal-300 px-3 py-1 text-[12px] font-semibold text-teal-800 transition hover:bg-teal-100"
             >
-              Publish (stub)
+              Publish marketplace
+            </button>
+            <button
+              type="button"
+              onClick={() => runAction("publish.liveloop", { playlist: "prime-time" })}
+              className="rounded-full border border-amber-300 px-3 py-1 text-[12px] font-semibold text-amber-800 transition hover:bg-amber-100"
+            >
+              Publish LiveLoop
             </button>
             <button
               type="button"
               onClick={() => runAction("verify.proofs")}
               className="rounded-full border border-slate-300 px-3 py-1 text-[12px] font-semibold text-slate-800 transition hover:border-teal-500/70"
             >
-              Verify (stub)
+              Verify proofs
             </button>
           </>
         ) : null}
       </div>
-      <div className="h-[420px] overflow-hidden rounded-2xl border border-slate-700 bg-slate-900/80">
+      <div className="h-[420px] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-card">
         <Canvas camera={{ position: [0, 4, 8], fov: 50 }}>
-          <color attach="background" args={["#0b1220"]} />
+          <color attach="background" args={["#f2ece2"]} />
           <XR enabled={xrEnabled}>
             <ambientLight intensity={0.6} />
             <directionalLight position={[5, 8, 5]} intensity={1} />
             <Stars radius={40} depth={50} count={1200} factor={4} fade />
             <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.4, 0]}>
               <cylinderGeometry args={[6, 6, 0.6, 64]} />
-              <meshStandardMaterial color="#0f172a" roughness={1} metalness={0.2} />
+              <meshStandardMaterial color="#e3ddcf" roughness={1} metalness={0.2} />
             </mesh>
             {tutorialManifests.map((item, idx) => (
               <AgentNode
@@ -396,7 +416,7 @@ export function Playground3D() {
           </div>
           <div className="mb-2 flex flex-wrap items-center gap-2 text-[11px] text-slate-600">
             <span>Filter:</span>
-            {["all", "generate.preview", "publish.manifest", "verify.proofs"].map((f) => (
+            {["all", "generate.preview", "publish.marketplace", "publish.liveloop", "verify.proofs"].map((f) => (
               <button
                 key={f}
                 type="button"
@@ -418,6 +438,7 @@ export function Playground3D() {
                   <div className="flex flex-wrap gap-2 text-[11px] text-slate-600">
                     {entry.proofSha ? <span className="rounded-full bg-white px-2 py-[2px]">proof: {entry.proofSha}</span> : null}
                     {entry.policyVerdict ? <span className="rounded-full bg-white px-2 py-[2px]">policy: {entry.policyVerdict}</span> : null}
+                    {entry.latencyMs ? <span className="rounded-full bg-white px-2 py-[2px]">latency: {entry.latencyMs}ms</span> : null}
                   </div>
                 </div>
                 <div className="text-[11px] text-slate-500">{formatTime(entry.timestamp)}</div>

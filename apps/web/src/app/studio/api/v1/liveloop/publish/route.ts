@@ -27,7 +27,12 @@ export async function POST(request: Request) {
   if (agentManagerUrl) {
     try {
       const client = new AgentManagerClient(agentManagerUrl);
-      const enqueue = await client.enqueueJob("agent.story-weaver.001", "schedule", { assetId, schedule: body.schedule });
+      const enqueue = await client.enqueueJob(
+        "agent.story-weaver.001",
+        "schedule",
+        { assetId, schedule: body.schedule },
+        { action: "publish.liveloop" }
+      );
       const newItem = {
         id: enqueue.jobId,
         title: assetId,

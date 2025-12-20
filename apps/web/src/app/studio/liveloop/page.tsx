@@ -327,13 +327,13 @@ export default function LiveLoopRokuPage() {
   const nextTitle = nextSlot ? `${nextSlot.title} · ${nextSlot.window.split("–")[0]}` : "Next";
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 p-6 text-white">
+    <div className="min-h-screen bg-gradient-to-b from-[color:var(--bg-cream)] via-white to-[color:var(--bg-cream)] p-6 text-[color:var(--text)]">
       <div className="mx-auto max-w-7xl space-y-6">
         <header className="flex flex-wrap items-center justify-between gap-4">
           <div className="space-y-2">
-            <p className="text-xs uppercase tracking-[0.3em] text-teal-200/80">ILLUVRSE LiveLoop</p>
+            <p className="text-xs uppercase tracking-[0.3em] text-teal-700">ILLUVRSE LiveLoop</p>
             <h1 className="text-4xl font-extrabold tracking-tight">All-day stream, prime-time classics</h1>
-            <p className="max-w-3xl text-slate-200/90">
+            <p className="max-w-3xl text-slate-700">
               Beverly Hillbillies all day. At 6 PM local: Gilda → The Royal Wedding → Casablanca, each rolling immediately after the last frame. Clean, verified playback with channel proofs.
             </p>
             <div className="flex flex-wrap gap-3">
@@ -345,16 +345,16 @@ export default function LiveLoopRokuPage() {
               </a>
               <a
                 href="#schedule"
-                className="rounded-full border border-slate-600 px-5 py-3 text-sm font-semibold text-cream transition hover:border-teal-500/70 hover:text-teal-200"
+                className="rounded-full border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:border-teal-500/70 hover:text-teal-700"
               >
                 View schedule
               </a>
             </div>
           </div>
           <div className="text-right">
-            <div className="text-xs uppercase tracking-[0.2em] text-slate-400">Now playing</div>
+            <div className="text-xs uppercase tracking-[0.2em] text-slate-500">Now playing</div>
             <div className="text-lg font-bold">{onAirTitle}</div>
-            <div className="text-xs text-slate-400">Next: {nextTitle}</div>
+            <div className="text-xs text-slate-500">Next: {nextTitle}</div>
           </div>
         </header>
 
@@ -362,8 +362,8 @@ export default function LiveLoopRokuPage() {
           <LivePlayer streamSrc={streamSrc} embedSrc={embedSrc} fallbackMp4={fallbackMp4} />
         </div>
 
-        <section id="schedule" aria-label="LiveLoop Grid" className="rounded-lg bg-slate-900/60 p-4">
-          <div className="mb-3 text-sm text-slate-300">Keyboard/remote arrows supported. Enter recenters the player.</div>
+        <section id="schedule" aria-label="LiveLoop Grid" className="rounded-lg border border-slate-200 bg-white p-4">
+          <div className="mb-3 text-sm text-slate-600">Keyboard/remote arrows supported. Enter recenters the player.</div>
           <div
             className="grid gap-4"
             style={{
@@ -381,15 +381,15 @@ export default function LiveLoopRokuPage() {
                   tabIndex={isFocused ? 0 : -1}
                   className={`relative overflow-hidden transform rounded-lg p-5 text-left transition-all duration-150 focus:outline-none ${
                     isFocused
-                      ? "scale-105 bg-teal-900/40 ring-4 ring-teal-400 ring-offset-2"
-                      : "bg-slate-800/60 hover:bg-slate-800/40"
+                      ? "scale-105 bg-teal-50 ring-4 ring-teal-300 ring-offset-2"
+                      : "bg-slate-50 hover:bg-slate-100"
                   }`}
                   onClick={() => setFocused(i)}
                   aria-current={slot.status === "on-air" ? "true" : undefined}
                   style={
                     slot.thumbnail
                       ? {
-                          backgroundImage: `linear-gradient(180deg, rgba(15,23,42,0.8) 0%, rgba(15,23,42,0.9) 40%, rgba(15,23,42,0.95) 100%), url(${slot.thumbnail})`,
+                          backgroundImage: `linear-gradient(180deg, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0.85) 40%, rgba(255,255,255,0.95) 100%), url(${slot.thumbnail})`,
                           backgroundSize: "cover",
                           backgroundPosition: "center"
                         }
@@ -399,44 +399,44 @@ export default function LiveLoopRokuPage() {
                   <div className="flex items-center justify-between">
                     <div>
                       <div className="text-lg font-semibold">{slot.title}</div>
-                      <div className="text-sm text-slate-300">{slot.focus}</div>
+                      <div className="text-sm text-slate-600">{slot.focus}</div>
                     </div>
                     <div className="text-right">
-                      <div className="text-xs text-slate-400">{slot.window}</div>
-                      {slot.status === "on-air" && <div className="mt-2 text-sm font-bold text-emerald-300">ON AIR</div>}
-                      {slot.status === "next" && <div className="mt-2 text-sm font-semibold text-amber-300">NEXT</div>}
+                      <div className="text-xs text-slate-500">{slot.window}</div>
+                      {slot.status === "on-air" && <div className="mt-2 text-sm font-bold text-emerald-600">ON AIR</div>}
+                      {slot.status === "next" && <div className="mt-2 text-sm font-semibold text-amber-600">NEXT</div>}
                     </div>
                   </div>
-                  <div className="mt-3 text-xs text-slate-400">proof: {slot.proof}</div>
+                  <div className="mt-3 text-xs text-slate-500">proof: {slot.proof}</div>
                 </button>
               );
             })}
           </div>
         </section>
 
-        <section className="rounded-2xl border border-slate-800 bg-slate-900/70 p-6">
+        <section className="rounded-2xl border border-slate-200 bg-white p-6">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <div className="text-xs uppercase tracking-[0.2em] text-slate-400">Future line-up</div>
-              <h2 className="text-2xl font-semibold text-cream">Coming soon to LiveLoop</h2>
-              <p className="text-sm text-slate-300">Roadmap items ready for the next deploys.</p>
+              <div className="text-xs uppercase tracking-[0.2em] text-slate-500">Future line-up</div>
+              <h2 className="text-2xl font-semibold text-slate-900">Coming soon to LiveLoop</h2>
+              <p className="text-sm text-slate-600">Roadmap items ready for the next deploys.</p>
             </div>
-            <span className="rounded-full bg-teal-600/20 px-3 py-1 text-xs font-semibold text-teal-200">Channel roadmap</span>
+            <span className="rounded-full bg-teal-50 px-3 py-1 text-xs font-semibold text-teal-700">Channel roadmap</span>
           </div>
           <div className="mt-4 grid gap-3 md:grid-cols-3">
             {COMING_SOON.map((item) => (
-              <div key={item.title} className="rounded-xl border border-slate-800 bg-slate-800/60 p-4 shadow-card">
+              <div key={item.title} className="rounded-xl border border-slate-200 bg-slate-50 p-4 shadow-card">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-semibold text-cream">{item.title}</h3>
-                  <span className="text-xs text-teal-200">ETA {item.eta}</span>
+                  <h3 className="text-lg font-semibold text-slate-900">{item.title}</h3>
+                  <span className="text-xs text-teal-700">ETA {item.eta}</span>
                 </div>
-                <p className="mt-2 text-sm text-slate-300">{item.body}</p>
+                <p className="mt-2 text-sm text-slate-600">{item.body}</p>
               </div>
             ))}
           </div>
         </section>
 
-        <footer className="text-sm text-slate-400">
+        <footer className="text-sm text-slate-500">
           Built for big screens — keyboard and remote friendly. Extend slot objects with manifests or proofs as needed.
         </footer>
       </div>

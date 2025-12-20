@@ -16,9 +16,15 @@ Monorepo for the governed creator platform and StorySphere studio.
 
 ## Scripts
 - `pnpm dev` – start the unified platform (Next.js) on port 3000.
+- `pnpm dev:food` – start Moms Kitchen on port 4001.
+- `pnpm dev:gridstock` – start GridStock on port 4002.
 - `pnpm build` – build the unified platform.
+- `pnpm build:food` – build Moms Kitchen.
+- `pnpm build:gridstock` – build GridStock.
 - `pnpm start:platform` – start the production build on port 3000 (requires `pnpm build` first).
 - `pnpm lint` – lint the unified platform.
+- `pnpm lint:food` – lint Moms Kitchen.
+- `pnpm lint:gridstock` – lint GridStock.
 - `pnpm test:smoke` – Playwright smoke tests (skipped by default). Set `RUN_UI_SMOKE=true WEB_URL=http://localhost:3000 STUDIO_URL=http://localhost:3000/news` and run `pnpm dev`.
 
 ## Local operator (RYAN)
@@ -70,17 +76,17 @@ Examples:
 - `POST /api/kernel/verify` – stub signature verification.
 - `POST /api/sentinel/evaluate` – stub policy verdict.
 - `GET /api/marketplace/listing` – stub listing with signed manifest.
-- `POST /storysphere/api/v1/generate` – stub StorySphere generate job.
-- `POST /storysphere/api/v1/liveloop/publish` – stub publish flow.
+- `POST /studio/api/v1/generate` – stub StorySphere generate job.
+- `POST /studio/api/v1/liveloop/publish` – stub publish flow.
 
 Golden path reminders:
 1. IDEA builds artifact → Kernel signs manifest.
 2. ArtifactPublisher publishes signed manifest → Marketplace lists and completes checkout → Finance issues receipt.
 3. StorySphere prompt → preview → MP4 → publish to LiveLoop with proofs.
 
-## Local dev flow (AgentManager + StorySphere)
+## Local dev flow (AgentManager + Studio)
 1. Start AgentManager stub: `pnpm --filter @illuvrse/agent-manager test:integration` (or run the server via `createAgentManagerServer` at port 4040).
-2. Run StorySphere: `pnpm dev --filter storysphere` and web shell: `pnpm dev --filter web`.
+2. Run the platform: `pnpm dev` (StorySphere lives under `/studio` in the web app).
 3. Use Playground/Developers pages to drop a manifest and verify Kernel + Sentinel proofs (local stubs).
-4. Hit `POST /storysphere/api/v1/generate` to enqueue a job in AgentManager; track it on `/jobs`.
-5. Publish via `POST /storysphere/api/v1/liveloop/publish` to push into playlist with stub proof.
+4. Hit `POST /studio/api/v1/generate` to enqueue a job in AgentManager; track it on `/studio/jobs`.
+5. Publish via `POST /studio/api/v1/liveloop/publish` to push into playlist with stub proof.

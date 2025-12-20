@@ -17,12 +17,25 @@ export type JobRecord = {
   id: string;
   kind: JobKind;
   agentId: string;
+  action?: string;
   payload: Record<string, unknown>;
   status: JobStatus;
   result?: Record<string, unknown>;
   error?: string;
   createdAt: string;
   updatedAt: string;
+};
+
+export type AgentStreamEvent = {
+  id: string;
+  agentId: string;
+  action?: string;
+  status: "queued" | "running" | "completed" | "failed";
+  message?: string;
+  timestamp: number;
+  proofSha?: string;
+  policyVerdict?: string;
+  latencyMs?: number;
 };
 
 export type AgentManagerState = {

@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { describe, expect, it } from "vitest";
 import type { AceAgentManifest } from "@illuvrse/contracts";
 import {
   computeStageErrors,
@@ -10,8 +10,7 @@ import {
   type StageFormState
 } from "../../../apps/web/src/app/ace/create/utils";
 
-test.skip(({ }, testInfo) => testInfo.project.name !== "web", "Run ACE utils tests only in web project");
-
+describe("ACE utils", () => {
 const baseState: StageFormState = {
   id: "agent.story-weaver.001",
   name: "StoryWeaver",
@@ -41,7 +40,7 @@ const baseManifest: AceAgentManifest = {
   metadata: { publishToLiveLoop: false }
 };
 
-test("identity stage requires id/name/version/runtimeImage format", () => {
+it("identity stage requires id/name/version/runtimeImage format", () => {
   const errors = computeStageErrors("identity", { ...baseState, id: "Bad Id", name: "", version: "", runtimeImage: "" });
   expect(errors.id).toContain("Use lowercase");
   expect(errors.name).toBe("Required");
@@ -49,12 +48,12 @@ test("identity stage requires id/name/version/runtimeImage format", () => {
   expect(errors.runtimeImage).toBe("Required");
 });
 
-test("capabilities stage requires at least one capability", () => {
+it("capabilities stage requires at least one capability", () => {
   const errors = computeStageErrors("capabilities", { ...baseState, capabilities: [] });
   expect(errors.capabilities).toBe("Pick at least one capability");
 });
 
-test("runtime stage requires trigger, llm, tts, and resources", () => {
+it("runtime stage requires trigger, llm, tts, and resources", () => {
   const errors = computeStageErrors("runtime", { ...baseState, trigger: "", llmId: "", ttsId: "", cpu: "", memory: "" });
   expect(errors.trigger).toBe("Required");
   expect(errors.llmId).toBe("Required");
@@ -63,7 +62,7 @@ test("runtime stage requires trigger, llm, tts, and resources", () => {
   expect(errors.memory).toBe("Required");
 });
 
-test("summarizeDiff reports changed fields", () => {
+it("summarizeDiff reports changed fields", () => {
   const updated: AceAgentManifest = {
     ...baseManifest,
     id: "agent.new",
@@ -78,7 +77,7 @@ test("summarizeDiff reports changed fields", () => {
   expect(summary.some((s) => s.includes("runtime image"))).toBeTruthy();
 });
 
-test("avatar helpers parse and validate assets/voice", () => {
+it("avatar helpers parse and validate assets/voice", () => {
   const parsed = parseAvatarAssets("s3://a, https://cdn.com/b.png");
   expect(parsed).toHaveLength(2);
 
@@ -93,9 +92,10 @@ test("avatar helpers parse and validate assets/voice", () => {
   expect(badVoice.avatarVoiceUrl).toContain("http");
 });
 
-test("resource normalization converts decimals to milli and uppercases mem units", () => {
+it("resource normalization converts decimals to milli and uppercases mem units", () => {
   expect(normalizeCpu("0.5")).toBe("500m");
   expect(normalizeCpu("500m")).toBe("500m");
   expect(normalizeMemory("1gi")).toBe("1GI");
   expect(normalizeMemory("256MiB")).toContain("Mi");
+});
 });

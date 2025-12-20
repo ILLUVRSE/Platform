@@ -1,7 +1,7 @@
-import { test, expect } from "@playwright/test";
+import { expect, it } from "vitest";
 import { pushStatus, statusByAgent, statusEmitter, type AgentStatus } from "../../../apps/web/src/app/api/agent/store";
 
-test("pushStatus stores and emits proof/policy/latency", async () => {
+it("pushStatus stores and emits proof/policy/latency", async () => {
   const sample: AgentStatus = {
     id: "agent-1-1",
     action: "publish.manifest",

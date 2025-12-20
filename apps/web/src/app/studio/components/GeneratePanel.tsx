@@ -45,9 +45,9 @@ export function GeneratePanel() {
       body={
         <div className="space-y-4 text-sm">
           <div className="space-y-2">
-            <label className="text-slate-200/80">Prompt</label>
+            <label className="text-slate-700">Prompt</label>
             <textarea
-              className="w-full rounded-xl border border-slate-600 bg-slate-900/60 p-3 text-cream outline-none focus:border-teal-500"
+              className="w-full rounded-xl border border-slate-300 bg-white p-3 text-slate-900 outline-none focus:border-teal-500"
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
               rows={3}
@@ -61,18 +61,18 @@ export function GeneratePanel() {
             {loading ? "Submitting..." : "Generate 7s preview"}
           </button>
           <div className="space-y-2">
-            <div className="text-xs uppercase tracking-[0.2em] text-slate-200/70">Recent jobs</div>
+            <div className="text-xs uppercase tracking-[0.2em] text-slate-500">Recent jobs</div>
             <div className="space-y-2">
               {jobs.map((job) => (
                 <div
                   key={job.id}
-                  className="flex items-center justify-between rounded-xl border border-slate-700 bg-slate-900/60 px-3 py-2"
+                  className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-3 py-2"
                 >
                   <div>
-                    <div className="text-cream">{job.prompt}</div>
-                    <div className="text-[12px] text-slate-200/70">{job.id}</div>
+                    <div className="text-slate-900">{job.prompt}</div>
+                    <div className="text-[12px] text-slate-500">{job.id}</div>
                   </div>
-                  <Pill className="bg-slate-700 text-slate-200 capitalize">{job.status}</Pill>
+                  <Pill className="bg-slate-100 text-slate-700 capitalize">{job.status}</Pill>
                 </div>
               ))}
             </div>

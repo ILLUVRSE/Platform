@@ -15,23 +15,23 @@ export function AuditLog() {
       .catch((e) => setError((e as Error).message));
   }, []);
 
-  if (error) return <div className="text-sm text-red-300">Audit error: {error}</div>;
+  if (error) return <div className="text-sm text-rose-600">Audit error: {error}</div>;
 
   return (
-    <div className="space-y-2 text-sm text-slate-200/80">
+    <div className="space-y-2 text-sm text-slate-700">
       {events.map((evt) => (
         <div
           key={evt.id}
-          className="flex items-center justify-between rounded-lg border border-slate-700 bg-slate-900/60 px-3 py-2"
+          className="flex items-center justify-between rounded-lg border border-slate-200 bg-slate-50 px-3 py-2"
         >
           <div>
-            <div className="font-semibold text-cream">{evt.message}</div>
-            <div className="text-[11px] text-slate-400">
+            <div className="font-semibold text-slate-900">{evt.message}</div>
+            <div className="text-[11px] text-slate-500">
               {evt.actor ? `${evt.actor} · ` : ""}
               {new Date(evt.timestamp).toLocaleString()}
             </div>
           </div>
-          <span className="text-[11px] text-slate-500">{evt.id}</span>
+          <span className="text-[11px] text-slate-400">{evt.id}</span>
         </div>
       ))}
     </div>

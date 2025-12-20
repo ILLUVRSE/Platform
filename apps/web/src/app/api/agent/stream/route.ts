@@ -8,7 +8,7 @@ export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const filterId = searchParams.get("id");
 
-  const backend = env.AGENT_BACKEND_URL;
+  const backend = env.AGENT_BACKEND_URL ?? "http://localhost:4040";
   if (backend) {
     try {
       const upstream = await fetch(`${backend.replace(/\/$/, "")}/stream${filterId ? `?id=${encodeURIComponent(filterId)}` : ""}`, {

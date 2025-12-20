@@ -3,9 +3,12 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "test": "playwright test"
+    "test": "playwright test",
+    "test:unit": "vitest run --config vitest.config.ts",
+    "test:e2e": "playwright test"
   },
   "devDependencies": {
-    "@playwright/test": "^1.49.0"
+    "@playwright/test": "^1.49.0",
+    "vitest": "^1.6.0"
   }
 }

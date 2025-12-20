@@ -14,6 +14,8 @@ function mapJobStatus(status: JobRecord["status"]): AgentStatus["status"] {
 }
 
 function buildMessage(job: JobRecord, mappedStatus: AgentStatus["status"]) {
+  const explicit = (job.result as { message?: string } | undefined)?.message;
+  if (explicit) return explicit;
   if (mappedStatus === "queued") return "Queued in AgentManager";
   if (mappedStatus === "running") return "Running in AgentManager";
   if (mappedStatus === "completed") {
@@ -30,11 +32,14 @@ function buildMessage(job: JobRecord, mappedStatus: AgentStatus["status"]) {
 }
 
 function buildProof(job: JobRecord) {
-  if (job.kind !== "proof") return {};
-  const signature = (job.result as { signature?: string } | undefined)?.signature;
+  const result = job.result as Record<string, unknown> | undefined;
+  const signature = typeof result?.signature === "string" ? result.signature : undefined;
+  const proofSha = typeof result?.proofSha === "string" ? result.proofSha : signature ? signature.slice(0, 12) : undefined;
+  const policyVerdict = typeof result?.policyVerdict === "string" ? result.policyVerdict : undefined;
+  if (!proofSha && !policyVerdict) return {};
   return {
-    proofSha: signature ? signature.slice(0, 12) : `proof-${job.id.slice(0, 6)}`,
-    policyVerdict: "PASS"
+    proofSha: proofSha ?? `proof-${job.id.slice(0, 6)}`,
+    policyVerdict: policyVerdict ?? "PASS"
   };
 }
 

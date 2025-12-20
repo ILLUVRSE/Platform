@@ -37,12 +37,12 @@ const guardrails = [
 
 const surfaceStack = [
   {
-    title: "Food",
+    title: "Mom Kitech",
     body: "FoodNetwork-style surface for recipes, menus, and creator cooking workflows.",
     href: surfaceUrls.food
   },
   {
-    title: "GridStock",
+    title: "Gridstock",
     body: "CNBC/Bloomberg-style terminal for markets, research, and trading play.",
     href: surfaceUrls.gridstock
   }
@@ -51,12 +51,12 @@ const surfaceStack = [
 export default function ProductsPage() {
   return (
     <div className="space-y-10">
-      <section className="rounded-3xl border border-slate-700/70 bg-slate-800/70 px-8 py-10 shadow-card">
+      <section className="rounded-3xl border border-slate-200 bg-white px-8 py-10 shadow-card">
         <div className="flex flex-wrap items-start justify-between gap-6">
           <div className="max-w-3xl space-y-4">
-            <Pill className="bg-teal-600/20 text-teal-200">ACE creation zone</Pill>
+            <Pill className="bg-teal-50 text-teal-700">ACE creation zone</Pill>
             <h1 className="text-4xl font-semibold leading-tight">Build, sign, and activate agents with proof-first defaults.</h1>
-            <p className="text-lg text-slate-200/90">
+            <p className="text-lg text-slate-700">
               The ACE wizard assembles your manifest across Identity, Capabilities, Runtime/Models, Avatar/Activation, and Review. Every step feeds live JSON, SHA-256 digest, and policy-ready metadata.
             </p>
             <div className="flex flex-wrap gap-3">
@@ -68,21 +68,21 @@ export default function ProductsPage() {
               </Link>
               <Link
                 href="/developers#ace-spec"
-                className="rounded-full border border-slate-600 px-5 py-3 text-sm font-semibold text-cream transition hover:border-teal-500/70 hover:text-teal-200"
+                className="rounded-full border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:border-teal-500/70 hover:text-teal-700"
               >
                 View ACE spec
               </Link>
             </div>
             <div className="flex flex-wrap gap-2 text-sm">
               {["Live manifest preview", "Autosave drafts", "Import/export JSON", "Kernel + Sentinel-ready"].map((item) => (
-                <Pill key={item} className="bg-slate-700 text-slate-200">
+                <Pill key={item} className="bg-slate-100 text-slate-700">
                   {item}
                 </Pill>
               ))}
             </div>
           </div>
-          <div className="flex w-full max-w-sm flex-col gap-3 rounded-2xl border border-slate-700 bg-slate-900/60 p-5 shadow-card">
-            <div className="text-xs uppercase tracking-[0.2em] text-slate-200/70">Proof snapshot</div>
+          <div className="flex w-full max-w-sm flex-col gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-5 shadow-card">
+            <div className="text-xs uppercase tracking-[0.2em] text-slate-500">Proof snapshot</div>
             <ProofCard
               sha="c2a4...9f7e"
               signer="Kernel"
@@ -103,10 +103,10 @@ export default function ProductsPage() {
             <Card
               key={stage.title}
               title={stage.title}
-              body={<p className="text-sm text-slate-200/80">{stage.detail}</p>}
+              body={<p className="text-sm text-slate-700">{stage.detail}</p>}
               footer={
                 stage.title === "Review & proof" ? (
-                  <span className="text-sm text-teal-200">SHA-256 + verify before register</span>
+                  <span className="text-sm text-teal-700">SHA-256 + verify before register</span>
                 ) : null
               }
             />
@@ -122,7 +122,7 @@ export default function ProductsPage() {
               title={product.title}
               body={<p>{product.body}</p>}
               footer={
-                <Link href={product.href} className="text-sm font-semibold text-teal-300 underline underline-offset-4">
+                <Link href={product.href} className="text-sm font-semibold text-teal-700 underline underline-offset-4">
                   Open {product.title}
                 </Link>
               }
@@ -139,7 +139,7 @@ export default function ProductsPage() {
               title={surface.title}
               body={<p>{surface.body}</p>}
               footer={
-                <Link href={surface.href} className="text-sm font-semibold text-teal-300 underline underline-offset-4">
+                <Link href={surface.href} className="text-sm font-semibold text-teal-700 underline underline-offset-4">
                   Open {surface.title}
                 </Link>
               }
@@ -153,14 +153,14 @@ export default function ProductsPage() {
           <Card
             title="How we keep agents trustworthy"
             body={
-              <ul className="list-disc space-y-2 pl-4 text-sm text-slate-200/80">
+              <ul className="list-disc space-y-2 pl-4 text-sm text-slate-700">
                 {guardrails.map((item) => (
                   <li key={item}>{item}</li>
                 ))}
               </ul>
             }
             footer={
-              <Link href="/developers#verify" className="text-sm font-semibold text-teal-300 underline underline-offset-4">
+              <Link href="/developers#verify" className="text-sm font-semibold text-teal-700 underline underline-offset-4">
                 Verify a manifest
               </Link>
             }
@@ -168,14 +168,14 @@ export default function ProductsPage() {
           <Card
             title="Register + send to Playground"
             body={
-              <div className="space-y-2 text-sm text-slate-200/80">
+              <div className="space-y-2 text-sm text-slate-700">
                 <p>One-click handoff writes the manifest to localStorage + cookie so Playground can load it instantly.</p>
                 <p>Register uses Kernel sign + Agent Manager stubs so you can test the full path even if backend isn’t live.</p>
-                <p className="text-slate-200">Errors surface inline with severity so you know why a register is blocked.</p>
+                <p className="text-slate-700">Errors surface inline with severity so you know why a register is blocked.</p>
               </div>
             }
             footer={
-              <div className="text-sm text-slate-200">
+              <div className="text-sm text-slate-700">
                 See it in action inside the ACE Review step.
               </div>
             }
@@ -188,7 +188,7 @@ export default function ProductsPage() {
           <Card
             title="Activation preview"
             body={
-              <div className="space-y-3 text-sm text-slate-200/80">
+              <div className="space-y-3 text-sm text-slate-700">
                 <p>Preview the activation line, avatar assets, and voice sample link before pushing to Playground.</p>
                 <p>Keep assets in S3 or HTTPS; we’ll carry the URLs and voice activation text into the manifest.</p>
               </div>
@@ -197,13 +197,13 @@ export default function ProductsPage() {
           <Card
             title="Launch conditions"
             body={
-              <div className="space-y-2 text-sm text-slate-200/80">
+              <div className="space-y-2 text-sm text-slate-700">
                 <p>Pick triggers (cron/event/http) and opt into LiveLoop publishing so agents ship with clear activation rules.</p>
                 <p>Runtime image + resources sit alongside capabilities so operators see what’s deployed at a glance.</p>
               </div>
             }
             footer={
-              <Link href="/storysphere" className="text-sm font-semibold text-teal-300 underline underline-offset-4">
+              <Link href="/storysphere" className="text-sm font-semibold text-teal-700 underline underline-offset-4">
                 See the launch surface
               </Link>
             }

@@ -21,10 +21,10 @@ const sampleManifest: AceAgentManifest = {
 export default function DevelopersPage() {
   return (
     <div className="space-y-10">
-      <section className="rounded-3xl border border-slate-700/70 bg-slate-800/70 px-8 py-10 shadow-card">
-        <Pill className="bg-slate-700 text-teal-200">Developers</Pill>
+      <section className="rounded-3xl border border-slate-200 bg-white px-8 py-10 shadow-card">
+        <Pill className="bg-teal-50 text-teal-700">Developers</Pill>
         <h1 className="mt-3 text-4xl font-semibold">Specs, legal, and support for ACE + platform</h1>
-        <p className="mt-3 max-w-2xl text-lg text-slate-200/90">
+        <p className="mt-3 max-w-2xl text-lg text-slate-700">
           Official specs for ACE agents, Kernel/Marketplace contracts, and legal claims. Submit issues directly to Ryan’s team when you hit errors.
         </p>
       </section>
@@ -34,7 +34,7 @@ export default function DevelopersPage() {
           <Card
             title="Required fields"
             body={
-              <div className="text-sm text-slate-200/80 space-y-2">
+              <div className="text-sm text-slate-700 space-y-2">
                 <div>Identity: archetype, biological style, alignment sliders.</div>
                 <div>Appearance: style preset, morph params, surface/animation settings.</div>
                 <div>Personality: traits (3–5), interaction style, emotional range.</div>
@@ -46,7 +46,7 @@ export default function DevelopersPage() {
           <Card
             title="Kernel + SentinelNet"
             body={
-              <div className="text-sm text-slate-200/80 space-y-2">
+              <div className="text-sm text-slate-700 space-y-2">
                 <div>Manifest must be SHA-256 hashed and signed by Kernel.</div>
                 <div>SentinelNet policy verdict required before publish.</div>
                 <div>Audit events emitted for activation/publish/update.</div>
@@ -91,9 +91,9 @@ export default function DevelopersPage() {
           <Card
             title="Docs & legal"
             body={
-              <div className="text-sm text-slate-200/80 space-y-2">
+              <div className="text-sm text-slate-700 space-y-2">
                 <p>Legal claims: signed delivery, auditability, policy enforcement. Document data handling, privacy, and usage of ACE assets.</p>
-                <Link href="/legal" className="text-teal-300 underline underline-offset-4 text-sm">
+                <Link href="/legal" className="text-teal-700 underline underline-offset-4 text-sm">
                   View legal
                 </Link>
               </div>
@@ -120,7 +120,7 @@ export default function DevelopersPage() {
           <Card
             title="How to use"
             body={
-              <div className="text-sm text-slate-200/80 space-y-2">
+              <div className="text-sm text-slate-700 space-y-2">
                 <p>Paste your ACE Agent Manifest and ensure it passes validation, signing, and policy verdicts.</p>
                 <p>The viewer computes SHA-256, calls Kernel verify, and shows SentinelNet stub verdicts.</p>
                 <p>Handoff: build in ACE, click “Send to Playground” to store manifest (cookie + localStorage), then open `/playground?source=ace` to preview actions.</p>
@@ -136,10 +136,10 @@ export default function DevelopersPage() {
         <Card
           title="Support channel"
           body={
-            <div className="text-sm text-slate-200/80 space-y-2">
+            <div className="text-sm text-slate-700 space-y-2">
               <p>Report ACE manifest issues, API failures, or policy verdict discrepancies.</p>
               <p>Include: request body, response, timestamp, and SHA.</p>
-              <Link href="mailto:support@illuvrse.com" className="text-teal-300 underline underline-offset-4">
+              <Link href="mailto:support@illuvrse.com" className="text-teal-700 underline underline-offset-4">
                 Email support@illuvrse.com
               </Link>
             </div>

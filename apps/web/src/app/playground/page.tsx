@@ -97,8 +97,8 @@ export default function PlaygroundPage({ searchParams }: { searchParams?: { sour
           }
         />
         <div className="mt-4 space-y-2">
-          <Pill className="bg-slate-700 text-teal-200">Tutorial agents</Pill>
-          <p className="text-sm text-slate-200/80">Load a ready-made tutorial agent into Playground as a guided example.</p>
+          <Pill className="bg-teal-50 text-teal-700">Tutorial agents</Pill>
+          <p className="text-sm text-slate-600">Load a ready-made tutorial agent into Playground as a guided example.</p>
           {/* @ts-expect-error Client Component */}
           <TutorialManifests />
           {/* @ts-expect-error Client Component */}
@@ -112,11 +112,11 @@ export default function PlaygroundPage({ searchParams }: { searchParams?: { sour
         <div className="grid gap-4 md:grid-cols-2">
           <Card
             title="Preview activation"
-            body={<p className="text-sm text-slate-200/80">Run activation moment (lighting pulse, voice line) without publishing. Validate appearance, personality, and voice settings.</p>}
+            body={<p className="text-sm text-slate-700">Run activation moment (lighting pulse, voice line) without publishing. Validate appearance, personality, and voice settings.</p>}
           />
           <Card
             title="Behavior probe"
-            body={<p className="text-sm text-slate-200/80">Send scripted prompts to test traits, attributes, and voice style before release.</p>}
+            body={<p className="text-sm text-slate-700">Send scripted prompts to test traits, attributes, and voice style before release.</p>}
           />
           {/* @ts-expect-error Server Component */}
           <ManifestViewer manifest={manifestToUse} />
@@ -132,13 +132,13 @@ export default function PlaygroundPage({ searchParams }: { searchParams?: { sour
         <div className="grid gap-4 md:grid-cols-3">
           <Card
             title="Marketplace publish"
-            body={<p className="text-sm text-slate-200/80">When satisfied, publish to Marketplace with Finance receipt + ArtifactPublisher delivery proofs.</p>}
-            footer={<Link href="/marketplace" className="text-teal-300 underline underline-offset-4 text-sm">Go to Marketplace</Link>}
+            body={<p className="text-sm text-slate-700">When satisfied, publish to Marketplace with Finance receipt + ArtifactPublisher delivery proofs.</p>}
+            footer={<Link href="/marketplace" className="text-teal-700 underline underline-offset-4 text-sm">Go to Marketplace</Link>}
           />
           <Card
             title="LiveLoop placement"
-            body={<p className="text-sm text-slate-200/80">Add the agent’s activation or cinematic to LiveLoop playlists with proofs.</p>}
-            footer={<Link href="/storysphere" className="text-teal-300 underline underline-offset-4 text-sm">Open StorySphere</Link>}
+            body={<p className="text-sm text-slate-700">Add the agent’s activation or cinematic to LiveLoop playlists with proofs.</p>}
+            footer={<Link href="/storysphere" className="text-teal-700 underline underline-offset-4 text-sm">Open StorySphere</Link>}
           />
           {/* @ts-expect-error Client Component */}
           <PublishDrawer />

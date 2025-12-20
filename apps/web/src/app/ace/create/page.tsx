@@ -611,7 +611,7 @@ export default function AceCreatePage() {
     <div className="space-y-10">
       {toast && (
         <div
-          className={`fixed right-6 top-6 z-40 rounded-xl border px-4 py-3 text-sm shadow-card ${toast.type === "success" ? "border-teal-500/60 bg-slate-900/80 text-teal-100" : "border-rose-500/70 bg-rose-900/70 text-rose-50"}`}
+          className={`fixed right-6 top-6 z-40 rounded-xl border px-4 py-3 text-sm shadow-card ${toast.type === "success" ? "border-teal-200 bg-white text-teal-800" : "border-rose-200 bg-rose-50 text-rose-700"}`}
         >
           {toast.message}
         </div>
@@ -639,14 +639,14 @@ export default function AceCreatePage() {
               <button
                 type="button"
                 onClick={sendToPlayground}
-                className="rounded-full border border-slate-600 px-5 py-3 text-sm font-semibold text-cream transition hover:border-teal-500/70 hover:text-teal-200"
+                className="rounded-full border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:border-teal-500/70 hover:text-teal-700"
               >
                 Send to Playground
               </button>
               <button
                 type="button"
                 onClick={registerWithAgentManager}
-                className="rounded-full border border-teal-500/60 px-5 py-3 text-sm font-semibold text-teal-200 transition hover:bg-teal-500/10"
+                className="rounded-full border border-teal-300 px-5 py-3 text-sm font-semibold text-teal-700 transition hover:bg-teal-50"
               >
                 Register with AgentManager
               </button>
@@ -717,7 +717,7 @@ export default function AceCreatePage() {
           <button
             type="button"
             onClick={goPrev}
-            className="rounded-full border border-slate-600 px-4 py-2 text-sm font-semibold text-cream transition hover:border-teal-500/70 hover:text-teal-200 disabled:opacity-40"
+            className="rounded-full border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-teal-500/70 hover:text-teal-700 disabled:opacity-40"
             disabled={currentStep === 0}
           >
             Previous step
@@ -725,7 +725,7 @@ export default function AceCreatePage() {
           <button
             type="button"
             onClick={goNext}
-            className="rounded-full bg-teal-600 px-4 py-2 text-sm font-semibold text-slate-900 shadow-card transition hover:opacity-95 disabled:opacity-40"
+            className="rounded-full bg-teal-600 px-4 py-2 text-sm font-semibold text-white shadow-card transition hover:opacity-95 disabled:opacity-40"
             disabled={currentStep === stageAnchors.length - 1 || !stageIsValid(stageAnchors[currentStep].key)}
           >
             Next step
@@ -797,9 +797,9 @@ export default function AceCreatePage() {
                     </button>
                   ))}
                 </div>
-              {fieldErrors.capabilities && <div className="text-xs text-rose-300">{fieldErrors.capabilities}</div>}
-              <div className="rounded-xl border border-slate-700 bg-slate-900/60 p-3">
-                <div className="mb-2 text-xs uppercase tracking-[0.2em] text-slate-200/70">Presets</div>
+              {fieldErrors.capabilities && <div className="text-xs text-rose-600">{fieldErrors.capabilities}</div>}
+              <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+                <div className="mb-2 text-xs uppercase tracking-[0.2em] text-slate-500">Presets</div>
                 <div className="flex flex-wrap gap-2">
                   {[
                     {
@@ -843,7 +843,7 @@ export default function AceCreatePage() {
                       key={preset.name}
                       type="button"
                       onClick={() => applyPreset(preset as AceAgentManifest)}
-                      className="rounded-full border border-slate-700 px-3 py-1 text-xs font-semibold text-cream transition hover:border-teal-500/70"
+                      className="rounded-full border border-slate-300 px-3 py-1 text-xs font-semibold text-slate-700 transition hover:border-teal-500/70"
                     >
                       {preset.name}
                     </button>
@@ -862,8 +862,8 @@ export default function AceCreatePage() {
             <div className="space-y-3 text-sm">
               <label className="space-y-1 block">
                 <div className="text-slate-800/80">Trigger (cron:*, event:*, or path)</div>
-                <input className="w-full rounded-lg border border-slate-700 bg-slate-900/70 p-2" value={trigger} onChange={(e) => setTrigger(e.target.value)} />
-                {fieldErrors.trigger && <div className="text-xs text-rose-300">{fieldErrors.trigger}</div>}
+                <input className="w-full rounded-lg border border-slate-300 bg-white p-2" value={trigger} onChange={(e) => setTrigger(e.target.value)} />
+                {fieldErrors.trigger && <div className="text-xs text-rose-600">{fieldErrors.trigger}</div>}
                 <div className="text-[11px] text-slate-500">Examples: cron:*/5 * * * * · event:job.requested · /hook/generate</div>
               </label>
               <div className="flex gap-3">
@@ -880,7 +880,7 @@ export default function AceCreatePage() {
                       </option>
                     ))}
                   </select>
-                  {fieldErrors.llmId && <div className="text-xs text-rose-300">{fieldErrors.llmId}</div>}
+                  {fieldErrors.llmId && <div className="text-xs text-rose-600">{fieldErrors.llmId}</div>}
                 </label>
                 <label className="space-y-1 flex-1">
                   <div className="text-slate-800/80">TTS ID</div>
@@ -895,7 +895,7 @@ export default function AceCreatePage() {
                       </option>
                     ))}
                   </select>
-                  {fieldErrors.ttsId && <div className="text-xs text-rose-300">{fieldErrors.ttsId}</div>}
+                  {fieldErrors.ttsId && <div className="text-xs text-rose-600">{fieldErrors.ttsId}</div>}
                 </label>
               </div>
               <div className="grid gap-3 md:grid-cols-2">
@@ -924,12 +924,12 @@ export default function AceCreatePage() {
                   <div className="text-[11px] text-slate-400">Examples: 512Mi, 1Gi.</div>
                 </label>
               </div>
-              <div className="flex flex-wrap gap-2 text-[12px] text-slate-200">
+              <div className="flex flex-wrap gap-2 text-[12px] text-slate-600">
                 {resourcePresets.map((preset) => (
                   <button
                     key={preset.name}
                     type="button"
-                    className="rounded-full border border-slate-700 px-3 py-1 transition hover:border-teal-500/70"
+                    className="rounded-full border border-slate-300 px-3 py-1 text-slate-700 transition hover:border-teal-500/70"
                     onClick={() => {
                       setCpu(preset.cpu);
                       setMemory(preset.memory);
@@ -961,22 +961,22 @@ export default function AceCreatePage() {
           body={
             <div className="space-y-3 text-sm">
               <label className="space-y-1 block">
-                <div className="text-slate-200/80">Activation line</div>
-                <textarea className="w-full rounded-lg border border-slate-700 bg-slate-900/70 p-2" rows={2} value={avatarActivation} onChange={(e) => setAvatarActivation(e.target.value)} />
+                <div className="text-slate-700">Activation line</div>
+                <textarea className="w-full rounded-lg border border-slate-300 bg-white p-2" rows={2} value={avatarActivation} onChange={(e) => setAvatarActivation(e.target.value)} />
               </label>
               <label className="space-y-1 block">
-                <div className="text-slate-200/80">Appearance assets (comma-separated URLs)</div>
+                <div className="text-slate-700">Appearance assets (comma-separated URLs)</div>
                 <textarea
-                  className="w-full rounded-lg border border-slate-700 bg-slate-900/70 p-2"
+                  className="w-full rounded-lg border border-slate-300 bg-white p-2"
                   rows={2}
                   value={avatarAssets}
                   onChange={(e) => setAvatarAssets(e.target.value)}
                   placeholder="s3://avatars/demo1, https://cdn.example.com/avatar2.png"
                 />
-                {fieldErrors.avatarAssets && <div className="field-error text-xs text-rose-300">{fieldErrors.avatarAssets}</div>}
+                {fieldErrors.avatarAssets && <div className="field-error text-xs text-rose-600">{fieldErrors.avatarAssets}</div>}
                 <button
                   type="button"
-                  className="rounded-lg border border-slate-700 px-3 py-1 text-[12px] font-semibold text-cream transition hover:border-teal-500/70"
+                  className="rounded-lg border border-slate-300 px-3 py-1 text-[12px] font-semibold text-slate-700 transition hover:border-teal-500/70"
                   onClick={() => {
                     setAvatarAssets(
                       avatarAssets
@@ -991,14 +991,14 @@ export default function AceCreatePage() {
                 </button>
               </label>
               <label className="space-y-1 block">
-                <div className="text-slate-200/80">Voice sample URL</div>
-                <input className="w-full rounded-lg border border-slate-700 bg-slate-900/70 p-2" value={avatarVoiceUrl} onChange={(e) => setAvatarVoiceUrl(e.target.value)} />
-                {fieldErrors.avatarVoiceUrl && <div className="field-error text-xs text-rose-300">{fieldErrors.avatarVoiceUrl}</div>}
+                <div className="text-slate-700">Voice sample URL</div>
+                <input className="w-full rounded-lg border border-slate-300 bg-white p-2" value={avatarVoiceUrl} onChange={(e) => setAvatarVoiceUrl(e.target.value)} />
+                {fieldErrors.avatarVoiceUrl && <div className="field-error text-xs text-rose-600">{fieldErrors.avatarVoiceUrl}</div>}
               </label>
-              <div className="rounded-xl border border-slate-700 bg-slate-900/60 p-3">
-                <div className="text-xs uppercase tracking-[0.2em] text-slate-200/70">Preview</div>
-                <div className="text-sm text-cream">{avatarActivation || "No activation line set"}</div>
-                <div className="mt-2 text-xs text-slate-200/80">
+              <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+                <div className="text-xs uppercase tracking-[0.2em] text-slate-500">Preview</div>
+                <div className="text-sm text-slate-900">{avatarActivation || "No activation line set"}</div>
+                <div className="mt-2 text-xs text-slate-600">
                   <div>Assets: {avatarAssets || "none"}</div>
                   <div className="flex items-center gap-2">
                     <span>Voice sample: {avatarVoiceUrl || "none"}</span>
@@ -1017,35 +1017,35 @@ export default function AceCreatePage() {
 
       <PageSection eyebrow="Review" title="Manifest, hash, and proofs" id="review">
         <div className="grid gap-4 md:grid-cols-3">
-          <Card title="Manifest JSON" body={<pre className="max-h-96 overflow-auto rounded-xl bg-slate-900/80 p-3 text-[12px] leading-relaxed text-cream">{manifestJson}</pre>} />
+          <Card title="Manifest JSON" body={<pre className="max-h-96 overflow-auto rounded-xl bg-slate-50 p-3 text-[12px] leading-relaxed text-slate-900">{manifestJson}</pre>} />
           <Card
             title="Hash & actions"
             body={
               <div className="space-y-3 text-sm">
                 <div>
-                  <div className="text-xs uppercase tracking-[0.2em] text-slate-200/70">SHA-256</div>
-                  <div className="break-all font-mono text-[12px] text-cream">{sha || "computing..."}</div>
+                  <div className="text-xs uppercase tracking-[0.2em] text-slate-500">SHA-256</div>
+                  <div className="break-all font-mono text-[12px] text-slate-900">{sha || "computing..."}</div>
                 </div>
-                {error ? <div className="rounded-lg border border-rose-500/50 bg-rose-500/10 p-2 text-rose-100">{error}</div> : <div className="text-teal-200">Valid manifest</div>}
+                {error ? <div className="rounded-lg border border-rose-200 bg-rose-50 p-2 text-rose-700">{error}</div> : <div className="text-teal-700">Valid manifest</div>}
                 <div className="flex flex-wrap gap-2">
                   <button
                     type="button"
                     onClick={handleDownload}
-                    className="rounded-lg border border-slate-700 px-3 py-2 text-xs font-semibold text-cream transition hover:border-teal-500/70"
+                    className="rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-700 transition hover:border-teal-500/70"
                   >
                     Download JSON
                   </button>
                   <button
                     type="button"
                     onClick={sendToPlayground}
-                    className="rounded-lg bg-teal-600 px-3 py-2 text-xs font-semibold text-slate-900 transition hover:opacity-95"
+                    className="rounded-lg bg-teal-600 px-3 py-2 text-xs font-semibold text-white transition hover:opacity-95"
                   >
                     Send to Playground
                   </button>
                   <button
                     type="button"
                     onClick={validateAndCheck}
-                    className="rounded-lg border border-slate-700 px-3 py-2 text-xs font-semibold text-cream transition hover:border-teal-500/70"
+                    className="rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-700 transition hover:border-teal-500/70"
                   >
                     Validate & Run Checks
                   </button>
@@ -1067,27 +1067,27 @@ export default function AceCreatePage() {
                 />
                 {proofLatencyMs ? <div className="text-[11px] text-slate-400">Kernel sign latency: {proofLatencyMs} ms</div> : null}
                 {policy ? (
-                  <div className="rounded-lg border border-slate-700 bg-slate-900/70 p-3">
-                    <div className="text-xs uppercase tracking-[0.2em] text-slate-200/70">Policy</div>
-                    <div className="text-cream">{policy.verdict}</div>
-                    <div className="text-xs text-slate-200/70">Severity: {policy.severity ?? "n/a"}</div>
-                    <ul className="mt-2 space-y-1 text-xs text-slate-200/80">
+                  <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+                    <div className="text-xs uppercase tracking-[0.2em] text-slate-500">Policy</div>
+                    <div className="text-slate-900">{policy.verdict}</div>
+                    <div className="text-xs text-slate-500">Severity: {policy.severity ?? "n/a"}</div>
+                    <ul className="mt-2 space-y-1 text-xs text-slate-600">
                       {policy.rules?.map((r) => (
                         <li key={r.id} className="flex items-center justify-between gap-2">
                           <span>{r.id}</span>
-                          <span className="font-semibold text-teal-300">{r.result}</span>
+                          <span className="font-semibold text-teal-700">{r.result}</span>
                         </li>
                       ))}
                     </ul>
-                    <div className="mt-2 text-xs text-slate-300/70">
+                    <div className="mt-2 text-xs text-slate-500">
                       Need guidance?{" "}
-                      <a href="/developers#api" className="text-teal-300 underline underline-offset-4">
+                      <a href="/developers#api" className="text-teal-700 underline underline-offset-4">
                         See API & policy docs
                       </a>
                     </div>
                   </div>
                 ) : (
-                  <div className="text-xs text-slate-200/70">Run checks to see policy verdict and proof.</div>
+                  <div className="text-xs text-slate-500">Run checks to see policy verdict and proof.</div>
                 )}
               </div>
             }
@@ -1101,14 +1101,14 @@ export default function AceCreatePage() {
             body={
               <div className="space-y-2 text-sm">
                 {stageAnchors.map((stage) => (
-                  <div key={stage.key} className="flex items-center justify-between rounded-lg border border-slate-700/60 bg-slate-900/60 px-3 py-2">
+                  <div key={stage.key} className="flex items-center justify-between rounded-lg border border-slate-200 bg-white px-3 py-2">
                     <div>
-                      <div className="text-xs uppercase tracking-[0.2em] text-slate-200/70">{stage.label}</div>
-                      <div className="text-[12px] text-slate-300/80">{stage.desc}</div>
+                      <div className="text-xs uppercase tracking-[0.2em] text-slate-500">{stage.label}</div>
+                      <div className="text-[12px] text-slate-600">{stage.desc}</div>
                     </div>
                     <span
                       className={`rounded-full px-3 py-1 text-[11px] font-semibold ${
-                        stageIsValid(stage.key) ? "bg-teal-600/30 text-teal-100" : "bg-rose-600/20 text-rose-100"
+                        stageIsValid(stage.key) ? "bg-teal-50 text-teal-700" : "bg-rose-50 text-rose-700"
                       }`}
                     >
                       {stageIsValid(stage.key) ? "Complete" : "Incomplete"}
@@ -1127,43 +1127,43 @@ export default function AceCreatePage() {
           body={
             <div className="space-y-3 text-sm">
               <textarea
-                className="w-full rounded-xl border border-slate-700 bg-slate-900/70 p-3 font-mono text-[12px] leading-relaxed text-cream"
+                className="w-full rounded-xl border border-slate-300 bg-white p-3 font-mono text-[12px] leading-relaxed text-slate-900"
                 rows={6}
                 placeholder='{"id":"agent.demo","name":"Demo","version":"0.1","capabilities":["generator"],"runtime":{"container":{"image":"img"}}}'
                 value={importJson}
                 onChange={(e) => setImportJson(e.target.value)}
               />
               <div>
-                <label className="text-xs text-slate-300/80">
+                <label className="text-xs text-slate-600">
                   Upload manifest file:
                   <input
                     type="file"
                     accept="application/json"
-                    className="mt-1 block text-xs text-slate-200"
+                    className="mt-1 block text-xs text-slate-700"
                     onChange={(e) => handleFileUpload(e.target.files?.[0] ?? null)}
                   />
                 </label>
-                {uploadError && <div className="text-xs text-rose-300">{uploadError}</div>}
+                {uploadError && <div className="text-xs text-rose-600">{uploadError}</div>}
               </div>
               <div className="flex gap-2">
                 <button
                   type="button"
                   onClick={handleImport}
-                  className="rounded-lg bg-teal-600 px-3 py-2 text-xs font-semibold text-slate-900 transition hover:opacity-95"
+                  className="rounded-lg bg-teal-600 px-3 py-2 text-xs font-semibold text-white transition hover:opacity-95"
                 >
                   Load into wizard
                 </button>
                 <button
                   type="button"
                   onClick={() => setImportJson("")}
-                  className="rounded-lg border border-slate-700 px-3 py-2 text-xs font-semibold text-cream transition hover:border-teal-500/70"
+                  className="rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-700 transition hover:border-teal-500/70"
                 >
                   Clear
                 </button>
               </div>
               {pendingImport ? (
-                <div className="rounded-xl border border-amber-500/50 bg-amber-500/10 p-3 text-xs text-amber-50">
-                  <div className="font-semibold text-cream">Confirm import?</div>
+                <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800">
+                  <div className="font-semibold text-amber-900">Confirm import?</div>
                   <ul className="mt-2 space-y-1">
                     {pendingImport.summary.map((item) => (
                       <li key={item}>• {item}</li>
@@ -1180,14 +1180,14 @@ export default function AceCreatePage() {
                     <button
                       type="button"
                       onClick={() => setPendingImport(null)}
-                      className="rounded-lg border border-amber-400/60 px-3 py-2 text-[12px] font-semibold text-amber-100 transition hover:border-amber-300"
+                      className="rounded-lg border border-amber-400/60 px-3 py-2 text-[12px] font-semibold text-amber-700 transition hover:border-amber-300"
                     >
                       Cancel
                     </button>
                   </div>
                 </div>
               ) : null}
-              <p className="text-xs text-slate-300/70">
+              <p className="text-xs text-slate-600">
                 {`On load, fields populate and validation run automatically. Drafts autosave to localStorage key "${STORAGE_KEY}", Playground handoff uses "${PLAYGROUND_KEY}".`}
               </p>
             </div>

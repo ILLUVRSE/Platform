@@ -41,10 +41,10 @@ export class AgentManagerClient {
     return this.request<{ ok: boolean }>("/heartbeat", { method: "POST", body: JSON.stringify({ agentId }) });
   }
 
-  async enqueueJob(agentId: string, kind: JobKind, payload?: Record<string, unknown>) {
+  async enqueueJob(agentId: string, kind: JobKind, payload?: Record<string, unknown>, options?: { action?: string }) {
     return this.request<{ jobId: string; status: string }>("/jobs", {
       method: "POST",
-      body: JSON.stringify({ agentId, kind, payload })
+      body: JSON.stringify({ agentId, kind, action: options?.action, payload })
     });
   }
 

@@ -64,10 +64,10 @@ export function CheckoutForm({ sha }: { sha: string }) {
       >
         Checkout demo
       </button>
-      {status && <div className="text-teal-200">{status}</div>}
-      {error && <div className="text-red-300">Error: {error}</div>}
+      {status && <div className="text-teal-700">{status}</div>}
+      {error && <div className="text-rose-600">Error: {error}</div>}
       {receipt && (
-        <div className="rounded-xl border border-slate-700 bg-slate-900/60 p-3 text-xs text-slate-200/80">
+        <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 text-xs text-slate-700">
           <div>Receipt ID: {receipt.id}</div>
           <div>SHA: {receipt.sha256}</div>
           <div>Amount: {receipt.amount}</div>
@@ -76,7 +76,7 @@ export function CheckoutForm({ sha }: { sha: string }) {
         </div>
       )}
       {delivery && (
-        <div className="rounded-xl border border-slate-700 bg-slate-900/60 p-3 text-xs text-slate-200/80">
+        <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 text-xs text-slate-700">
           <div>Encrypted blob: {delivery.encryptedBlob}</div>
           <div>Proof: {delivery.proof}</div>
           <div>Policy: {delivery.policy ?? "stub"}</div>
@@ -85,12 +85,12 @@ export function CheckoutForm({ sha }: { sha: string }) {
       {receipt && (
         <button
           onClick={verifyReceipt}
-          className="rounded-full border border-slate-600 px-3 py-1 text-sm text-cream transition hover:border-teal-500/70 hover:text-teal-200"
+          className="rounded-full border border-slate-300 px-3 py-1 text-sm text-slate-700 transition hover:border-teal-500/70 hover:text-teal-700"
         >
           Verify receipt
         </button>
       )}
-      {verifyError && <div className="text-red-300">{verifyError}</div>}
+      {verifyError && <div className="text-rose-600">{verifyError}</div>}
     </div>
   );
 }

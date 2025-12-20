@@ -1,8 +1,8 @@
-import { expect, test } from "@playwright/test";
+import { describe, expect, it } from "vitest";
 import { buildLiveLoopSchedule, mapLiveLoopEvents } from "../../../apps/web/src/app/liveloop/page";
 
-test.describe("LiveLoop helpers", () => {
-  test("maps 24h schedule and marks on-air/next by UTC hour", () => {
+describe("LiveLoop helpers", () => {
+  it("maps 24h schedule and marks on-air/next by UTC hour", () => {
     const now = new Date(Date.UTC(2024, 0, 1, 5, 0, 0));
     const { schedule, onAirSlot, nextSlot } = buildLiveLoopSchedule(1, now);
 

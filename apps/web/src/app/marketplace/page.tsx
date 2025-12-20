@@ -23,10 +23,10 @@ export default async function MarketplacePage() {
   const listing = await fetchListing();
   return (
     <div className="space-y-10">
-      <section className="rounded-3xl border border-slate-700/70 bg-slate-800/70 px-8 py-10 shadow-card">
-        <Pill className="bg-gold-500/30 text-gold-100">Marketplace</Pill>
+      <section className="rounded-3xl border border-slate-200 bg-white px-8 py-10 shadow-card">
+        <Pill className="bg-gold-500/20 text-gold-400">Marketplace</Pill>
         <h1 className="mt-3 text-4xl font-semibold">Buy ACE agents and add-ons</h1>
-        <p className="mt-3 max-w-2xl text-lg text-slate-200/90">
+        <p className="mt-3 max-w-2xl text-lg text-slate-700">
           Curated ACE agents with Kernel-signed manifests, sandbox previews, and Finance-backed delivery proofs. Add-on packs extend appearance, personality, and abilities.
         </p>
         <div className="mt-4 flex flex-wrap gap-3">
@@ -38,7 +38,7 @@ export default async function MarketplacePage() {
           </Link>
           <Link
             href="/developers#marketplace"
-            className="rounded-full border border-slate-600 px-5 py-3 text-sm font-semibold text-cream transition hover:border-teal-500/70 hover:text-teal-200"
+            className="rounded-full border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:border-teal-500/70 hover:text-teal-700"
           >
             Listing schema
           </Link>
@@ -54,22 +54,22 @@ export default async function MarketplacePage() {
               body={
                 <div className="space-y-3 text-sm">
                   <div className="flex items-center justify-between">
-                    <span className="text-cream">
+                    <span className="text-slate-900">
                       {listing.price} {listing.currency}
                     </span>
-                    <Pill className="bg-slate-700 text-slate-200">{listing.status}</Pill>
+                    <Pill className="bg-slate-100 text-slate-700">{listing.status}</Pill>
                   </div>
-                  <div className="font-mono text-[12px] text-cream">SHA {listing.sha256}</div>
-                  <div className="flex items-center gap-2 text-[12px] text-slate-200/80">
+                  <div className="font-mono text-[12px] text-slate-700">SHA {listing.sha256}</div>
+                  <div className="flex items-center gap-2 text-[12px] text-slate-600">
                     <span>Signed manifest</span>
-                    {listing.signed && <span className="text-teal-300">●</span>}
+                    {listing.signed && <span className="text-teal-600">●</span>}
                   </div>
                 </div>
               }
               footer={
                 <Link
                   href="/checkout"
-                  className="text-sm font-semibold text-teal-300 underline underline-offset-4"
+                  className="text-sm font-semibold text-teal-700 underline underline-offset-4"
                 >
                   View listing
                 </Link>
@@ -77,7 +77,7 @@ export default async function MarketplacePage() {
             />
           </div>
         ) : (
-          <div className="rounded-xl border border-slate-700 bg-slate-900/60 p-4 text-sm text-slate-200/80">
+          <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
             No listing available (upstream not reachable).
           </div>
         )}
@@ -106,7 +106,7 @@ export default async function MarketplacePage() {
                   // @ts-expect-error Server Component
                   <ManifestViewer manifest={listing.manifest as any} />
                 ) : (
-                  <div className="text-sm text-slate-200/70">Manifest not available from listing.</div>
+                  <div className="text-sm text-slate-600">Manifest not available from listing.</div>
                 )}
               </div>
             }
@@ -118,11 +118,11 @@ export default async function MarketplacePage() {
         <div className="grid gap-4 md:grid-cols-2">
           <Card
             title="Cosmetic packs"
-            body={<p className="text-sm text-slate-200/80">Skins, armor sets, particle effects, emotes, voice filters.</p>}
+            body={<p className="text-sm text-slate-700">Skins, armor sets, particle effects, emotes, voice filters.</p>}
           />
           <Card
             title="Personality/ability packs"
-            body={<p className="text-sm text-slate-200/80">Trait packs, ability modules, memory expansions, lore fragments, seasonal bundles.</p>}
+            body={<p className="text-sm text-slate-700">Trait packs, ability modules, memory expansions, lore fragments, seasonal bundles.</p>}
           />
         </div>
       </PageSection>

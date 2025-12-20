@@ -8,16 +8,16 @@ export default function ControlPanelPage() {
   const gated = process.env.NODE_ENV === "production";
   return (
     <div className="space-y-10">
-        <section className="rounded-3xl border border-red-500/40 bg-red-950/30 px-8 py-6 shadow-card">
-          <h2 className="text-xl font-semibold text-red-100">Restricted — admin only</h2>
-          <p className="text-sm text-red-200/80">
+        <section className="rounded-3xl border border-rose-200 bg-rose-50 px-8 py-6 shadow-card">
+          <h2 className="text-xl font-semibold text-rose-700">Restricted — admin only</h2>
+          <p className="text-sm text-rose-600">
             Control-Panel is gated and not visible on the public site. Authentication required.
           </p>
         </section>
-        <section className="rounded-3xl border border-slate-700/70 bg-slate-800/70 px-8 py-10 shadow-card">
-          <Pill className="bg-slate-700 text-gold-200">Control-Panel</Pill>
+        <section className="rounded-3xl border border-slate-200 bg-white px-8 py-10 shadow-card">
+          <Pill className="bg-gold-500/20 text-gold-400">Control-Panel</Pill>
           <h1 className="mt-3 text-4xl font-semibold">Operator surface with proofs and policy</h1>
-          <p className="mt-3 max-w-2xl text-lg text-slate-200/90">
+          <p className="mt-3 max-w-2xl text-lg text-slate-700">
             Gated operator controls backed by Kernel RBAC, SentinelNet policy verdicts, and
             Reasoning Graph traces. Use it to ship changes, run canaries, or roll back with audit
             evidence.
@@ -58,7 +58,7 @@ export default function ControlPanelPage() {
                   <StatBadge label="Recent events" value="12 traces" variant="warning" />
                   <Link
                     href="/api/reasoning/demo-trace"
-                    className="text-sm font-semibold text-teal-300 underline underline-offset-4"
+                    className="text-sm font-semibold text-teal-700 underline underline-offset-4"
                   >
                     Fetch sample trace
                   </Link>
@@ -73,7 +73,7 @@ export default function ControlPanelPage() {
           <div className="mt-4">
             <Link
               href="/control-panel/approvals"
-              className="text-sm font-semibold text-teal-300 underline underline-offset-4"
+              className="text-sm font-semibold text-teal-700 underline underline-offset-4"
             >
               Open approval ledger
             </Link>
@@ -89,11 +89,11 @@ export default function ControlPanelPage() {
             policyVerdict="SentinelNet PASS"
           />
           <div className="mt-6">
-            <div className="text-xs uppercase tracking-[0.2em] text-slate-200/70">Reasoning trace</div>
+            <div className="text-xs uppercase tracking-[0.2em] text-slate-500">Reasoning trace</div>
             <TraceViewer />
           </div>
           <div className="mt-6">
-            <div className="text-xs uppercase tracking-[0.2em] text-slate-200/70">Audit log</div>
+            <div className="text-xs uppercase tracking-[0.2em] text-slate-500">Audit log</div>
             <AuditLog />
           </div>
         </PageSection>

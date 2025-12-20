@@ -5,7 +5,7 @@ const studioBaseURL = process.env.STUDIO_URL ?? "http://localhost:3001";
 const runUISmoke = process.env.RUN_UI_SMOKE === "true";
 
 export default defineConfig({
-  testDir: "./tests",
+  testDir: "./tests/e2e",
   timeout: 30_000,
   reporter: [["list"]],
   use: {

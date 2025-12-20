@@ -34,12 +34,12 @@ const productTiles = [
     href: "/control-panel"
   },
   {
-    title: "Food",
+    title: "Mom Kitech",
     body: "FoodNetwork-style kitchen and recipes hub with AI-assisted menus.",
     href: surfaceUrls.food
   },
   {
-    title: "GridStock",
+    title: "Gridstock",
     body: "CNBC/Bloomberg-style market terminal with live dashboards and trading play.",
     href: surfaceUrls.gridstock
   }
@@ -63,14 +63,14 @@ const journeys = [
 export default function Home() {
   return (
     <div className="space-y-12">
-      <section className="rounded-3xl border border-slate-700/70 bg-slate-800/70 px-8 py-12 shadow-card">
+      <section className="rounded-3xl border border-slate-200 bg-white px-8 py-12 shadow-card">
         <div className="flex flex-wrap items-start justify-between gap-8">
           <div className="max-w-2xl space-y-4">
-            <Pill className="bg-teal-600/20 text-teal-200">Governed creator platform</Pill>
+            <Pill className="bg-teal-50 text-teal-700">Governed creator platform</Pill>
             <h1 className="text-4xl font-semibold leading-tight md:text-5xl">
               Create, sign, deliver — ILLUVRSE is trust-first creator tooling and a personal studio.
             </h1>
-            <p className="text-lg text-slate-200/90">
+            <p className="text-lg text-slate-700">
               Build artifacts in IDEA, get Kernel signatures, publish to Marketplace, and show the
               output in StorySphere: prompt to MP4, LiveLoop streaming, and GameGrid Arcade.
             </p>
@@ -83,16 +83,16 @@ export default function Home() {
               </Link>
               <Link
                 href="/storysphere#liveloop"
-                className="rounded-full border border-slate-600 px-5 py-3 text-sm font-semibold text-cream transition hover:border-teal-500/70 hover:text-teal-200"
+                className="rounded-full border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:border-teal-500/70 hover:text-teal-700"
               >
                 Try StorySphere LiveLoop
               </Link>
             </div>
           </div>
-          <div className="flex flex-col gap-4 rounded-2xl border border-slate-700 bg-slate-900/60 p-6 shadow-card md:w-[340px]">
-            <div className="text-xs uppercase tracking-[0.2em] text-slate-200/70">Live demo</div>
+          <div className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-6 shadow-card md:w-[340px]">
+            <div className="text-xs uppercase tracking-[0.2em] text-slate-500">Live demo</div>
             <div className="aspect-video rounded-xl bg-gradient-to-br from-slate-700 via-teal-600/40 to-gold-500/60" />
-            <div className="text-sm text-slate-200/90">
+            <div className="text-sm text-slate-700">
               StorySphere LiveLoop preview — streaming generated MP4s with inline proofs.
             </div>
             <div className="grid grid-cols-2 gap-3">
@@ -109,7 +109,7 @@ export default function Home() {
         cta={
           <Link
             href="/developers#verify"
-            className="rounded-full border border-slate-600 px-4 py-2 text-sm font-semibold text-cream transition hover:border-teal-500/70 hover:text-teal-200"
+            className="rounded-full border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-teal-500/70 hover:text-teal-700"
           >
             Verify a signed artifact
           </Link>
@@ -154,7 +154,7 @@ export default function Home() {
               footer={
                 <Link
                   href={tile.href}
-                  className="text-sm font-semibold text-teal-300 underline underline-offset-4"
+                  className="text-sm font-semibold text-teal-700 underline underline-offset-4"
                 >
                   Explore {tile.title}
                 </Link>
@@ -174,7 +174,7 @@ export default function Home() {
               footer={
                 <Link
                   href="/developers"
-                  className="text-sm font-semibold text-teal-300 underline underline-offset-4"
+                  className="text-sm font-semibold text-teal-700 underline underline-offset-4"
                 >
                   View quickstart
                 </Link>
@@ -194,18 +194,18 @@ export default function Home() {
                   HLS player with PIP Arcade (GameGrid), captions, language tracks, and proof
                   badges. Embed on any page to show what creators make.
                 </p>
-                <div className="rounded-xl border border-slate-700 bg-slate-900/60 p-4">
-                  <div className="text-xs uppercase tracking-[0.2em] text-slate-200/70">
+                <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                  <div className="text-xs uppercase tracking-[0.2em] text-slate-500">
                     Playlist
                   </div>
-                  <div className="mt-2 space-y-2 text-sm text-cream">
-                    <div className="flex items-center justify-between rounded-lg bg-slate-700/60 px-3 py-2">
+                  <div className="mt-2 space-y-2 text-sm text-slate-900">
+                    <div className="flex items-center justify-between rounded-lg bg-white px-3 py-2 shadow-sm">
                       <span>Chronicles of the Grid · 00:24</span>
-                      <Pill className="bg-teal-600/30 text-teal-100">Signed</Pill>
+                      <Pill className="bg-teal-100 text-teal-700">Signed</Pill>
                     </div>
-                    <div className="flex items-center justify-between rounded-lg bg-slate-700/40 px-3 py-2">
+                    <div className="flex items-center justify-between rounded-lg bg-white px-3 py-2 shadow-sm">
                       <span>LiveLoop // Next on Air</span>
-                      <Pill className="bg-gold-500/30 text-gold-400">Live</Pill>
+                      <Pill className="bg-gold-500/20 text-gold-400">Live</Pill>
                     </div>
                   </div>
                 </div>
@@ -220,11 +220,11 @@ export default function Home() {
                   Call <code>POST /api/v1/generate</code> with a prompt, watch preview generation,
                   and publish to LiveLoop with a signed manifest.
                 </p>
-                <div className="rounded-xl border border-slate-700 bg-slate-900/60 p-4 text-sm">
-                  <div className="text-xs uppercase tracking-[0.2em] text-slate-200/70">
+                <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm">
+                  <div className="text-xs uppercase tracking-[0.2em] text-slate-500">
                     Example request
                   </div>
-                  <pre className="mt-2 overflow-auto rounded-lg bg-slate-800 p-3 text-[12px] leading-relaxed text-cream">
+                  <pre className="mt-2 overflow-auto rounded-lg bg-white p-3 text-[12px] leading-relaxed text-slate-900">
 {`POST /api/v1/generate
 {
   "prompt": "neon harbor at dawn, tilt-shift",

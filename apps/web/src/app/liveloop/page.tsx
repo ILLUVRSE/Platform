@@ -60,14 +60,14 @@ export default function LiveLoopPage() {
 
   return (
     <div className="space-y-8">
-      <section className="rounded-3xl border border-slate-700/70 bg-slate-800/70 px-8 py-10 shadow-card">
-        <Pill className="bg-gold-500/20 text-gold-100">LiveLoop</Pill>
+      <section className="rounded-3xl border border-slate-200 bg-white px-8 py-10 shadow-card">
+        <Pill className="bg-gold-500/20 text-gold-400">LiveLoop</Pill>
         <h1 className="mt-3 text-3xl font-semibold">{hourLabel}</h1>
-        <p className="mt-2 max-w-2xl text-slate-200/85">
+        <p className="mt-2 max-w-2xl text-slate-700">
           24/7 LiveLoop stream. Current UTC hour is marked Live; next hour is Upcoming. Slots roll forward automatically.
         </p>
         {onAirSlot ? (
-          <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-emerald-500/20 px-3 py-1 text-sm text-emerald-100">
+          <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-emerald-100 px-3 py-1 text-sm text-emerald-700">
             Live now · {onAirSlot.window}
           </div>
         ) : null}
@@ -87,10 +87,10 @@ export default function LiveLoopPage() {
                     <span
                       className={`rounded-full px-3 py-1 text-xs font-semibold ${
                         isLive
-                          ? "bg-emerald-500/30 text-emerald-100"
+                          ? "bg-emerald-100 text-emerald-700"
                           : isUpcoming
-                            ? "bg-gold-500/30 text-gold-100"
-                            : "bg-slate-700 text-slate-200"
+                            ? "bg-gold-500/20 text-gold-400"
+                            : "bg-slate-100 text-slate-700"
                       }`}
                     >
                       {isLive ? "Live" : isUpcoming ? "Upcoming" : "Completed"}

@@ -163,15 +163,15 @@ export function TutorialManifests({ onLoaded }: { onLoaded?: (manifest: AceAgent
 
   return (
     <div className="space-y-3">
-      {message ? <div className="rounded-lg border border-teal-500/60 bg-slate-900/70 p-3 text-sm text-teal-100">{message}</div> : null}
+      {message ? <div className="rounded-lg border border-teal-200 bg-teal-50 p-3 text-sm text-teal-800">{message}</div> : null}
       <div className="grid gap-3 md:grid-cols-2">
         {tutorialManifests.map(({ manifest, blurb, stage }) => (
           <Card
             key={manifest.id}
             title={manifest.name}
             body={
-              <div className="space-y-2 text-sm text-slate-200/85">
-                <Pill className="bg-slate-700 text-slate-200">{stage}</Pill>
+              <div className="space-y-2 text-sm text-slate-700">
+                <Pill className="bg-slate-100 text-slate-700">{stage}</Pill>
                 <p>{blurb}</p>
                 <div className="grid grid-cols-2 gap-2 text-[12px]">
                   <StatBadge label="Trigger" value={manifest.triggers?.[0]?.type ?? "n/a"} variant="neutral" />
@@ -180,7 +180,7 @@ export function TutorialManifests({ onLoaded }: { onLoaded?: (manifest: AceAgent
                 <button
                   type="button"
                   onClick={() => apply(manifest)}
-                  className="rounded-full bg-teal-600 px-3 py-2 text-[12px] font-semibold text-slate-900 shadow-card transition hover:opacity-95"
+                  className="rounded-full bg-teal-600 px-3 py-2 text-[12px] font-semibold text-white shadow-card transition hover:opacity-95"
                 >
                   Load in Playground
                 </button>

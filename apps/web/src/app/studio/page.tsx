@@ -13,10 +13,10 @@ const pipeline = [
 export default function StorySphereStudioPage() {
   return (
     <div className="space-y-10">
-      <section className="rounded-3xl border border-slate-700/70 bg-slate-800/70 px-8 py-10 shadow-card">
-        <Pill className="bg-teal-600/20 text-teal-200">Studio</Pill>
+      <section className="rounded-3xl border border-slate-200 bg-white px-8 py-10 shadow-card">
+        <Pill className="bg-teal-50 text-teal-700">Studio</Pill>
         <h1 className="mt-3 text-4xl font-semibold">Prompt → Preview → MP4 → LiveLoop</h1>
-        <p className="mt-3 max-w-2xl text-lg text-slate-200/90">
+        <p className="mt-3 max-w-2xl text-lg text-slate-700">
           The personal studio of ILLUVRSE. Generate previews, approve finals, publish to LiveLoop,
           and embed the Player with PIP Arcade. Everything is signed and auditable.
         </p>
@@ -29,7 +29,7 @@ export default function StorySphereStudioPage() {
           </Link>
           <Link
             href="/studio/gamegrid"
-            className="rounded-full border border-slate-600 px-5 py-3 text-sm font-semibold text-cream transition hover:border-teal-500/70 hover:text-teal-200"
+            className="rounded-full border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:border-teal-500/70 hover:text-teal-700"
           >
             Open GameGrid
           </Link>
@@ -43,7 +43,7 @@ export default function StorySphereStudioPage() {
             body={
               <div className="space-y-3">
                 <p>Preview fast, then render finals with proofs.</p>
-                <ol className="list-decimal space-y-2 pl-4 text-sm text-slate-200/80">
+                <ol className="list-decimal space-y-2 pl-4 text-sm text-slate-700">
                   {pipeline.map((step) => (
                     <li key={step}>{step}</li>
                   ))}
@@ -56,13 +56,13 @@ export default function StorySphereStudioPage() {
             body={
               <div className="space-y-3 text-sm">
                 <p>Add to LiveLoop with schedule slots. Player surfaces captions, dub tracks, and PIP Arcade.</p>
-                <div className="rounded-xl border border-slate-700 bg-slate-900/60 p-4">
-                  <div className="text-xs uppercase tracking-[0.2em] text-slate-200/70">
+                <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                  <div className="text-xs uppercase tracking-[0.2em] text-slate-500">
                     LiveLoop slot
                   </div>
-                  <div className="mt-2 flex items-center justify-between text-cream">
+                  <div className="mt-2 flex items-center justify-between text-slate-900">
                     <span>Arcadia Dawn · 00:18</span>
-                    <Pill className="bg-gold-500/30 text-gold-100">On Air</Pill>
+                    <Pill className="bg-gold-500/20 text-gold-400">On Air</Pill>
                   </div>
                 </div>
               </div>

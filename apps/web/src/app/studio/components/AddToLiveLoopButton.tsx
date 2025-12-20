@@ -39,12 +39,12 @@ export function AddToLiveLoopButton({
     <div className="space-y-1 text-sm">
       <button
         onClick={add}
-        className="rounded-full border border-slate-600 px-3 py-1 text-sm text-cream transition hover:border-teal-500/70 hover:text-teal-200"
+        className="rounded-full border border-slate-300 px-3 py-1 text-sm text-slate-700 transition hover:border-teal-500/70 hover:text-teal-700"
       >
         Add to LiveLoop
       </button>
-      {status && <div className="text-teal-200">{status}</div>}
-      {error && <div className="text-red-300">{error}</div>}
+      {status && <div className="text-teal-700">{status}</div>}
+      {error && <div className="text-rose-600">{error}</div>}
     </div>
   );
 }

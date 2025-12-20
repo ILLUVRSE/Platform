@@ -10,11 +10,11 @@ export function GameGridListing() {
           <Card
             key={game.id}
             title={game.title}
-            body={<p className="text-sm text-slate-200/80">{game.description}</p>}
+            body={<p className="text-sm text-slate-700">{game.description}</p>}
             footer={
               <Link
                 href={`/games/${game.id}`}
-                className="text-sm font-semibold text-teal-300 underline underline-offset-4"
+                className="text-sm font-semibold text-teal-700 underline underline-offset-4"
               >
                 Details
               </Link>

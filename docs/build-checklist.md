@@ -9,12 +9,13 @@ Use this checklist to get the platform running locally and to align on workstrea
 
 ## Core dev commands
 - Web app: `pnpm --filter web dev` (runs Next on :3000)
-- StorySphere app: `pnpm --filter storysphere dev` (Next on :3001)
-- Food app: `cd Food/apps/moms-kitchen && PORT=4001 pnpm dev`
-- GridStock app: `cd GridStock && PORT=4002 npm run dev`
+- Studio (StorySphere) lives under `/studio` in the web app.
+- Food app: `pnpm dev:food` (Next on :4001)
+- GridStock app: `pnpm dev:gridstock` (Next on :4002)
 - Lint: `pnpm lint`
 - Build (CI parity): `pnpm build --filter '!@illuvrse/tests'`
-- Tests (Playwright unit/integration): `pnpm --filter @illuvrse/tests test` (UI smoke requires RUN_UI_SMOKE=true and servers running)
+- Tests (unit): `pnpm --filter @illuvrse/tests test:unit`
+- Tests (Playwright smoke/integration): `pnpm --filter @illuvrse/tests test` (UI smoke requires RUN_UI_SMOKE=true and servers running)
 
 ## Local routing
 To serve Food/GridStock under the main platform routes:
@@ -29,7 +30,7 @@ To serve Food/GridStock under the main platform routes:
   - Products: `/products`
   - About: `/about`
   - LiveLoop (web): `/liveloop`
-- StorySphere (apps/storysphere): main studio; LiveLoop page at `/liveloop`.
+- Studio (StorySphere): `/studio`
 - APIs (web): `/api/kernel/*`, `/api/sentinel/*`, `/api/agent/*` (exec/status/stream stubs), `/api/marketplace/*`, etc.
 
 ## ACE wizard status
@@ -56,23 +57,20 @@ To serve Food/GridStock under the main platform routes:
 
 ## StorySphere status
 - LiveLoop page restored in web app with schedule helpers (`buildLiveLoopSchedule`, `mapLiveLoopEvents`).
-- StorySphere Tailwind config uses shared preset (CJS); type shim added; `@ts-expect-error` present in config.
-- Needs: confirm Tailwind preset typing approach; full light theme alignment if desired.
+- Studio styling uses shared preset (CJS); type shim added; `@ts-expect-error` present in config.
+- Needs: confirm Tailwind preset typing approach.
 
 ## Marketplace status
 - Pages intact; APIs stubbed (`/api/marketplace/*`, `/api/finance/*`), proof flows present.
 
 ## Outstanding issues / TODOs
-- Theme: align light theme across TopNav/Footer/cards/wizard/playground; many components still dark.
-- Tests: Playwright unit runner exits unexpectedly; fix config or move utils to a Jest/Vitest harness.
-- Agent backend: replace in-memory exec/stream with real queue (Redis/NATS) and executor service; add proof/policy fields in status.
-- Agent approvals: persist to Postgres by running `pnpm --filter @illuvrse/db prisma:migrate:dev` and `pnpm --filter @illuvrse/db prisma:generate`.
+- Agent approvals persist to Postgres after running `pnpm --filter @illuvrse/db prisma:migrate:dev` and `pnpm --filter @illuvrse/db prisma:generate`.
 - CI warnings: git gc warnings (unreachable loose objects) on local; Tailwind preset typing still has @ts-expect-error.
 - Clean artifacts: `packages/tests/test-results/.last-run.json` is a test artifact.
 
 ## Quick start to handoff
 1) `pnpm install`
-2) `pnpm --filter web dev` (and optionally `pnpm --filter storysphere dev`)
+2) `pnpm --filter web dev`
 3) Visit `/ace/create` and `/playground`; use tutorial nodes to load manifests.
 4) If contributing: create feature branch, run `pnpm lint` and `pnpm build --filter '!@illuvrse/tests'` before PR.
-5) For agents: start by swapping `/api/agent/exec`/`/stream` to a real queue + executor; wire 3D actions to backend.
+5) For agents: swap the AgentManager stub for a real queue + executor when ready; the 3D actions already stream status/proof data.

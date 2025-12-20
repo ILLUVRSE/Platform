@@ -21,10 +21,10 @@ const gameGridHighlights = [
 export default function StorySpherePage() {
   return (
     <div className="space-y-10">
-      <section className="rounded-3xl border border-slate-700/70 bg-slate-800/70 px-8 py-10 shadow-card">
-        <Pill className="bg-teal-600/20 text-teal-200">StorySphere</Pill>
+      <section className="rounded-3xl border border-slate-200 bg-white px-8 py-10 shadow-card">
+        <Pill className="bg-teal-50 text-teal-700">StorySphere</Pill>
         <h1 className="mt-3 text-4xl font-semibold">Personal studio: prompt → MP4 → LiveLoop</h1>
-        <p className="mt-3 max-w-2xl text-lg text-slate-200/90">
+        <p className="mt-3 max-w-2xl text-lg text-slate-700">
           Generate previews, assemble final MP4s, and stream them 24/7 on LiveLoop with PIP Arcade
           and a GameGrid library. Every publish carries Kernel signatures and SentinelNet verdicts.
         </p>
@@ -37,7 +37,7 @@ export default function StorySpherePage() {
           </Link>
           <Link
             href="#liveloop"
-            className="rounded-full border border-slate-600 px-5 py-3 text-sm font-semibold text-cream transition hover:border-teal-500/70 hover:text-teal-200"
+            className="rounded-full border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:border-teal-500/70 hover:text-teal-700"
           >
             View LiveLoop
           </Link>
@@ -54,7 +54,7 @@ export default function StorySpherePage() {
                   The studio runs locally-first with fast previews, then escalates to final MP4
                   assembly when approved.
                 </p>
-                <ul className="list-disc space-y-2 pl-4 text-sm text-slate-200/80">
+                <ul className="list-disc space-y-2 pl-4 text-sm text-slate-700">
                   {pipelineSteps.map((step) => (
                     <li key={step}>{step}</li>
                   ))}
@@ -70,18 +70,18 @@ export default function StorySpherePage() {
                   Every render can be added to LiveLoop with a schedule slot. The player exposes PIP,
                   captions, dub tracks, and watch-party hooks.
                 </p>
-                <div className="rounded-xl border border-slate-700 bg-slate-900/60 p-4 text-sm">
-                  <div className="text-xs uppercase tracking-[0.2em] text-slate-200/70">
+                <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm">
+                  <div className="text-xs uppercase tracking-[0.2em] text-slate-500">
                     LiveLoop slot
                   </div>
                   <div className="mt-2 space-y-2">
-                    <div className="flex items-center justify-between rounded-lg bg-slate-700/60 px-3 py-2">
+                    <div className="flex items-center justify-between rounded-lg bg-white px-3 py-2 shadow-sm">
                       <span>Arcadia // 00:18</span>
-                      <Pill className="bg-gold-500/30 text-gold-100">Next</Pill>
+                      <Pill className="bg-gold-500/20 text-gold-400">Next</Pill>
                     </div>
-                    <div className="flex items-center justify-between rounded-lg bg-slate-700/40 px-3 py-2">
+                    <div className="flex items-center justify-between rounded-lg bg-white px-3 py-2 shadow-sm">
                       <span>StorySphere LiveLoop</span>
-                      <Pill className="bg-teal-600/30 text-teal-100">Signed</Pill>
+                      <Pill className="bg-teal-100 text-teal-700">Signed</Pill>
                     </div>
                   </div>
                 </div>
@@ -115,12 +115,12 @@ export default function StorySpherePage() {
             body={
               <div className="space-y-3">
                 <p>Drag/drop ordering, scheduled start windows, and on-air indicator.</p>
-                <div className="rounded-xl border border-slate-700 bg-slate-900/60 p-4">
-                  <div className="flex items-center justify-between text-sm text-cream">
+                <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                  <div className="flex items-center justify-between text-sm text-slate-900">
                     <span>Slot 01 · Arcadia Dawn</span>
-                    <Pill className="bg-gold-500/30 text-gold-100">Live</Pill>
+                    <Pill className="bg-gold-500/20 text-gold-400">Live</Pill>
                   </div>
-                  <div className="mt-2 text-sm text-slate-200/80">
+                  <div className="mt-2 text-sm text-slate-600">
                     Next: Neon Runner · 00:21 — proof: <code>c1e7...901a</code>
                   </div>
                 </div>
@@ -135,11 +135,11 @@ export default function StorySpherePage() {
                   HLS with captions, dub tracks, and Arcade PIP from GameGrid. Suitable for embedding
                   across www.illuvrse.com.
                 </p>
-                <div className="rounded-xl border border-slate-700 bg-slate-900/60 p-4 text-sm">
-                  <div className="text-xs uppercase tracking-[0.2em] text-slate-200/70">
+                <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm">
+                  <div className="text-xs uppercase tracking-[0.2em] text-slate-500">
                     PIP Arcade
                   </div>
-                  <div className="mt-2 text-cream">Play “Grid Kart” while the stream runs.</div>
+                  <div className="mt-2 text-slate-900">Play “Grid Kart” while the stream runs.</div>
                 </div>
               </div>
             }

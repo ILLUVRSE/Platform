@@ -28,7 +28,12 @@ export async function POST(request: Request) {
   if (agentManagerUrl) {
     try {
       const client = new AgentManagerClient(agentManagerUrl);
-      const enqueue = await client.enqueueJob("agent.story-weaver.001", "generate", { prompt, publish: body.publishToLiveLoop });
+      const enqueue = await client.enqueueJob(
+        "agent.story-weaver.001",
+        "generate",
+        { prompt, publish: body.publishToLiveLoop },
+        { action: "generate.preview" }
+      );
       const response: StorySphereGenerateResponse = {
         jobId: enqueue.jobId,
         status: "queued",

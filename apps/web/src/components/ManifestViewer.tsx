@@ -70,30 +70,30 @@ export async function ManifestViewer({ manifest, className }: ManifestViewerProp
         <div className="space-y-4 text-sm">
           <div className="grid gap-2 sm:grid-cols-2">
             <div>
-              <div className="text-xs uppercase tracking-[0.2em] text-slate-200/70">Identity</div>
-              <div className="font-semibold text-cream">
-                {summary.name} <span className="text-slate-300/80">({summary.version})</span>
+              <div className="text-xs uppercase tracking-[0.2em] text-slate-500">Identity</div>
+              <div className="font-semibold text-slate-900">
+                {summary.name} <span className="text-slate-500">({summary.version})</span>
               </div>
-              <div className="text-xs text-slate-200/70">{summary.id}</div>
+              <div className="text-xs text-slate-500">{summary.id}</div>
             </div>
             <div>
-              <div className="text-xs uppercase tracking-[0.2em] text-slate-200/70">Runtime</div>
-              <div className="font-mono text-[12px] text-cream">{summary.runtime}</div>
+              <div className="text-xs uppercase tracking-[0.2em] text-slate-500">Runtime</div>
+              <div className="font-mono text-[12px] text-slate-900">{summary.runtime}</div>
             </div>
           </div>
           <div className="grid gap-2 sm:grid-cols-2">
             <div>
-              <div className="text-xs uppercase tracking-[0.2em] text-slate-200/70">Capabilities</div>
-              <div className="text-cream">{summary.capabilities}</div>
+              <div className="text-xs uppercase tracking-[0.2em] text-slate-500">Capabilities</div>
+              <div className="text-slate-900">{summary.capabilities}</div>
             </div>
             <div>
-              <div className="text-xs uppercase tracking-[0.2em] text-slate-200/70">Triggers</div>
-              <div className="text-cream">{summary.triggers}</div>
+              <div className="text-xs uppercase tracking-[0.2em] text-slate-500">Triggers</div>
+              <div className="text-slate-900">{summary.triggers}</div>
             </div>
           </div>
           <div>
-            <div className="text-xs uppercase tracking-[0.2em] text-slate-200/70">Manifest SHA</div>
-            <div className="font-mono text-[12px] text-cream break-all">{sha}</div>
+            <div className="text-xs uppercase tracking-[0.2em] text-slate-500">Manifest SHA</div>
+            <div className="font-mono text-[12px] text-slate-900 break-all">{sha}</div>
           </div>
           <ProofCard
             sha={proof?.sha256 ?? sha}
@@ -104,24 +104,24 @@ export async function ManifestViewer({ manifest, className }: ManifestViewerProp
             error={error}
           />
           {policy ? (
-            <div className="rounded-xl border border-slate-700 bg-slate-900/60 p-3">
-              <div className="text-xs uppercase tracking-[0.2em] text-slate-200/70">Policy verdict</div>
-              <div className="text-cream text-sm">
+            <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+              <div className="text-xs uppercase tracking-[0.2em] text-slate-500">Policy verdict</div>
+              <div className="text-slate-900 text-sm">
                 {policy.verdict} · {policy.severity}
               </div>
-              <div className="mt-2 space-y-1 text-xs text-slate-200/80">
+              <div className="mt-2 space-y-1 text-xs text-slate-600">
                 {policy.rules?.map((rule: any) => (
                   <div key={rule.id} className="flex items-center justify-between gap-2">
                     <span>{rule.id}</span>
-                    <span className="font-semibold text-teal-200">{rule.result}</span>
+                    <span className="font-semibold text-teal-700">{rule.result}</span>
                   </div>
                 ))}
               </div>
             </div>
           ) : null}
           <div>
-            <div className="text-xs uppercase tracking-[0.2em] text-slate-200/70">Manifest JSON</div>
-            <pre className="mt-2 max-h-64 overflow-auto rounded-xl bg-slate-900/80 p-3 text-[12px] leading-relaxed text-cream">
+            <div className="text-xs uppercase tracking-[0.2em] text-slate-500">Manifest JSON</div>
+            <pre className="mt-2 max-h-64 overflow-auto rounded-xl bg-slate-50 p-3 text-[12px] leading-relaxed text-slate-900">
               {JSON.stringify(manifest, null, 2)}
             </pre>
           </div>

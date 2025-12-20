@@ -5,10 +5,10 @@ import { gameGridManifest } from "@studio/lib/gameGridManifest";
 export default function GameGridPage() {
   return (
     <div className="space-y-10">
-      <section className="rounded-3xl border border-slate-700/70 bg-slate-800/70 px-8 py-10 shadow-card">
-        <Pill className="bg-teal-600/20 text-teal-200">GameGrid</Pill>
+      <section className="rounded-3xl border border-slate-200 bg-white px-8 py-10 shadow-card">
+        <Pill className="bg-teal-50 text-teal-700">GameGrid</Pill>
         <h1 className="mt-3 text-4xl font-semibold">Arcade built into StorySphere</h1>
-        <p className="mt-3 max-w-2xl text-lg text-slate-200/90">
+        <p className="mt-3 max-w-2xl text-lg text-slate-700">
           Lightweight HTML5/tile games playable in PIP alongside LiveLoop. Manifest-driven so new
           games can be added by updating one file.
         </p>
@@ -23,8 +23,8 @@ export default function GameGridPage() {
               body={
                 <div className="space-y-2 text-sm">
                   <p>{game.description}</p>
-                  <Pill className="bg-slate-700 text-slate-200 capitalize">{game.genre}</Pill>
-                  <div className="text-[12px] text-slate-200/80">
+                  <Pill className="bg-slate-100 text-slate-700 capitalize">{game.genre}</Pill>
+                  <div className="text-[12px] text-slate-600">
                     playPath: <code>{game.playPath}</code>
                   </div>
                 </div>
@@ -33,13 +33,13 @@ export default function GameGridPage() {
                 <div className="flex items-center justify-between">
                   <Link
                     href={game.playPath}
-                    className="text-sm font-semibold text-teal-300 underline underline-offset-4"
+                    className="text-sm font-semibold text-teal-700 underline underline-offset-4"
                   >
                     Launch
                   </Link>
                   <Link
                     href={`/studio/games/${game.id}`}
-                    className="text-sm font-semibold text-cream underline underline-offset-4"
+                    className="text-sm font-semibold text-slate-700 underline underline-offset-4"
                   >
                     Details
                   </Link>
@@ -48,7 +48,7 @@ export default function GameGridPage() {
             />
           ))}
         </div>
-        <div className="mt-4 text-sm text-slate-200/80">
+        <div className="mt-4 text-sm text-slate-600">
           Canonical manifest: <code>apps/web/src/app/studio/lib/gameGridManifest.ts</code>
         </div>
       </PageSection>

@@ -18,7 +18,7 @@ export type ExecResult = {
 };
 
 export async function executeAgentAction(body: AgentExecRequest): Promise<ExecResult> {
-  const backend = env.AGENT_BACKEND_URL;
+  const backend = env.AGENT_BACKEND_URL ?? "http://localhost:4040";
   if (backend) {
     try {
       const baseUrl = backend.replace(/\/$/, "");
@@ -40,6 +40,7 @@ export async function executeAgentAction(body: AgentExecRequest): Promise<ExecRe
         body: JSON.stringify({
           agentId: body.agentId,
           kind,
+          action: body.action,
           payload: body.payload ?? {}
         })
       });

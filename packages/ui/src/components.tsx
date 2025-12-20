@@ -130,7 +130,7 @@ export function ProofCard({
             {ledgerLink && (
               <>
                 <span className="h-3 w-px bg-slate-600" />
-                <a className="text-teal-300 underline" href={ledgerLink}>
+                <a className="text-teal-700 underline" href={ledgerLink}>
                   Ledger proof
                 </a>
               </>
