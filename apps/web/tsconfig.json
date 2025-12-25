@@ -17,6 +17,12 @@
       "@/*": [
         "./src/*"
       ],
+      "@food/*": [
+        "./src/food/*"
+      ],
+      "@gridstock/*": [
+        "./src/gridstock/*"
+      ],
       "@studio/*": [
         "./src/app/studio/*"
       ],

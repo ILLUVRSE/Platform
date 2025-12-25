@@ -5,14 +5,8 @@
   "description": "ILLUVRSE platform monorepo",
   "scripts": {
     "dev": "pnpm --filter web dev",
-    "dev:food": "pnpm --filter moms-kitchen dev -- --port 4001",
-    "dev:gridstock": "pnpm --filter gridstock dev -- --port 4002",
     "build": "pnpm --filter web build",
-    "build:food": "pnpm --filter moms-kitchen build",
-    "build:gridstock": "pnpm --filter gridstock build",
     "lint": "pnpm --filter web lint",
-    "lint:food": "pnpm --filter moms-kitchen lint",
-    "lint:gridstock": "pnpm --filter gridstock lint",
     "test:smoke": "pnpm --filter @illuvrse/tests test",
     "start:platform": "pnpm --filter web start -- --port 3000"
   },

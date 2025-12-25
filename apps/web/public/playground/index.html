@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ILLUVRSE Playground - Business Park</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div id="park-root">
+      <div id="scene" aria-label="ILLUVRSE business park"></div>
+
+      <div id="hud">
+        <div class="hud-column left">
+          <section class="panel brand-panel" style="--delay: 0s">
+            <p class="eyebrow">ILLUVRSE Platform</p>
+            <h1>Business Park</h1>
+            <p class="lede">
+              A Tokyo-meets-Venice campus where each tower routes into a real ILLUVRSE surface. Navigate the
+              park, enter a building, and open its live workspace in a new tab.
+            </p>
+            <div class="chip-row">
+              <span class="chip">ACE</span>
+              <span class="chip">StorySphere</span>
+              <span class="chip">LiveLoop</span>
+            </div>
+            <div class="cta-row">
+              <a class="ghost" href="/games/wumpa-island/index.html" target="_blank" rel="noreferrer">
+                Open Wumpa Island Rift
+              </a>
+            </div>
+          </section>
+
+          <section class="panel agent-panel" style="--delay: 0.08s">
+            <div class="panel-title">Agent Directory</div>
+            <div id="agentList" class="agent-list"></div>
+          </section>
+
+          <section class="panel location-panel" style="--delay: 0.16s">
+            <div class="panel-title">Campus Directory</div>
+            <div id="locationList" class="location-list"></div>
+          </section>
+        </div>
+
+        <div class="hud-column right">
+          <section class="panel console-panel" style="--delay: 0.12s">
+            <div class="panel-title">Agent Console</div>
+            <div class="agent-meta">
+              <div id="agentName" class="agent-name">Select a kiosk</div>
+              <div id="agentRole" class="agent-role">No agent selected</div>
+              <div id="agentTags" class="agent-tags"></div>
+            </div>
+
+            <label class="field-label" for="actionSelect">Action</label>
+            <select id="actionSelect"></select>
+
+            <label class="field-label" for="directive">Directive</label>
+            <textarea id="directive" placeholder="Describe the request for the selected agent."></textarea>
+
+            <div class="console-actions">
+              <button id="sendBtn" class="primary" type="button">Request Action</button>
+              <span id="requestStatus" class="status-text">Ryan approval required for repo actions.</span>
+            </div>
+
+            <div class="hint">
+              Tip: approvals are managed in Control Panel or via the ryan approvals CLI.
+            </div>
+          </section>
+
+          <section class="panel feed-panel" style="--delay: 0.2s">
+            <div class="panel-title">Status Feed</div>
+            <div id="statusFeed" class="status-feed"></div>
+          </section>
+        </div>
+      </div>
+
+      <div id="prompt" class="prompt hidden">
+        <div id="promptText" class="prompt-text">Press E or Enter to enter</div>
+        <button id="enterBtn" class="primary" type="button">Enter</button>
+      </div>
+
+      <div id="controls" class="panel controls-panel" style="--delay: 0.3s">
+        WASD to move, drag to look, press E or Enter to enter a building.
+      </div>
+
+      <div id="start" class="overlay">
+        <div class="overlay-card">
+          <p class="eyebrow">ILLUVRSE Playground</p>
+          <h1>Business Park</h1>
+          <p>
+            A lightweight 3D operations hub and customer campus. Towers pulse as one hive mind,
+            connecting every building to its ILLUVRSE surface.
+          </p>
+          <button id="startBtn" class="primary" type="button">Enter the Playground</button>
+        </div>
+      </div>
+    </div>
+
+    <script type="module" src="main.js"></script>
+  </body>
+</html>

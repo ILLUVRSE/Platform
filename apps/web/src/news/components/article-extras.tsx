@@ -35,8 +35,8 @@ export function ArticleProgress() {
 }
 
 export function ShareButtons({ slug, title }: { slug: string; title: string }) {
-  const url =
-    typeof window !== 'undefined' ? window.location.href : `https://cntrl.local/news/articles/${slug}`;
+  const baseUrl = (process.env.NEXT_PUBLIC_SITE_URL || 'https://illuvrse.news').replace(/\/$/, '');
+  const url = `${baseUrl}/news/articles/${slug}`;
 
   const encodedUrl = encodeURIComponent(url);
   const encodedTitle = encodeURIComponent(title);

@@ -1,9 +1,6 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
-import { PlatformBar } from "../components/PlatformBar";
-import { TopNav } from "../components/TopNav";
-import { Footer } from "../components/Footer";
 
 const headingFont = localFont({
   src: "../fonts/Heading.ttf",
@@ -37,14 +34,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body
-        className={`${headingFont.variable} ${bodyFont.variable} ${monoFont.variable} bg-[color:var(--bg-cream)] text-[color:var(--text)] antialiased`}
+        className={`${headingFont.variable} ${bodyFont.variable} ${monoFont.variable} antialiased`}
       >
-        <div className="min-h-screen" style={{ background: "var(--bg-cream)" }}>
-          <PlatformBar />
-          <TopNav />
-          <main className="mx-auto max-w-6xl px-4 pb-16 pt-8">{children}</main>
-          <Footer />
-        </div>
+        {children}
       </body>
     </html>
   );

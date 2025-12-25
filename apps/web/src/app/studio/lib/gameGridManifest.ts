@@ -8,6 +8,13 @@ export type GameEntry = {
 
 export const gameGridManifest: GameEntry[] = [
   {
+    id: "wumpa-island",
+    title: "Wumpa Island Rift",
+    description: "A lightweight 3D adventure across Wumpa Island, the Badlands, Ripto City, and the Artisan Homeworld.",
+    playPath: "/games/wumpa-island/index.html",
+    genre: "adventure"
+  },
+  {
     id: "riverport",
     title: "Riverport Baseball League",
     description: "Arcade baseball on a tile grid with quickfire innings.",

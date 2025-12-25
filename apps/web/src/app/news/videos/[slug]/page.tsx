@@ -7,19 +7,19 @@ export const revalidate = 60;
 
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
   const video = await prisma.video.findUnique({ where: { slug: params.slug } });
-  if (!video) return { title: 'Video not found • ILLUVRSE News' };
-  const description = video.description || `${video.title} on ILLUVRSE News`;
+  if (!video) return { title: 'Coverage not found • ILLUVRSE News' };
+  const description = video.description || `${video.title} on ILLUVRSE Sports`;
   return {
-    title: `${video.title} • ILLUVRSE Video`,
+    title: `${video.title} • ILLUVRSE Sports`,
     description,
     openGraph: {
-      title: `${video.title} • ILLUVRSE Video`,
+      title: `${video.title} • ILLUVRSE Sports`,
       description,
       images: video.thumbnail ? [video.thumbnail] : undefined,
     },
     twitter: {
       card: 'summary_large_image',
-      title: `${video.title} • ILLUVRSE Video`,
+      title: `${video.title} • ILLUVRSE Sports`,
       description,
       images: video.thumbnail ? [video.thumbnail] : undefined,
     },
@@ -41,7 +41,7 @@ export default async function VideoPage({ params }: { params: { slug: string } }
       style={{ background: 'var(--cream)', color: 'var(--text)' }}
     >
       <p className="text-xs uppercase tracking-[0.24em]" style={{ color: 'var(--forest)' }}>
-        {video.live ? 'Live Stream' : 'On Demand'}
+        {video.live ? 'Live Game' : 'Replay'}
       </p>
       <h1 className="text-3xl font-black leading-tight md:text-4xl" style={{ color: 'var(--forest)' }}>
         {video.title}
@@ -84,13 +84,13 @@ function VideoPlayer({ video }: { video: { hlsUrl: string | null; mp4Url: string
         <p className="font-semibold" style={{ color: 'var(--forest)' }}>
           Playback not configured yet.
         </p>
-        <p>We&apos;re prepping the stream. Check back shortly or browse the library.</p>
+        <p>We&apos;re prepping the stream. Check back shortly or browse the replays.</p>
         <Link
           href="/news/videos"
           className="rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em]"
           style={{ borderColor: 'var(--border)', color: 'var(--forest)' }}
         >
-          View videos
+          View sports
         </Link>
       </div>
     );

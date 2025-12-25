@@ -1,6 +1,7 @@
 import { env } from "process";
 import { mapActionToJobKind } from "../agent-manager";
 import { queue, pushStatus, trackJob, type AgentCommand, type AgentStatus } from "../store";
+import { getRegistryManifestById } from "@/lib/aceRegistry";
 
 export type AgentExecRequest = {
   agentId: string;
@@ -19,14 +20,15 @@ export type ExecResult = {
 
 export async function executeAgentAction(body: AgentExecRequest): Promise<ExecResult> {
   const backend = env.AGENT_BACKEND_URL ?? "http://localhost:4040";
+  const manifest = body.manifest ?? getRegistryManifestById(body.agentId);
   if (backend) {
     try {
       const baseUrl = backend.replace(/\/$/, "");
-      if (body.manifest) {
+      if (manifest) {
         const registerRes = await fetch(`${baseUrl}/register`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ manifest: body.manifest })
+          body: JSON.stringify({ manifest })
         });
         if (!registerRes.ok) {
           return { ok: false, status: registerRes.status, body: { error: "Agent register failed" } };

@@ -17,6 +17,14 @@ const {
 } = require("./lib");
 const { buildIndex, loadIndex } = require("./indexer");
 const { generateArchitectureMap } = require("./map");
+const {
+  listRegistry,
+  getRegistryEntry,
+  upsertManifest,
+  readHandoff,
+  setHandoff,
+  setHandoffFromRegistry
+} = require("./ace-store");
 
 const COMMAND_DENYLIST = [
   { pattern: /\brm\s+-rf\b/i, reason: "rm -rf is not allowed" },
@@ -64,6 +72,8 @@ Usage:
 Commands:
   ask "<prompt>"               Analysis-only mode. No file edits.
   do "<task>"                  Action mode (offline). Supports mock mode.
+  ace                           Manage ACE manifests and Playground handoffs.
+  approvals                     Review and decide agent approval requests.
   memory                         Show memory summary or add notes.
   index                          Build/show repo index.
   map                            Generate architecture map.
@@ -133,6 +143,28 @@ function showMapHelp() {
   ryan map generate
 
 Generates docs/architecture_map.md from the repo index.`);
+}
+
+function showAceHelp() {
+  console.log(`Usage:
+  ryan ace list [--json]
+  ryan ace push <manifest.json> [--handoff] [--source <label>]
+  ryan ace handoff <id|manifest.json> [--source <label>]
+  ryan ace current [--json]
+  ryan ace show <id> [--json]
+
+Notes:
+  Manifests are stored locally in .ryan/ace and never leave the machine.`);
+}
+
+function showApprovalsHelp() {
+  console.log(`Usage:
+  ryan approvals list [--json] [--base <url>]
+  ryan approvals approve <id> [--by <name>] [--reason <text>] [--base <url>]
+  ryan approvals reject <id> [--by <name>] [--reason <text>] [--base <url>]
+
+Notes:
+  Defaults to http://localhost:3000. The web app must be running.`);
 }
 
 function parseAskArgs(args) {
@@ -1698,6 +1730,317 @@ async function handleMap(rootDir, args) {
   return 1;
 }
 
+function validateManifestShape(manifest) {
+  if (!manifest || typeof manifest !== "object") {
+    throw new Error("Manifest must be a JSON object");
+  }
+  const missing = [];
+  if (!manifest.id || typeof manifest.id !== "string") missing.push("id");
+  if (!manifest.name || typeof manifest.name !== "string") missing.push("name");
+  if (!manifest.version || typeof manifest.version !== "string") missing.push("version");
+  if (!Array.isArray(manifest.capabilities) || manifest.capabilities.length === 0) missing.push("capabilities");
+  if (!manifest.runtime || !manifest.runtime.container || !manifest.runtime.container.image) missing.push("runtime.container.image");
+  if (missing.length) {
+    throw new Error(`Manifest missing required fields: ${missing.join(", ")}`);
+  }
+}
+
+function readManifestFile(filePath) {
+  const raw = fs.readFileSync(filePath, "utf8");
+  const parsed = JSON.parse(raw);
+  validateManifestShape(parsed);
+  return parsed;
+}
+
+function formatEntry(entry) {
+  const stamp = entry.updatedAt ? new Date(entry.updatedAt).toLocaleString() : "unknown";
+  const source = entry.source ? ` · ${entry.source}` : "";
+  return `${entry.id} (${entry.name} v${entry.version}) · ${stamp}${source}`;
+}
+
+async function requestJson(url, options = {}) {
+  const headers = { "Content-Type": "application/json", ...(options.headers ?? {}) };
+  const res = await fetch(url, { ...options, headers });
+  const data = await res.json().catch(() => null);
+  if (!res.ok) {
+    const message = typeof data?.error === "string" ? data.error : `Request failed (${res.status})`;
+    const err = new Error(message);
+    err.status = res.status;
+    throw err;
+  }
+  return data;
+}
+
+async function handleAce(rootDir, args) {
+  const [subcommand, ...rest] = args;
+  if (!subcommand || subcommand === "--help" || subcommand === "-h") {
+    showAceHelp();
+    return 0;
+  }
+
+  if (subcommand === "list") {
+    const json = rest.includes("--json");
+    const entries = listRegistry(rootDir);
+    if (json) {
+      console.log(JSON.stringify(entries, null, 2));
+    } else if (entries.length === 0) {
+      console.log("No ACE manifests in registry. Use: ryan ace push <manifest.json>");
+    } else {
+      entries.forEach((entry) => console.log(formatEntry(entry)));
+    }
+    appendAuditLog(rootDir, { action: "ryan.ace.list", detail: { count: entries.length } });
+    return 0;
+  }
+
+  if (subcommand === "push") {
+    let filePath = null;
+    let handoff = false;
+    let source = "cli";
+    let json = false;
+    for (let i = 0; i < rest.length; i += 1) {
+      const arg = rest[i];
+      if (arg === "--handoff") {
+        handoff = true;
+        continue;
+      }
+      if (arg === "--json") {
+        json = true;
+        continue;
+      }
+      if (arg === "--source") {
+        source = rest[i + 1] ?? source;
+        i += 1;
+        continue;
+      }
+      if (arg.startsWith("--source=")) {
+        source = arg.split("=")[1] ?? source;
+        continue;
+      }
+      if (!filePath) filePath = arg;
+    }
+    if (!filePath) {
+      console.error("Missing manifest path.");
+      showAceHelp();
+      return 1;
+    }
+    if (!fs.existsSync(filePath)) {
+      console.error(`Manifest file not found: ${filePath}`);
+      return 1;
+    }
+    const manifest = readManifestFile(filePath);
+    const entry = upsertManifest(rootDir, manifest, source);
+    let handoffPayload = null;
+    if (handoff) {
+      handoffPayload = setHandoff(rootDir, manifest, source);
+    }
+    appendAuditLog(rootDir, {
+      action: "ryan.ace.push",
+      detail: { id: entry.id, source, handoff: Boolean(handoffPayload) }
+    });
+    if (json) {
+      console.log(JSON.stringify({ entry, handoff: handoffPayload }, null, 2));
+    } else {
+      console.log(`Stored ${formatEntry(entry)}`);
+      if (handoffPayload) {
+        console.log(`Set handoff: ${entry.id}`);
+      }
+    }
+    return 0;
+  }
+
+  if (subcommand === "handoff") {
+    let target = null;
+    let source = "cli";
+    let json = false;
+    for (let i = 0; i < rest.length; i += 1) {
+      const arg = rest[i];
+      if (arg === "--json") {
+        json = true;
+        continue;
+      }
+      if (arg === "--source") {
+        source = rest[i + 1] ?? source;
+        i += 1;
+        continue;
+      }
+      if (arg.startsWith("--source=")) {
+        source = arg.split("=")[1] ?? source;
+        continue;
+      }
+      if (!target) target = arg;
+    }
+    if (!target) {
+      console.error("Missing handoff target (id or manifest path).");
+      showAceHelp();
+      return 1;
+    }
+    let payload = null;
+    if (fs.existsSync(target)) {
+      const manifest = readManifestFile(target);
+      payload = setHandoff(rootDir, manifest, source);
+    } else {
+      payload = setHandoffFromRegistry(rootDir, target, source);
+    }
+    if (!payload) {
+      console.error("Handoff target not found in registry.");
+      return 1;
+    }
+    appendAuditLog(rootDir, { action: "ryan.ace.handoff", detail: { id: payload.manifest.id, source } });
+    if (json) {
+      console.log(JSON.stringify(payload, null, 2));
+    } else {
+      console.log(`Handoff set to ${payload.manifest.id} (${payload.manifest.name})`);
+    }
+    return 0;
+  }
+
+  if (subcommand === "current") {
+    const json = rest.includes("--json");
+    const handoff = readHandoff(rootDir);
+    if (!handoff) {
+      console.log("No ACE handoff set.");
+      return 0;
+    }
+    if (json) {
+      console.log(JSON.stringify(handoff, null, 2));
+    } else {
+      console.log(`${handoff.manifest.id} (${handoff.manifest.name} v${handoff.manifest.version})`);
+    }
+    appendAuditLog(rootDir, { action: "ryan.ace.current", detail: { id: handoff.manifest.id } });
+    return 0;
+  }
+
+  if (subcommand === "show") {
+    const json = rest.includes("--json");
+    const id = rest.find((arg) => !arg.startsWith("--"));
+    if (!id) {
+      console.error("Missing manifest id.");
+      return 1;
+    }
+    const entry = getRegistryEntry(rootDir, id);
+    if (!entry) {
+      console.error(`Manifest not found: ${id}`);
+      return 1;
+    }
+    if (json) {
+      console.log(JSON.stringify(entry, null, 2));
+    } else {
+      console.log(JSON.stringify(entry.manifest, null, 2));
+    }
+    appendAuditLog(rootDir, { action: "ryan.ace.show", detail: { id } });
+    return 0;
+  }
+
+  console.error(`Unknown ace subcommand: ${subcommand}`);
+  showAceHelp();
+  return 1;
+}
+
+async function handleApprovals(rootDir, args) {
+  const [subcommand, ...rest] = args;
+  if (!subcommand || subcommand === "--help" || subcommand === "-h") {
+    showApprovalsHelp();
+    return 0;
+  }
+
+  if (subcommand === "list") {
+    let baseUrl = "http://localhost:3000";
+    const json = rest.includes("--json");
+    for (let i = 0; i < rest.length; i += 1) {
+      const arg = rest[i];
+      if (arg === "--base" || arg === "--base-url" || arg === "--url") {
+        baseUrl = rest[i + 1] ?? baseUrl;
+        i += 1;
+        continue;
+      }
+      if (arg.startsWith("--base=")) {
+        baseUrl = arg.split("=")[1] ?? baseUrl;
+      }
+    }
+    const url = baseUrl.replace(/\/$/, "");
+    const data = await requestJson(`${url}/api/agent/requests`, { method: "GET" });
+    if (json) {
+      console.log(JSON.stringify(data, null, 2));
+    } else {
+      const pending = data.pending ?? [];
+      const history = data.history ?? [];
+      console.log(`Pending: ${pending.length} | History: ${history.length}`);
+      pending.forEach((req) => {
+        console.log(`[${req.status}] ${req.id} · ${req.action} · ${req.agentId}`);
+      });
+    }
+    appendAuditLog(rootDir, { action: "ryan.approvals.list", detail: { baseUrl: url } });
+    return 0;
+  }
+
+  if (subcommand === "approve" || subcommand === "reject") {
+    let id = null;
+    let approvedBy = "Ryan Lueckenotte";
+    let reason = "";
+    let baseUrl = "http://localhost:3000";
+    let json = false;
+    for (let i = 0; i < rest.length; i += 1) {
+      const arg = rest[i];
+      if (arg === "--json") {
+        json = true;
+        continue;
+      }
+      if (arg === "--by" || arg === "--approver") {
+        approvedBy = rest[i + 1] ?? approvedBy;
+        i += 1;
+        continue;
+      }
+      if (arg === "--reason") {
+        reason = rest[i + 1] ?? "";
+        i += 1;
+        continue;
+      }
+      if (arg === "--base" || arg === "--base-url" || arg === "--url") {
+        baseUrl = rest[i + 1] ?? baseUrl;
+        i += 1;
+        continue;
+      }
+      if (arg.startsWith("--base=")) {
+        baseUrl = arg.split("=")[1] ?? baseUrl;
+        continue;
+      }
+      if (!id && !arg.startsWith("--")) {
+        id = arg;
+      }
+    }
+    if (!id) {
+      console.error("Missing approval request id.");
+      showApprovalsHelp();
+      return 1;
+    }
+    const url = baseUrl.replace(/\/$/, "");
+    const payload = {
+      id,
+      decision: subcommand,
+      approvedBy,
+      reason: reason || undefined
+    };
+    const data = await requestJson(`${url}/api/agent/approve`, {
+      method: "POST",
+      body: JSON.stringify(payload)
+    });
+    if (json) {
+      console.log(JSON.stringify(data, null, 2));
+    } else {
+      console.log(`${subcommand}d ${id} (${data.request?.status ?? "updated"})`);
+    }
+    appendAuditLog(rootDir, {
+      action: `ryan.approvals.${subcommand}`,
+      detail: { id, approvedBy, baseUrl: url }
+    });
+    return 0;
+  }
+
+  console.error(`Unknown approvals subcommand: ${subcommand}`);
+  showApprovalsHelp();
+  return 1;
+}
+
 async function main(argv) {
   const rootDir = findRepoRoot(process.cwd());
   const [command, ...rest] = argv;
@@ -1718,6 +2061,10 @@ async function main(argv) {
         return await handleIndex(rootDir, rest);
       case "map":
         return await handleMap(rootDir, rest);
+      case "ace":
+        return await handleAce(rootDir, rest);
+      case "approvals":
+        return await handleApprovals(rootDir, rest);
       case "log":
         return await handleLog(rootDir, rest);
       default:

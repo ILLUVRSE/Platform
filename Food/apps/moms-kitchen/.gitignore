@@ -1,6 +1,0 @@
-.next
-.vercel
-node_modules
-.turbo
-.test-dist
-.DS_Store

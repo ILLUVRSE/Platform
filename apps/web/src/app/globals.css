@@ -1,6 +1,4 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
 @layer base {
   :root {
@@ -17,36 +15,89 @@
     --focus: #0f766e;
   }
 
-  body {
+  .platform-shell {
     background-color: var(--bg-cream);
     color: var(--text);
   }
 
-  h1,
-  h2,
-  h3,
-  h4 {
+  .platform-shell h1,
+  .platform-shell h2,
+  .platform-shell h3,
+  .platform-shell h4 {
     font-family: var(--font-heading), serif;
     letter-spacing: -0.01em;
   }
 
-  p,
-  span,
-  a {
+  .platform-shell p,
+  .platform-shell span,
+  .platform-shell a {
     font-family: var(--font-body), sans-serif;
   }
 
-  a {
+  .platform-shell a {
     color: var(--forest);
   }
 
-  code {
+  .platform-shell code {
     font-family: var(--font-mono), monospace;
+  }
+
+  summary {
+    list-style: none;
+  }
+
+  summary::-webkit-details-marker {
+    display: none;
+  }
+
+  details[open] summary {
+    color: #0f766e;
+  }
+
+  details[open] summary svg {
+    transform: rotate(180deg);
   }
 }
 
 @layer utilities {
   .text-balance {
     text-wrap: balance;
+  }
+
+  .animate-rise {
+    animation: rise 0.7s ease-out both;
+  }
+
+  .animate-rise-delay-1 {
+    animation-delay: 120ms;
+  }
+
+  .animate-rise-delay-2 {
+    animation-delay: 240ms;
+  }
+
+  .animate-rise-delay-3 {
+    animation-delay: 360ms;
+  }
+
+  .animate-rise-delay-4 {
+    animation-delay: 480ms;
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-rise {
+    animation: none;
   }
 }

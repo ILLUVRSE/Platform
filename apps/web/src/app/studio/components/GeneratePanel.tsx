@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { Card, Pill } from "@illuvrse/ui";
 
 type Job = {
@@ -10,9 +11,17 @@ type Job = {
 };
 
 export function GeneratePanel() {
-  const [prompt, setPrompt] = useState("neon harbor at dawn");
+  const searchParams = useSearchParams();
+  const promptFromQuery = searchParams.get("prompt")?.trim();
+  const [prompt, setPrompt] = useState(promptFromQuery || "neon harbor at dawn");
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (promptFromQuery) {
+      setPrompt(promptFromQuery);
+    }
+  }, [promptFromQuery]);
 
   useEffect(() => {
     fetch("/studio/api/v1/jobs")

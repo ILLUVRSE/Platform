@@ -11,6 +11,17 @@ import { z } from 'zod';
 import slugify from 'slugify';
 import { isSafeMode } from '@news/lib/settings';
 
+const ROLE_ADMIN = 'admin';
+const ROLE_SPORTS_EDITOR = 'sports_editor';
+
+const getSessionRole = (session: unknown) =>
+  (session as { user?: { role?: string } } | null)?.user?.role;
+
+const hasRole = (session: unknown, allowed: string[]) => {
+  const role = getSessionRole(session);
+  return role ? allowed.includes(role) : false;
+};
+
 export async function authenticate(
   prevState: string | undefined,
   formData: FormData,
@@ -101,6 +112,9 @@ export async function createArticle(prevState: CreateArticleState | undefined, f
   const session = await auth();
   if (!session || !session.user || !session.user.email) {
       return { message: 'Unauthorized' };
+  }
+  if (!hasRole(session, [ROLE_ADMIN])) {
+    return { message: 'Forbidden' };
   }
 
   // Fetch user ID from email since session might not have ID depending on config
@@ -241,6 +255,9 @@ export async function generateAiArticle(
   if (!session?.user?.email) {
     return { message: 'Sign in first to publish AI stories.' };
   }
+  if (!hasRole(session, [ROLE_ADMIN])) {
+    return { message: 'Forbidden' };
+  }
 
   const user = await prisma.user.findUnique({ where: { email: session.user.email } });
   if (!user) return { message: 'User not found' };
@@ -367,6 +384,7 @@ export async function deleteArticle(formData: FormData) {
   const session = await auth();
   const isProd = process.env.NODE_ENV === 'production';
   if (!session?.user?.email && isProd) return { message: 'Unauthorized' };
+  if (session?.user?.email && !hasRole(session, [ROLE_ADMIN])) return { message: 'Forbidden' };
 
   const id = formData.get('articleId');
   if (!id || typeof id !== 'string') return { message: 'Missing article ID' };
@@ -387,6 +405,9 @@ export async function updateArticle(prevState: CreateArticleState | undefined, f
   const session = await auth();
   if (!session || !session.user || !session.user.email) {
     return { message: 'Unauthorized' };
+  }
+  if (!hasRole(session, [ROLE_ADMIN])) {
+    return { message: 'Forbidden' };
   }
 
   const user = await prisma.user.findUnique({
@@ -521,6 +542,9 @@ export async function createMedia(_prevState: { message?: string } | undefined, 
   if (!session || !session.user?.email) {
     return { message: 'Unauthorized' };
   }
+  if (!hasRole(session, [ROLE_ADMIN])) {
+    return { message: 'Forbidden' };
+  }
 
   const parsed = MediaSchema.safeParse({
     title: formData.get('title'),
@@ -551,6 +575,9 @@ export async function createCredit(_prevState: { message?: string } | undefined,
   const session = await auth();
   if (!session || !session.user?.email) {
     return { message: 'Unauthorized' };
+  }
+  if (!hasRole(session, [ROLE_ADMIN])) {
+    return { message: 'Forbidden' };
   }
 
   const validated = CreditSchema.safeParse({
@@ -583,6 +610,7 @@ export async function createCredit(_prevState: { message?: string } | undefined,
 export async function deleteCredit(formData: FormData) {
   const session = await auth();
   if (!session?.user?.email) return { message: 'Unauthorized' };
+  if (!hasRole(session, [ROLE_ADMIN])) return { message: 'Forbidden' };
 
   const id = formData.get('creditId');
   if (!id || typeof id !== 'string') return { message: 'Missing credit ID' };
@@ -597,6 +625,9 @@ export async function createVideo(_prevState: { message?: string } | undefined, 
   const session = await auth();
   if (!session || !session.user?.email) {
     return { message: 'Unauthorized' };
+  }
+  if (!hasRole(session, [ROLE_ADMIN, ROLE_SPORTS_EDITOR])) {
+    return { message: 'Forbidden' };
   }
 
   const parsed = VideoSchema.safeParse({
@@ -628,21 +659,22 @@ export async function createVideo(_prevState: { message?: string } | undefined, 
     return { message: 'Failed to save video' };
   }
 
-  revalidatePath('/admin/videos');
-  revalidatePath('/videos');
+  revalidatePath('/news/admin/videos');
+  revalidatePath('/news/videos');
   return { message: 'Saved' };
 }
 
 export async function deleteVideo(formData: FormData) {
   const session = await auth();
   if (!session?.user?.email) return { message: 'Unauthorized' };
+  if (!hasRole(session, [ROLE_ADMIN, ROLE_SPORTS_EDITOR])) return { message: 'Forbidden' };
 
   const id = formData.get('videoId');
   if (!id || typeof id !== 'string') return { message: 'Missing video ID' };
 
   await prisma.video.delete({ where: { id } });
-  revalidatePath('/admin/videos');
-  revalidatePath('/videos');
+  revalidatePath('/news/admin/videos');
+  revalidatePath('/news/videos');
 }
 
 export async function updateArticleStatus(
@@ -652,6 +684,9 @@ export async function updateArticleStatus(
   const session = await auth();
   if (!session || !session.user?.email) {
     return { message: 'Unauthorized' };
+  }
+  if (!hasRole(session, [ROLE_ADMIN])) {
+    return { message: 'Forbidden' };
   }
 
   const user = await prisma.user.findUnique({

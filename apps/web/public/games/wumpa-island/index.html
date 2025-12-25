@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ILLUVRSE Playground - Wumpa Island</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div id="game-root">
+      <div id="scene" aria-label="ILLUVRSE Playground 3D world"></div>
+
+      <div id="ui">
+        <div id="hud" class="panel">
+          <div class="stat">
+            <span class="label">Inventory</span>
+            <div class="value" id="inventory">Wumpa 0 | Gems 0 | Cogs 0 | Crystals 0 | Keys 0/3</div>
+          </div>
+          <div class="stat">
+            <span class="label">Activities</span>
+            <div class="value" id="activity">Kart Time Trial: Best --:--</div>
+          </div>
+          <div class="stat">
+            <span class="label">Objective</span>
+            <div class="value" id="objective">Meet Crash, Coco, and Spyro.</div>
+          </div>
+        </div>
+        <div id="prompt" class="prompt hidden">Press E to talk</div>
+        <div id="controls" class="panel">
+          <span>WASD to move</span>
+          <span>Mouse drag to look</span>
+          <span>Shift to sprint</span>
+          <span>E to interact / exit</span>
+        </div>
+      </div>
+
+      <div id="start" class="overlay">
+        <div class="overlay-card">
+          <p class="eyebrow">ILLUVRSE Playground</p>
+          <h1>Wumpa Island Rift</h1>
+          <p>
+            A lightweight 3D adventure built for a basic laptop. Explore Wumpa
+            Island, then push out to the Badlands, Ripto City, and the Artisan
+            Homeworld. Drive the kart, surf the wave ring, and hunt crystals in the cave.
+          </p>
+          <button id="startBtn" class="primary" type="button">Enter the Playground</button>
+        </div>
+      </div>
+
+      <div id="dialog" class="overlay hidden" aria-live="polite">
+        <div class="overlay-card dialog-card">
+          <h2 id="dialogName">Crash</h2>
+          <p id="dialogText">...</p>
+          <div class="dialog-actions">
+            <button id="dialogNext" class="primary" type="button">Next</button>
+            <button id="dialogClose" class="ghost" type="button">Close</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="end" class="overlay hidden">
+        <div class="overlay-card">
+          <p class="eyebrow">Playground Clear</p>
+          <h1>Rift Stabilized</h1>
+          <p id="endText">You helped the trio stabilize the portal.</p>
+          <button id="restartBtn" class="primary" type="button">Play Again</button>
+        </div>
+      </div>
+    </div>
+
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "/vendor/three/three.module.js",
+          "three/addons/": "/vendor/three/examples/jsm/"
+        }
+      }
+    </script>
+    <script type="module" src="main.js"></script>
+  </body>
+</html>

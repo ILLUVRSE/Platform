@@ -11,7 +11,7 @@ const navLinks = [
   { href: `${base}/features`, label: "Features" },
   { href: `${base}/radio`, label: "Radio" },
   { href: `${base}/live`, label: "Live Stream" },
-  { href: `${base}/videos`, label: "Video" },
+  { href: `${base}/videos`, label: "Sports" },
 ];
 
 export default function SiteChrome({ children }: { children: ReactNode }) {

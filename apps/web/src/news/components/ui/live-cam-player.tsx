@@ -11,6 +11,7 @@ type LiveCamPlayerProps = {
   timeLabel?: string;
   temperature?: string;
   watermark?: string;
+  badgeLabel?: string;
   loop?: boolean;
   muted?: boolean;
   showControls?: boolean;
@@ -28,6 +29,7 @@ export function LiveCamPlayer({
   timeLabel,
   temperature,
   watermark,
+  badgeLabel = "Live Cam",
   loop = true,
   muted = true,
   showControls = true,
@@ -98,7 +100,7 @@ export function LiveCamPlayer({
 
       <div className="absolute left-4 bottom-4 z-10 flex flex-col gap-1 rounded-2xl px-4 py-3 shadow-lg" style={{ background: "rgba(10,10,10,0.55)", color: "#fff" }}>
         <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[rgba(255,255,255,0.75)]">
-          Live Cam
+          {badgeLabel}
         </p>
         <p className="text-xl font-bold leading-tight">{title}</p>
         <div className="flex flex-wrap items-center gap-3 text-sm text-[rgba(255,255,255,0.82)]">

@@ -29,6 +29,7 @@ export default async function StationPage({
   const lastChecked = station.lastCheckedAt
     ? new Date(station.lastCheckedAt).toLocaleString()
     : 'Unknown';
+  const hasStream = Boolean(station.streamUrl?.trim());
   const readAttributes = [
     station.countryCode && `Country ${station.countryCode}`,
     station.region && `Region ${station.region}`,
@@ -63,9 +64,15 @@ export default async function StationPage({
               Source site →
             </a>
           )}
-          <a href={station.streamUrl} target="_blank" rel="noopener noreferrer" className="text-xs font-semibold uppercase tracking-[0.18em] underline" style={{ color: 'var(--forest)' }}>
-            Open stream
-          </a>
+          {hasStream ? (
+            <a href={station.streamUrl} target="_blank" rel="noopener noreferrer" className="text-xs font-semibold uppercase tracking-[0.18em] underline" style={{ color: 'var(--forest)' }}>
+              Open stream
+            </a>
+          ) : (
+            <span className="text-xs font-semibold uppercase tracking-[0.18em]" style={{ color: 'var(--muted)' }}>
+              Stream pending
+            </span>
+          )}
         </div>
         <p className="mt-3 text-sm" style={{ color: 'var(--text)' }}>
           {station.notes || 'No description provided.'}
@@ -90,7 +97,11 @@ export default async function StationPage({
           </Link>
         </div>
         <div className="mt-3 grid gap-2 text-sm" style={{ color: 'var(--text)' }}>
-          <p>Stream URL: <a href={station.streamUrl} className="underline" target="_blank" rel="noopener noreferrer">{station.streamUrl}</a></p>
+          {hasStream ? (
+            <p>Stream URL: <a href={station.streamUrl} className="underline" target="_blank" rel="noopener noreferrer">{station.streamUrl}</a></p>
+          ) : (
+            <p>Stream URL: Pending</p>
+          )}
           {station.bitrate && <p>Bitrate: {station.bitrate} kbps</p>}
           {station.codec && <p>Codec: {station.codec}</p>}
           <p>Status: {tone.label}</p>

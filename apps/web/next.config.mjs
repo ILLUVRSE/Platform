@@ -1,25 +1,6 @@
 /** @type {import('next').NextConfig} */
-const foodUpstream = process.env.FOOD_UPSTREAM_URL?.replace(/\/$/, "");
-const gridstockUpstream = process.env.GRIDSTOCK_UPSTREAM_URL?.replace(/\/$/, "");
-
 const nextConfig = {
   transpilePackages: ["@illuvrse/ui", "@illuvrse/agent-manager", "@illuvrse/contracts", "@illuvrse/db"],
-  async rewrites() {
-    const rules = [];
-    if (foodUpstream) {
-      rules.push(
-        { source: "/food", destination: foodUpstream },
-        { source: "/food/:path*", destination: `${foodUpstream}/:path*` }
-      );
-    }
-    if (gridstockUpstream) {
-      rules.push(
-        { source: "/gridstock", destination: gridstockUpstream },
-        { source: "/gridstock/:path*", destination: `${gridstockUpstream}/:path*` }
-      );
-    }
-    return rules;
-  },
   images: {
     remotePatterns: [
       { protocol: "https", hostname: "images.unsplash.com" },

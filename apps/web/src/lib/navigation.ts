@@ -21,8 +21,8 @@ export const platformSurfaces: NavItem[] = [
   { label: "StorySphere", href: "/storysphere" },
   { label: "LiveLoop", href: "/liveloop" },
   { label: "News", href: "/news" },
-  { label: "Mom Kitech", href: foodUrl },
-  { label: "Gridstock", href: gridstockUrl }
+  { label: "Mom's Kitchen", href: foodUrl },
+  { label: "GridStock", href: gridstockUrl }
 ];
 
 export const platformCreate: NavItem[] = [
@@ -43,8 +43,8 @@ export const topNavItems: NavItem[] = [
   { label: "Playground", href: "/playground" },
   { label: "Marketplace", href: "/marketplace" },
   { label: "News", href: "/news" },
-  { label: "Mom Kitech", href: foodUrl },
-  { label: "Gridstock", href: gridstockUrl },
+  { label: "Mom's Kitchen", href: foodUrl },
+  { label: "GridStock", href: gridstockUrl },
   { label: "Developers", href: "/developers" },
   { label: "About", href: "/about" }
 ];
@@ -55,8 +55,8 @@ export const footerNav = {
     { label: "Products", href: "/products" },
     { label: "StorySphere", href: "/storysphere" },
     { label: "LiveLoop", href: "/liveloop" },
-    { label: "Mom Kitech", href: foodUrl },
-    { label: "Gridstock", href: gridstockUrl },
+    { label: "Mom's Kitchen", href: foodUrl },
+    { label: "GridStock", href: gridstockUrl },
     { label: "Marketplace", href: "/marketplace" }
   ],
   docs: [

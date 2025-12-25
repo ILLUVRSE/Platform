@@ -1,8 +1,6 @@
 packages:
   - apps/*
   - packages/*
-  - Food/apps/*
-  - GridStock
 
 onlyBuiltDependencies:
   - '@prisma/client'

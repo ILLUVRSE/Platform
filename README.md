@@ -7,8 +7,8 @@ Monorepo for the governed creator platform and StorySphere studio.
   - `/` marketing shell (Home, Products, Marketplace, Developers, Control-Panel, etc.).
   - `/studio` StorySphere studio (prompt→MP4, LiveLoop, Player, GameGrid, Library, Settings).
   - `/news` ILLUVRSE News (articles, features, video, radio, admin).
-- `Food/apps/moms-kitchen` – FoodNetwork-style kitchen app (recipes, menus, meal planning).
-- `GridStock` – CNBC/Bloomberg-style market terminal (dashboard, portfolio, games).
+  - `/food` Moms Kitchen (recipes, menus, meal planning).
+  - `/gridstock` GridStock market terminal (dashboard, portfolio, games).
 
 ## Shared packages
 - `@illuvrse/ui` – design tokens and shared UI primitives.
@@ -16,15 +16,9 @@ Monorepo for the governed creator platform and StorySphere studio.
 
 ## Scripts
 - `pnpm dev` – start the unified platform (Next.js) on port 3000.
-- `pnpm dev:food` – start Moms Kitchen on port 4001.
-- `pnpm dev:gridstock` – start GridStock on port 4002.
 - `pnpm build` – build the unified platform.
-- `pnpm build:food` – build Moms Kitchen.
-- `pnpm build:gridstock` – build GridStock.
 - `pnpm start:platform` – start the production build on port 3000 (requires `pnpm build` first).
 - `pnpm lint` – lint the unified platform.
-- `pnpm lint:food` – lint Moms Kitchen.
-- `pnpm lint:gridstock` – lint GridStock.
 - `pnpm test:smoke` – Playwright smoke tests (skipped by default). Set `RUN_UI_SMOKE=true WEB_URL=http://localhost:3000 STUDIO_URL=http://localhost:3000/news` and run `pnpm dev`.
 
 ## Local operator (RYAN)
@@ -67,8 +61,6 @@ Examples:
 - `NEXT_PUBLIC_PLATFORM_URL` – base URL used by Food/GridStock platform bar links.
 - `NEXT_PUBLIC_FOOD_URL` – optional Food app URL for cross-linking.
 - `NEXT_PUBLIC_GRIDSTOCK_URL` – optional GridStock app URL for cross-linking.
-- `FOOD_UPSTREAM_URL` – upstream base for `/food` rewrites (e.g., `http://localhost:4001`).
-- `GRIDSTOCK_UPSTREAM_URL` – upstream base for `/gridstock` rewrites (e.g., `http://localhost:4002`).
 - Agent approvals persist to Postgres when `DATABASE_URL` is set; run `pnpm --filter @illuvrse/db prisma:migrate:dev` and `pnpm --filter @illuvrse/db prisma:generate`.
 - If unset, all routes return local stub data suitable for localhost:3000.
 

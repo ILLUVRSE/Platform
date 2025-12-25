@@ -32,6 +32,40 @@ Examples:
 ./ryan do "Locate audit log handling" --scan --grep "audit"
 ```
 
+### ace
+Manages the local ACE registry and Playground handoff stored in `.ryan/ace`.
+
+Usage:
+```
+./ryan ace list [--json]
+./ryan ace push <manifest.json> [--handoff] [--source <label>]
+./ryan ace handoff <id|manifest.json> [--source <label>]
+./ryan ace current [--json]
+```
+
+Examples:
+```
+./ryan ace push ./agents/storyweaver.manifest.json --handoff --source ace
+./ryan ace list
+./ryan ace current
+```
+
+### approvals
+Review and decide pending agent actions (human approval flow).
+
+Usage:
+```
+./ryan approvals list [--json] [--base <url>]
+./ryan approvals approve <id> [--by <name>] [--reason <text>] [--base <url>]
+./ryan approvals reject <id> [--by <name>] [--reason <text>] [--base <url>]
+```
+
+Examples:
+```
+./ryan approvals list
+./ryan approvals approve req_123 --by "Ryan Lueckenotte"
+```
+
 ### memory
 Shows a summary and recent memory entries, or adds notes.
 

@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import Link from "next/link";
 import clsx from "clsx";
 
@@ -11,6 +12,7 @@ type TagChipProps = {
   ariaLabel?: string;
   dataCy?: string;
   hideCount?: boolean;
+  icon?: ReactNode;
 };
 
 /**
@@ -27,6 +29,7 @@ export function TagChip({
   ariaLabel,
   dataCy,
   hideCount,
+  icon,
 }: TagChipProps) {
   const computedLabel = ariaLabel ?? `${label}${count ? `, ${count} items` : ""}`;
   const content = (
@@ -47,6 +50,7 @@ export function TagChip({
       aria-label={computedLabel}
       data-cy={dataCy}
     >
+      {icon}
       <span>{label}</span>
       {typeof count !== "undefined" && !hideCount && <small className="text-[10px] opacity-80">({count})</small>}
     </span>

@@ -14,8 +14,7 @@ pnpm --filter web dev
 
 ## Related apps
 
-- Food and GridStock run as separate apps and can be proxied under `/food` and `/gridstock`.
-- Set `FOOD_UPSTREAM_URL` and `GRIDSTOCK_UPSTREAM_URL` in the web app env when running them locally.
+- Food and GridStock live under `/food` and `/gridstock` inside the unified app.
 
 ## Environment
 

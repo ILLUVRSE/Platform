@@ -1,6 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 import { createVideo, deleteVideo } from '@news/lib/actions';
 import prisma from '@news/lib/prisma';
+import { sportsAthletes, sportsLeagues, sportsTeams } from '@news/lib/sports-data';
 
 export const dynamic = 'force-dynamic';
 
@@ -54,7 +55,12 @@ export default async function AdminVideosPage() {
             <Field label="HLS URL (.m3u8)" name="hlsUrl" />
             <Field label="MP4 URL (fallback)" name="mp4Url" />
             <Field label="Live URL (if live stream)" name="liveUrl" />
-            <Field label="Tags (comma separated)" name="tags" />
+            <Field
+              label="Tags (comma separated)"
+              name="tags"
+              list="sports-tags"
+              hint="Use league, team, and athlete tags to power Sports filters."
+            />
             <div className="flex items-center gap-2">
               <input type="checkbox" id="live" name="live" className="accent-[var(--forest)]" />
               <label htmlFor="live" className="text-sm" style={{ color: 'var(--forest)' }}>
@@ -74,6 +80,17 @@ export default async function AdminVideosPage() {
             >
               Save
             </button>
+            <datalist id="sports-tags">
+              {sportsLeagues.map((league) => (
+                <option key={league.id} value={league.tag} />
+              ))}
+              {sportsTeams.map((team) => (
+                <option key={team.id} value={team.tag} />
+              ))}
+              {sportsAthletes.map((athlete) => (
+                <option key={athlete.id} value={athlete.tag} />
+              ))}
+            </datalist>
           </div>
         </form>
 
@@ -124,7 +141,19 @@ export default async function AdminVideosPage() {
   );
 }
 
-function Field({ label, name, textarea }: { label: string; name: string; textarea?: boolean }) {
+function Field({
+  label,
+  name,
+  textarea,
+  list,
+  hint,
+}: {
+  label: string;
+  name: string;
+  textarea?: boolean;
+  list?: string;
+  hint?: string;
+}) {
   return (
     <div className="space-y-1">
       <label className="text-xs uppercase tracking-[0.18em]" style={{ color: 'var(--muted)' }}>
@@ -140,9 +169,15 @@ function Field({ label, name, textarea }: { label: string; name: string; textare
       ) : (
         <input
           name={name}
+          list={list}
           className="w-full rounded-xl border px-3 py-2 text-sm outline-none"
           style={{ borderColor: 'var(--border)', background: 'var(--cream)', color: 'var(--text)' }}
         />
+      )}
+      {hint && (
+        <p className="text-xs" style={{ color: 'var(--muted)' }}>
+          {hint}
+        </p>
       )}
     </div>
   );

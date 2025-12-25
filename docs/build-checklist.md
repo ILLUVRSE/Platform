@@ -10,18 +10,10 @@ Use this checklist to get the platform running locally and to align on workstrea
 ## Core dev commands
 - Web app: `pnpm --filter web dev` (runs Next on :3000)
 - Studio (StorySphere) lives under `/studio` in the web app.
-- Food app: `pnpm dev:food` (Next on :4001)
-- GridStock app: `pnpm dev:gridstock` (Next on :4002)
 - Lint: `pnpm lint`
 - Build (CI parity): `pnpm build --filter '!@illuvrse/tests'`
 - Tests (unit): `pnpm --filter @illuvrse/tests test:unit`
 - Tests (Playwright smoke/integration): `pnpm --filter @illuvrse/tests test` (UI smoke requires RUN_UI_SMOKE=true and servers running)
-
-## Local routing
-To serve Food/GridStock under the main platform routes:
-- Set `FOOD_UPSTREAM_URL=http://localhost:4001`
-- Set `GRIDSTOCK_UPSTREAM_URL=http://localhost:4002`
-- Keep platform links using `/food` and `/gridstock` (default).
 
 ## Apps & routes
 - Web (apps/web):
@@ -30,21 +22,24 @@ To serve Food/GridStock under the main platform routes:
   - Products: `/products`
   - About: `/about`
   - LiveLoop (web): `/liveloop`
+  - Moms Kitchen: `/food`
+  - GridStock: `/gridstock`
 - Studio (StorySphere): `/studio`
-- APIs (web): `/api/kernel/*`, `/api/sentinel/*`, `/api/agent/*` (exec/status/stream stubs), `/api/marketplace/*`, etc.
+- APIs (web): `/api/kernel/*`, `/api/sentinel/*`, `/api/agent/*` (exec/status/stream stubs), `/api/ace/*` (local registry/handoff), `/api/marketplace/*`, etc.
 
 ## ACE wizard status
-- 5-step flow with validation gating; autosave to `ace-wizard-draft`, Playground handoff key `ace-playground-manifest`.
+- 5-step flow with validation gating; autosave to `ace-wizard-draft`, Playground handoff key `ace-playground-manifest`, plus local registry sync to `.ryan/ace` via `/api/ace/registry`.
 - Presets include LiveLoop publisher; runtime image/LLM/TTS dropdowns; resource presets (Dev/Staging/Prod).
 - Proof snapshot with latency and register retry; policy block messages.
 - Import diff confirmation; avatar asset helper + audio preview.
 - Needs: unify light theme across sections; integrate real queue/backend for register/exec; fix Playwright worker exit for unit tests.
 
 ## Playground status
-- Tutorial manifests (StoryWeaver, Scheduler, Proof Guardian, Asset Curator, Voice Stylist, Engagement Monitor) load to storage/cookie; upload accepts signed manifests and stores to cookie/localStorage.
-- 3D scene (react-three-fiber + XR) with VR toggle; nodes show status badges via SSE `/api/agent/stream`; actions: Send to ACE, Generate preview (exec), Publish (stub), Verify (stub); history panel shows proof/policy fields plus action/timestamps.
+- Tutorial manifests (StoryWeaver, Scheduler, Proof Guardian, Asset Curator, Voice Stylist, Engagement Monitor) load to storage/cookie; upload accepts signed manifests; local handoff loads from `.ryan/ace` and syncs to storage.
+- 3D preview is currently disabled in this build (React 19 + react-three mismatch; `ReactSharedInternals` / `ReactCurrentOwner` undefined). When re-enabled, the 3D scene (react-three-fiber + XR) includes a VR toggle; nodes show status badges via SSE `/api/agent/stream`; actions: Send to ACE, Generate preview (exec), Publish (stub), Verify (stub); history panel shows proof/policy fields plus action/timestamps.
+- Custom handoff manifests appear as a dedicated node in the 3D scene for live actions.
 - Lightened HUD/tooltips; stored manifest controls (reload/clear); publish drawer triggers checkout/publish/verify stubs.
-- Needs: replace in-memory exec/stream with real queue/backend; add more commands (publish/verify) and status edges; continue theme alignment across 3D panel.
+- Needs: align React 19 + react-three stack to re-enable 3D preview; replace in-memory exec/stream with real queue/backend; add more commands (publish/verify) and status edges; continue theme alignment across 3D panel.
 
 ## Agent APIs (stubs)
 - `/api/agent/exec`: enqueues command in-memory, simulates queued→running→completed, emits SSE. If `AGENT_BACKEND_URL` is set, registers/enqueues jobs with AgentManager before falling back to stub.

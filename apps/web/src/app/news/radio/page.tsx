@@ -120,9 +120,15 @@ export default function RadioPage() {
   }, [stations, filters]);
 
   const selectedStation = filteredStations.find((s) => s.id === selectedStationId) || filteredStations[0] || null;
+  const selectedHasStream = Boolean(selectedStation?.streamUrl?.trim());
 
   const playStation = useCallback(
     (station: Station) => {
+      const streamUrl = station.streamUrl?.trim();
+      if (!streamUrl) {
+        setAriaMessage(`Stream pending for ${station.name}`);
+        return;
+      }
       if (!audioRef.current) {
         audioRef.current = new Audio();
         audioRef.current.addEventListener("ended", () => setIsPlaying(false));
@@ -135,7 +141,7 @@ export default function RadioPage() {
         return;
       }
       if (audioRef.current) {
-        audioRef.current.src = station.streamUrl;
+        audioRef.current.src = streamUrl;
         audioRef.current.play().catch(() => setIsPlaying(false));
         setNowPlaying(station);
         setSelectedStationId(station.id);
@@ -199,8 +205,13 @@ export default function RadioPage() {
   };
 
   const copyStream = async (url: string) => {
+    const trimmed = url.trim();
+    if (!trimmed) {
+      setAriaMessage("Stream URL not available");
+      return;
+    }
     try {
-      await navigator.clipboard.writeText(url);
+      await navigator.clipboard.writeText(trimmed);
       setAriaMessage("Stream URL copied");
     } catch {
       setAriaMessage("Copy failed");
@@ -353,6 +364,7 @@ export default function RadioPage() {
           const isFav = favorites.includes(station.id);
           const tone = statusTone(station.status);
           const lastChecked = station.lastCheckedAt ? new Date(station.lastCheckedAt).toLocaleString() : "Unknown";
+          const hasStream = station.streamUrl.trim().length > 0;
           return (
             <article key={station.id} className="flex flex-col gap-3 rounded-2xl border p-4 shadow-sm" style={{ borderColor: "var(--border)", background: isSelected ? "rgba(47,107,88,0.06)" : "var(--panel)" }} data-cy="radio-card">
               <div className="flex items-center justify-between gap-3">
@@ -408,32 +420,42 @@ export default function RadioPage() {
                     setSelectedStationId(station.id);
                     playStation(station);
                   }}
-                  className="rounded-full bg-[var(--forest)] px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-white shadow-sm transition hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--forest)]"
+                  className="rounded-full bg-[var(--forest)] px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-white shadow-sm transition hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--forest)] disabled:cursor-not-allowed disabled:opacity-60"
                   data-cy="radio-play"
                   aria-pressed={nowPlaying?.id === station.id && isPlaying}
-                  aria-label={nowPlaying?.id === station.id && isPlaying ? `Pause ${station.name}` : `Play ${station.name}`}
+                  aria-label={
+                    nowPlaying?.id === station.id && isPlaying
+                      ? `Pause ${station.name}`
+                      : hasStream
+                        ? `Play ${station.name}`
+                        : `${station.name} stream pending`
+                  }
+                  disabled={!hasStream}
                 >
-                  {nowPlaying?.id === station.id && isPlaying ? "Pause" : "Listen"}
+                  {nowPlaying?.id === station.id && isPlaying ? "Pause" : hasStream ? "Listen" : "Stream pending"}
                 </button>
                 <button
                   type="button"
                   onClick={() => copyStream(station.streamUrl)}
-                  className="rounded-full border px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] transition hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--forest)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--panel)]"
+                  className="rounded-full border px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] transition hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--forest)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--panel)] disabled:cursor-not-allowed disabled:opacity-60"
                   style={{ borderColor: "var(--border)", color: "var(--forest)" }}
                   data-cy="radio-copy"
+                  disabled={!hasStream}
                 >
                   Copy stream URL
                 </button>
-                <a
-                  href={station.streamUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="rounded-full border px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] transition hover:-translate-y-0.5"
-                  style={{ borderColor: "var(--border)", color: "var(--forest)" }}
-                  data-cy="radio-open-external"
-                >
-                  Open player
-                </a>
+                {hasStream && (
+                  <a
+                    href={station.streamUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="rounded-full border px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] transition hover:-translate-y-0.5"
+                    style={{ borderColor: "var(--border)", color: "var(--forest)" }}
+                    data-cy="radio-open-external"
+                  >
+                    Open player
+                  </a>
+                )}
                 <button
                   type="button"
                   onClick={() => toggleFavorite(station.id)}
@@ -519,20 +541,23 @@ export default function RadioPage() {
                   <button
                     type="button"
                     onClick={() => copyStream(selectedStation.streamUrl)}
-                    className="rounded-full border px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] transition hover:-translate-y-0.5"
+                    className="rounded-full border px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60"
                     style={{ borderColor: "var(--border)", color: "var(--forest)" }}
+                    disabled={!selectedHasStream}
                   >
                     Copy stream URL
                   </button>
-                  <a
-                    href={selectedStation.streamUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="rounded-full border px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] transition hover:-translate-y-0.5"
-                    style={{ borderColor: "var(--border)", color: "var(--forest)" }}
-                  >
-                    Open external
-                  </a>
+                  {selectedHasStream && (
+                    <a
+                      href={selectedStation.streamUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="rounded-full border px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] transition hover:-translate-y-0.5"
+                      style={{ borderColor: "var(--border)", color: "var(--forest)" }}
+                    >
+                      Open external
+                    </a>
+                  )}
                 </div>
 
                 <div className="flex flex-wrap items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em]" style={{ color: "var(--muted)" }}>
@@ -556,9 +581,10 @@ export default function RadioPage() {
                   <button
                     type="button"
                     onClick={() => playStation(selectedStation)}
-                    className="rounded-full bg-[var(--forest)] px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-white transition hover:-translate-y-0.5"
+                    className="rounded-full bg-[var(--forest)] px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-white transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60"
+                    disabled={!selectedHasStream}
                   >
-                    Listen live
+                    {selectedHasStream ? "Listen live" : "Stream pending"}
                   </button>
                 </div>
               </div>

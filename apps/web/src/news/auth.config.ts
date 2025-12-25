@@ -25,15 +25,21 @@ export const authConfig = {
       const isLoggedIn = !!auth?.user;
       const role = (auth?.user as { role?: string } | undefined)?.role;
       const isAdminPage = nextUrl.pathname.startsWith('/news/admin');
+      const isSportsEditorPage =
+        nextUrl.pathname === '/news/admin/videos' || nextUrl.pathname.startsWith('/news/admin/videos/');
       
       // Allow access to login page
       if (nextUrl.pathname === '/news/admin/login') {
-          if (isLoggedIn) return Response.redirect(new URL('/news/admin/dashboard', nextUrl));
-          return true;
+        if (isLoggedIn) {
+          const destination = role === 'sports_editor' ? '/news/admin/videos' : '/news/admin/dashboard';
+          return Response.redirect(new URL(destination, nextUrl));
+        }
+        return true;
       }
 
       if (isAdminPage) {
         if (isLoggedIn && role === 'admin') return true;
+        if (isLoggedIn && role === 'sports_editor' && isSportsEditorPage) return true;
         return false; // Redirect unauthenticated users to login page
       }
       return true;

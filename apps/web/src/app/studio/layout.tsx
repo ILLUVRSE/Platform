@@ -34,16 +34,12 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
-      <body
-        className={`${headingFont.variable} ${bodyFont.variable} ${monoFont.variable} bg-[color:var(--bg-cream)] text-[color:var(--text)] antialiased`}
-      >
-        <div className="min-h-screen" style={{ background: "var(--bg-cream)", color: "var(--text)" }}>
-          <PlatformBar />
-          <AppNav />
-          <main className="mx-auto max-w-6xl px-4 pb-16 pt-8">{children}</main>
-        </div>
-      </body>
-    </html>
+    <div
+      className={`${headingFont.variable} ${bodyFont.variable} ${monoFont.variable} min-h-screen bg-[color:var(--bg-cream)] text-[color:var(--text)] antialiased`}
+    >
+      <PlatformBar />
+      <AppNav />
+      <main className="mx-auto max-w-6xl px-4 pb-16 pt-8">{children}</main>
+    </div>
   );
 }

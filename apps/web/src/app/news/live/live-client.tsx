@@ -17,6 +17,7 @@ type StreamView = {
   attribution?: string | null;
   licenseNote?: string | null;
   status: AvailabilityStatus;
+  kind: "stream" | "video";
 };
 
 function isVideoUrl(url: string) {
@@ -24,6 +25,8 @@ function isVideoUrl(url: string) {
 }
 
 function StreamPlayer({ stream }: { stream: StreamView }) {
+  const badgeLabel = stream.kind === "video" ? "Live Stream" : "Live Cam";
+
   if (isVideoUrl(stream.embedUrl)) {
     return (
       <LiveCamPlayer
@@ -33,6 +36,7 @@ function StreamPlayer({ stream }: { stream: StreamView }) {
         location={stream.locationName ?? stream.countryCode ?? undefined}
         timeLabel={stream.status === AvailabilityStatus.online ? "Live" : "Offline"}
         watermark={stream.attribution ?? undefined}
+        badgeLabel={badgeLabel}
         muted
         showControls
       />
@@ -51,7 +55,7 @@ function StreamPlayer({ stream }: { stream: StreamView }) {
         />
       </div>
       <div className="absolute left-4 bottom-4 z-10 rounded-2xl bg-[rgba(0,0,0,0.55)] px-4 py-3 text-sm text-white">
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/70">Live Cam</p>
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/70">{badgeLabel}</p>
         <p className="text-lg font-bold leading-tight">{stream.name}</p>
         <div className="flex flex-wrap items-center gap-2 text-xs text-white/80">
           {stream.locationName && <span>{stream.locationName}</span>}
@@ -81,6 +85,8 @@ export function LiveClient({ streams }: { streams: StreamView[] }) {
   const [activeId, setActiveId] = useState(sorted[0]?.id);
   const active = sorted.find((s) => s.id === activeId) ?? sorted[0];
   const rest = sorted.filter((s) => s.id !== active?.id);
+  const activeHasMeta = Boolean(active?.locationName || active?.countryCode || active?.attribution || active?.licenseNote);
+  const activeFallback = active?.kind === "video" ? "ILLUVRSE live stream" : "Public access source";
 
   return (
     <main className="min-h-screen" style={{ background: "var(--bg-cream)", color: "var(--text)" }}>
@@ -97,12 +103,12 @@ export function LiveClient({ streams }: { streams: StreamView[] }) {
               </p>
               <div className="flex flex-wrap items-center gap-3">
                 <h1 className="text-4xl font-black tracking-tight" style={{ color: "var(--forest)" }}>
-                  Live Stream
+                  Live Streams
                 </h1>
                 {active?.status === AvailabilityStatus.online ? <TagChip label="On Air" active /> : <TagChip label="Standby" muted />}
               </div>
               <p className="max-w-3xl text-sm md:text-base" style={{ color: "var(--text)" }}>
-                Global public-access feeds curated for quick monitoring. Select a source to watch in-page; status badges show whether a feed is live, offline, or pending.
+                ILLUVRSE live broadcasts plus public-access feeds curated for quick monitoring. Select a source to watch in-page; status badges show whether a feed is live, offline, or pending.
               </p>
             </div>
             <div className="grid grid-cols-2 gap-3 rounded-2xl border bg-white/70 px-4 py-3 text-sm font-semibold uppercase tracking-[0.16em]" style={{ borderColor: "var(--border)", color: "var(--forest)" }}>
@@ -158,16 +164,14 @@ export function LiveClient({ streams }: { streams: StreamView[] }) {
               {active.countryCode && <span>• {active.countryCode}</span>}
               {active.attribution && <span>• {active.attribution}</span>}
               {active.licenseNote && <span>• {active.licenseNote}</span>}
-              {!active.locationName && !active.countryCode && !active.attribution && !active.licenseNote && (
-                <span>Public access source</span>
-              )}
+              {!activeHasMeta && <span>{activeFallback}</span>}
             </div>
           </div>
         ) : (
           <div className="rounded-3xl border p-10 text-center" style={{ borderColor: "var(--border)", background: "var(--panel)", boxShadow: "0 20px 38px -32px rgba(33,49,45,0.32)" }}>
             <p className="text-lg font-semibold" style={{ color: "var(--forest)" }}>No streams available yet.</p>
             <p className="text-sm" style={{ color: "var(--muted)" }}>
-              Add public cams to the database to see them here, or jump to Video for on-demand coverage.
+              Add public cams or publish a live stream to see them here, or jump to Sports for on-demand coverage.
             </p>
           </div>
         )}
@@ -210,7 +214,7 @@ export function LiveClient({ streams }: { streams: StreamView[] }) {
                       {stream.name}
                     </h3>
                     <p className="text-xs uppercase tracking-[0.16em]" style={{ color: "var(--muted)" }}>
-                      {stream.attribution || "Public feed"}
+                      {stream.attribution || (stream.kind === "video" ? "ILLUVRSE Live" : "Public feed")}
                     </p>
                   </div>
                 </button>

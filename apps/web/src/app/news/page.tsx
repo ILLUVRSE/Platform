@@ -121,15 +121,15 @@ export default async function Home({
     videos.length > 0
       ? [
           {
-            title: 'Watch',
-            ctaLabel: 'All video',
+            title: 'Sports',
+            ctaLabel: 'All sports',
             ctaHref: '/news/videos',
             items: videos.map((video) => ({
               title: video.title,
               href: `/news/videos/${video.slug}`,
               thumbnail: video.thumbnail ?? undefined,
               live: Boolean(video.live),
-              meta: video.live ? 'Live stream' : 'Video',
+              meta: video.live ? 'Live game' : 'Highlights',
               description: video.description ?? undefined,
             })),
           },

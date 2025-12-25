@@ -8,7 +8,7 @@ import {
   normalizeCpu,
   normalizeMemory,
   type StageFormState
-} from "../../../apps/web/src/app/ace/create/utils";
+} from "../../../../apps/web/src/app/(platform)/ace/create/utils";
 
 describe("ACE utils", () => {
 const baseState: StageFormState = {
@@ -22,7 +22,9 @@ const baseState: StageFormState = {
   llmId: "gpt-4o-mini",
   ttsId: "eleven.v1",
   cpu: "500m",
-  memory: "1Gi"
+  memory: "1Gi",
+  avatarAssets: "s3://avatars/demo",
+  avatarVoiceUrl: "https://cdn.example.com/voice.wav"
 };
 
 const baseManifest: AceAgentManifest = {
@@ -60,6 +62,12 @@ it("runtime stage requires trigger, llm, tts, and resources", () => {
   expect(errors.ttsId).toBe("Required");
   expect(errors.cpu).toBe("Required");
   expect(errors.memory).toBe("Required");
+});
+
+it("avatar stage requires valid assets and optional voice url", () => {
+  const errors = computeStageErrors("avatar", { ...baseState, avatarAssets: "", avatarVoiceUrl: "file://voice.wav" });
+  expect(errors.avatarAssets).toContain("avatar asset");
+  expect(errors.avatarVoiceUrl).toContain("http");
 });
 
 it("summarizeDiff reports changed fields", () => {

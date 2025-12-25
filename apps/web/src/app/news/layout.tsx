@@ -29,13 +29,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="bg-black">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-black text-slate-100`}
-      >
-        <PlatformBar />
-        <SiteChrome>{children}</SiteChrome>
-      </body>
-    </html>
+    <div className={`${geistSans.variable} ${geistMono.variable} min-h-screen bg-black text-slate-100 antialiased`}>
+      <PlatformBar />
+      <SiteChrome>{children}</SiteChrome>
+    </div>
   );
 }
