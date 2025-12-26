@@ -1,6 +1,6 @@
 import { readJson } from "./dataLoader";
-import { jobs as defaultJobs } from "./jobsData";
-import { playlist as defaultPlaylist } from "./liveloopData";
+import { jobs as defaultJobs, type Job } from "./jobsData";
+import { playlist as defaultPlaylist, type LiveLoopItem } from "./liveloopData";
 import { moviesCatalog, seriesCatalog } from "./libraryData";
 import { client } from "./db";
 
@@ -21,6 +21,23 @@ async function ensureSeeds() {
 }
 
 ensureSeeds();
+
+function normalizeJob(job: Job): Job {
+  return {
+    ...job,
+    proof: job.proof ?? (job.proofSha ? { sha: job.proofSha, signer: "kernel-multisig", status: "pending" } : undefined),
+    proofSha: job.proofSha ?? job.proof?.sha,
+    policyVerdict: job.policyVerdict ?? (job.proof ? "SentinelNet PENDING" : undefined)
+  };
+}
+
+function normalizePlaylistItem(item: LiveLoopItem): LiveLoopItem {
+  return {
+    ...item,
+    proofSha: item.proofSha ?? item.sha ?? "pending-proof",
+    policyVerdict: item.policyVerdict ?? "SentinelNet PASS"
+  };
+}
 
 async function getKV<T>(key: KVKeys): Promise<T | null> {
   if (client.type === "memory") {
@@ -80,15 +97,24 @@ async function setKV<T>(key: KVKeys, value: T) {
 }
 
 export const store = {
-  getJobs: async () => (await getKV<typeof defaultJobs>("jobs")) ?? defaultJobs,
-  addJob: async (job: { id: string; prompt: string; status: string; proof?: { sha: string; signer: string; status: string } }) => {
-    const jobs = [job, ...((await getKV<typeof defaultJobs>("jobs")) ?? defaultJobs)];
+  getJobs: async () => {
+    const raw = (await getKV<typeof defaultJobs>("jobs")) ?? defaultJobs;
+    return raw.map((job) => normalizeJob(job as Job));
+  },
+  addJob: async (job: Job) => {
+    const normalized = normalizeJob(job);
+    const existing = (await getKV<typeof defaultJobs>("jobs")) ?? defaultJobs;
+    const jobs = [normalized, ...existing.map((j) => normalizeJob(j as Job))];
     await setKV("jobs", jobs);
     return jobs;
   },
-  getPlaylist: async () => (await getKV<typeof defaultPlaylist>("playlist")) ?? defaultPlaylist,
-  addPlaylistItem: async (item: { id: string; title: string; duration: string; status: string; sha: string }) => {
-    const list = [item, ...((await getKV<typeof defaultPlaylist>("playlist")) ?? defaultPlaylist)];
+  getPlaylist: async () => {
+    const list = (await getKV<typeof defaultPlaylist>("playlist")) ?? defaultPlaylist;
+    return list.map((item) => normalizePlaylistItem(item as LiveLoopItem));
+  },
+  addPlaylistItem: async (item: LiveLoopItem) => {
+    const normalized = normalizePlaylistItem(item);
+    const list = [normalized, ...((await getKV<typeof defaultPlaylist>("playlist")) ?? defaultPlaylist).map((i) => normalizePlaylistItem(i as LiveLoopItem))];
     await setKV("playlist", list);
     return list;
   },

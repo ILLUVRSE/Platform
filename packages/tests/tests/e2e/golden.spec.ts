@@ -103,14 +103,33 @@ test.describe("ILLUVRSE golden paths (smoke)", () => {
     const genJson = await genRes.json();
     expect(genJson.jobId).toBeTruthy();
     expect(genJson.status).toBe("queued");
+    expect(genJson.proofSha).toBeTruthy();
+    expect(genJson.policyVerdict).toBeTruthy();
 
+    const jobsRes = await request.get(`${studioBase}/api/v1/jobs`);
+    expect(jobsRes.ok()).toBeTruthy();
+    const jobsJson = await jobsRes.json();
+    const fromQueue = (jobsJson.jobs ?? []).find((j: any) => j.id === genJson.jobId);
+    expect(fromQueue?.proofSha ?? fromQueue?.proof?.sha).toBe(genJson.proofSha);
+    expect((fromQueue?.policyVerdict ?? "") as string).toContain("Sentinel");
+
+    const publishAssetId = "asset-smoke";
     const publishRes = await request.post(`${studioBase}/api/v1/liveloop/publish`, {
-      data: { assetId: "asset-smoke" }
+      data: { assetId: publishAssetId }
     });
     expect(publishRes.ok()).toBeTruthy();
     const pubJson = await publishRes.json();
     expect(pubJson.proof).toBeTruthy();
     expect(pubJson.proof.sha256).toBeDefined();
+    expect(pubJson.proofSha ?? pubJson.proof.sha256).toBeDefined();
+    expect(pubJson.proof.policyVerdict).toBeTruthy();
+
+    const playlistRes = await request.get(`${studioBase}/api/v1/liveloop/playlist`);
+    expect(playlistRes.ok()).toBeTruthy();
+    const playlistJson = await playlistRes.json();
+    const published = (playlistJson.playlist ?? []).find((item: any) => item.id === publishAssetId || item.title === publishAssetId);
+    expect(published?.proofSha ?? published?.sha).toBe(pubJson.proofSha ?? pubJson.proof.sha256);
+    expect(published?.policyVerdict ?? "").toBe(pubJson.proof.policyVerdict);
   });
 
   test("Marketplace checkout + Finance receipt", async ({ request }) => {

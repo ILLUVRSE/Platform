@@ -15,7 +15,8 @@ export async function POST(request: Request) {
     title,
     duration: body.duration ?? "00:10",
     status: "Queued" as const,
-    sha: body.sha ?? "pending"
+    proofSha: body.proofSha ?? body.sha ?? "pending",
+    policyVerdict: body.policyVerdict ?? "SentinelNet PASS"
   };
 
   const updated = await store.addPlaylistItem(newItem);

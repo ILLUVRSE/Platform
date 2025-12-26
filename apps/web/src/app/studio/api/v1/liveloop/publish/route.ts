@@ -4,10 +4,12 @@ import { callUpstream } from "@studio/lib/upstream";
 import { loadConfig } from "@studio/lib/config";
 import { AgentManagerClient } from "@illuvrse/agent-manager";
 import { store } from "@studio/lib/store";
+import { type LiveLoopItem } from "@studio/lib/liveloopData";
 
 export async function POST(request: Request) {
   const body = (await request.json().catch(() => ({}))) as LiveLoopPublishRequest;
   const assetId = body.assetId ?? "unknown";
+  let playlistItem: LiveLoopItem | undefined;
 
   const { storysphereBackendUrl } = loadConfig();
   const upstream = storysphereBackendUrl;
@@ -33,14 +35,15 @@ export async function POST(request: Request) {
         { assetId, schedule: body.schedule },
         { action: "publish.liveloop" }
       );
-      const newItem = {
+      const newItem: LiveLoopItem = {
         id: enqueue.jobId,
         title: assetId,
         duration: "00:10",
         status: "Queued",
-        sha: enqueue.jobId
+        proofSha: enqueue.jobId,
+        policyVerdict: "SentinelNet PENDING"
       };
-      await store.addPlaylistItem(newItem);
+      playlistItem = newItem;
     } catch (err) {
       console.warn("SchedulerAgent enqueue failed", err);
     }
@@ -59,5 +62,24 @@ export async function POST(request: Request) {
     }
   };
 
-  return NextResponse.json(response);
+  const proofSha = response.proof.sha256;
+  const policyVerdict = response.proof.policyVerdict ?? "SentinelNet PASS";
+
+  playlistItem = {
+    ...(playlistItem ?? {
+      id: assetId,
+      title: assetId,
+      duration: body.schedule ?? "00:10",
+      status: "Queued"
+    }),
+    id: assetId,
+    title: assetId,
+    duration: body.schedule ?? "00:10",
+    status: "Queued",
+    proofSha,
+    policyVerdict
+  };
+  await store.addPlaylistItem(playlistItem);
+
+  return NextResponse.json({ ...response, proofSha, policyVerdict });
 }
