@@ -29,6 +29,84 @@ export default function DevelopersPage() {
         </p>
       </section>
 
+      <PageSection eyebrow="Starter pack" title="Get up and running fast" id="starter-pack">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <Card
+            title="Clone + run locally"
+            body={
+              <div className="space-y-2 text-sm text-slate-700">
+                <div>
+                  <code>pnpm install</code> → <code>pnpm dev</code> to boot the platform at <code>http://localhost:3000</code>.
+                </div>
+                <div>
+                  Set <code>AGENT_BACKEND_URL</code> if pointing to a remote AgentManager; leave empty to use local stubs.
+                </div>
+                <Link href="https://github.com/illuvrse/platform#local-dev-flow-agentmanager--studio" className="text-teal-700 underline underline-offset-4">
+                  Read the local dev flow
+                </Link>
+              </div>
+            }
+          />
+          <Card
+            title="Good first issues"
+            body={
+              <div className="space-y-2 text-sm text-slate-700">
+                <p>Pick up scoped, beginner-friendly tickets to learn the stack.</p>
+                <Link href="https://github.com/illuvrse/platform/labels/good%20first%20issue" className="text-teal-700 underline underline-offset-4">
+                  Platform good-first-issues
+                </Link>
+                <br />
+                <Link href="https://github.com/illuvrse/platform/contribute" className="text-teal-700 underline underline-offset-4">
+                  Contribution checklist
+                </Link>
+              </div>
+            }
+          />
+          <Card
+            title="ACE manifest templates"
+            body={
+              <div className="space-y-2 text-sm text-slate-700">
+                <p>Start from prebuilt JSON seeds for Oracle, Performer, and Producer archetypes.</p>
+                <Link href="/ace/create" className="text-teal-700 underline underline-offset-4">
+                  Open the ACE creator
+                </Link>
+                <br />
+                <Link href="https://github.com/illuvrse/platform/blob/main/apps/web/src/app/(platform)/developers/page.tsx#L5" className="text-teal-700 underline underline-offset-4">
+                  Download the StoryWeaver sample manifest
+                </Link>
+              </div>
+            }
+          />
+          <Card
+            title="AgentManager config"
+            body={
+              <div className="space-y-2 text-sm text-slate-700">
+                <div>Tune port, hostname, and queue concurrency for local + remote queues.</div>
+                <Link href="https://github.com/illuvrse/platform/blob/main/packages/agent-manager/src/config.ts" className="text-teal-700 underline underline-offset-4">
+                  View config defaults
+                </Link>
+                <br />
+                <Link href="https://github.com/illuvrse/platform#environment" className="text-teal-700 underline underline-offset-4">
+                  Environment variable reference
+                </Link>
+              </div>
+            }
+          />
+          <Card
+            title="Sandbox instructions"
+            body={
+              <div className="space-y-2 text-sm text-slate-700">
+                <div>Run with local stubs for Kernel, Sentinel, and Marketplace to validate flows without external services.</div>
+                <div>Use the Playground to stream status/proof data and the Developers tools to verify SHA + policy verdicts.</div>
+                <Link href="https://github.com/illuvrse/platform#api-stubs" className="text-teal-700 underline underline-offset-4">
+                  View sandbox stub endpoints
+                </Link>
+              </div>
+            }
+          />
+        </div>
+      </PageSection>
+
       <PageSection eyebrow="ACE Manifest" title="Agent Creation Experience spec" id="ace-spec">
         <div className="grid gap-4 md:grid-cols-2">
           <Card
@@ -135,18 +213,32 @@ export default function DevelopersPage() {
       </PageSection>
 
       <PageSection eyebrow="Issues" title="Submit problems or errors">
-        <Card
-          title="Support channel"
-          body={
-            <div className="text-sm text-slate-700 space-y-2">
-              <p>Report ACE manifest issues, API failures, or policy verdict discrepancies.</p>
-              <p>Include: request body, response, timestamp, and SHA.</p>
-              <Link href="mailto:support@illuvrse.com" className="text-teal-700 underline underline-offset-4">
-                Email support@illuvrse.com
-              </Link>
-            </div>
-          }
-        />
+        <div className="grid gap-4 md:grid-cols-2">
+          <Card
+            title="Support channel"
+            body={
+              <div className="text-sm text-slate-700 space-y-2">
+                <p>Report ACE manifest issues, API failures, or policy verdict discrepancies.</p>
+                <p>Include: request body, response, timestamp, and SHA.</p>
+                <Link href="mailto:support@illuvrse.com" className="text-teal-700 underline underline-offset-4">
+                  Email support@illuvrse.com
+                </Link>
+              </div>
+            }
+          />
+          <Card
+            title="Contribution guidelines"
+            body={
+              <div className="text-sm text-slate-700 space-y-2">
+                <p>When filing issues or PRs, include repro steps, expected vs. actual behavior, and manifest snippets when relevant.</p>
+                <p>Link the Git commit or branch you tested against, and tag whether it impacts Kernel, Sentinel, Marketplace, or AgentManager.</p>
+                <Link href="https://github.com/illuvrse/platform/blob/main/README.md" className="text-teal-700 underline underline-offset-4">
+                  Read contribution expectations
+                </Link>
+              </div>
+            }
+          />
+        </div>
       </PageSection>
     </div>
   );
