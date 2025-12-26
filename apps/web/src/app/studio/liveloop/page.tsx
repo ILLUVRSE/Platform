@@ -262,6 +262,23 @@ export default function LiveLoopRokuPage() {
     if (el) el.focus();
   }, [focused]);
 
+  const [handoff, setHandoff] = useState<{ title: string; proofSha?: string; policyVerdict?: string; status?: string } | null>(null);
+  useEffect(() => {
+    fetch("/studio/api/v1/liveloop/playlist")
+      .then((res) => res.json())
+      .then((data) => {
+        const first = data.playlist?.[0];
+        if (!first) return;
+        setHandoff({
+          title: first.title ?? first.id,
+          proofSha: first.proofSha ?? first.sha,
+          policyVerdict: first.policyVerdict,
+          status: first.status
+        });
+      })
+      .catch(() => {});
+  }, []);
+
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       if (!["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Enter"].includes(e.key)) return;
@@ -357,6 +374,22 @@ export default function LiveLoopRokuPage() {
             <div className="text-xs text-slate-500">Next: {nextTitle}</div>
           </div>
         </header>
+
+        {handoff && (
+          <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-card">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <div className="text-[11px] uppercase tracking-[0.2em] text-slate-500">Studio handoff</div>
+                <div className="text-sm font-semibold text-slate-900">{handoff.title}</div>
+                <div className="text-xs text-slate-500">Status: {handoff.status ?? "Queued"}</div>
+              </div>
+              <div className="text-right text-xs">
+                {handoff.policyVerdict && <div className="font-semibold text-emerald-700">{handoff.policyVerdict}</div>}
+                {handoff.proofSha && <div className="font-mono text-slate-700 break-words">proofSha: {handoff.proofSha}</div>}
+              </div>
+            </div>
+          </div>
+        )}
 
         <div id="livePlayer" className="overflow-hidden rounded-xl">
           <LivePlayer streamSrc={streamSrc} embedSrc={embedSrc} fallbackMp4={fallbackMp4} />

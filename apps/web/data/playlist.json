@@ -5,35 +5,40 @@
       "title": "The Beverly Hillbillies · Seasons 1 & 2",
       "duration": "All day",
       "status": "On Air",
-      "sha": "bhills:2477...loop"
+      "proofSha": "bhills:2477...loop",
+      "policyVerdict": "SentinelNet PASS"
     },
     {
       "id": "casablanca",
       "title": "Casablanca (6:00 PM)",
       "duration": "01:42",
       "status": "Next",
-      "sha": "casa:1942...color"
+      "proofSha": "casa:1942...color",
+      "policyVerdict": "SentinelNet PASS"
     },
     {
       "id": "royal-wedding",
       "title": "The Royal Wedding (7:30 PM)",
       "duration": "01:33",
       "status": "Queued",
-      "sha": "royal:wedd...1951"
+      "proofSha": "royal:wedd...1951",
+      "policyVerdict": "SentinelNet PASS"
     },
     {
       "id": "reefer-madness",
       "title": "Reefer Madness (9:15 PM)",
       "duration": "01:08",
       "status": "Queued",
-      "sha": "reefer:mad...1936"
+      "proofSha": "reefer:mad...1936",
+      "policyVerdict": "SentinelNet PASS"
     },
     {
       "id": "return-bev-hills",
       "title": "Back to Beverly Hillbillies (Overnight)",
       "duration": "Overnight loop",
       "status": "Queued",
-      "sha": "bhills:return...loop"
+      "proofSha": "bhills:return...loop",
+      "policyVerdict": "SentinelNet PASS"
     }
   ]
 }

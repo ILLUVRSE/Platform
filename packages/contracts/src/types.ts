@@ -290,6 +290,9 @@ export type StorySphereGenerateResponse = {
   status: "queued" | "rendering" | "complete";
   previewEtaSeconds?: number;
   publishToLiveLoop?: boolean;
+  proof?: SignatureProof;
+  proofSha?: string;
+  policyVerdict?: string;
 };
 
 export type LiveLoopPublishRequest = {

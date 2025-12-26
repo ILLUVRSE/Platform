@@ -1,9 +1,12 @@
 import { Card, PageSection, Pill } from "@illuvrse/ui";
 import { jobs as defaultJobs } from "@studio/lib/jobsData";
 import { readJson } from "@studio/lib/dataLoader";
+import { store } from "@studio/lib/store";
 import { Suspense } from "react";
 
 async function loadJobs() {
+  const stored = await store.getJobs();
+  if (stored?.length) return stored;
   const data = await readJson<{ jobs: typeof defaultJobs }>("data/jobs.json", { jobs: defaultJobs });
   return data.jobs ?? defaultJobs;
 }
@@ -49,6 +52,10 @@ async function JobsSection() {
                 ) : (
                   <div className="text-[12px] text-slate-500">Proof pending</div>
                 )}
+                {job.proofSha && (
+                  <div className="text-[12px] font-mono text-slate-700 break-words">proofSha: {job.proofSha}</div>
+                )}
+                {job.policyVerdict && <div className="text-[12px] text-emerald-700">{job.policyVerdict}</div>}
               </div>
             }
           />

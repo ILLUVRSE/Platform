@@ -1,7 +1,25 @@
 {
   "jobs": [
-    { "id": "job-1201", "prompt": "Neon harbor at dawn", "status": "rendering" },
-    { "id": "job-1200", "prompt": "Riverport highlights", "status": "complete" },
-    { "id": "job-1199", "prompt": "Mirror maze trailer", "status": "queued" }
+    {
+      "id": "job-1201",
+      "prompt": "Neon harbor at dawn",
+      "status": "rendering",
+      "proofSha": "sha-job-1201",
+      "policyVerdict": "SentinelNet PENDING"
+    },
+    {
+      "id": "job-1200",
+      "prompt": "Riverport highlights",
+      "status": "complete",
+      "proofSha": "sha-job-1200",
+      "policyVerdict": "SentinelNet PASS"
+    },
+    {
+      "id": "job-1199",
+      "prompt": "Mirror maze trailer",
+      "status": "queued",
+      "proofSha": "sha-job-1199",
+      "policyVerdict": "SentinelNet PENDING"
+    }
   ]
 }

@@ -8,6 +8,8 @@ type Job = {
   id: string;
   prompt: string;
   status: string;
+  proofSha?: string;
+  policyVerdict?: string;
 };
 
 export function GeneratePanel() {
@@ -39,7 +41,13 @@ export function GeneratePanel() {
         body: JSON.stringify({ prompt, duration: 7, publishToLiveLoop: true })
       });
       const data = await res.json();
-      const newJob: Job = { id: data.jobId ?? `job-${Date.now()}`, prompt, status: data.status };
+      const newJob: Job = {
+        id: data.jobId ?? `job-${Date.now()}`,
+        prompt,
+        status: data.status,
+        proofSha: data.proofSha,
+        policyVerdict: data.policyVerdict
+      };
       setJobs((prev) => [newJob, ...prev]);
     } catch (e) {
       // ignore for demo
@@ -80,6 +88,16 @@ export function GeneratePanel() {
                   <div>
                     <div className="text-slate-900">{job.prompt}</div>
                     <div className="text-[12px] text-slate-500">{job.id}</div>
+                    {job.proofSha && (
+                      <div className="text-[12px] font-mono text-slate-700" aria-label="proof sha">
+                        proof: {job.proofSha}
+                      </div>
+                    )}
+                    {job.policyVerdict && (
+                      <div className="text-[12px] text-emerald-700" aria-label="policy verdict">
+                        {job.policyVerdict}
+                      </div>
+                    )}
                   </div>
                   <Pill className="bg-slate-100 text-slate-700 capitalize">{job.status}</Pill>
                 </div>

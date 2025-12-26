@@ -21,7 +21,7 @@ export function AddToLiveLoopButton({
       const res = await fetch("/studio/api/v1/liveloop/playlist", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title, duration, sha })
+        body: JSON.stringify({ title, duration, proofSha: sha ?? `sha-${Date.now()}` })
       });
       if (!res.ok) {
         setError(`Failed: ${res.status}`);
