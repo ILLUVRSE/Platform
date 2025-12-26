@@ -26,6 +26,7 @@ const capabilityColors: Record<string, string> = {
   assistant: "#8DE3FF"
 };
 const APPROVER_KEY = "illuvrse-approver";
+const GUIDE_DISMISS_KEY = "illuvrse-playground-guide-dismissed";
 
 function CapabilityOrbit({ caps, selected }: { caps: string[]; selected: boolean }) {
   const ref = useRef<THREE.Group>(null!);
@@ -102,6 +103,7 @@ export function Playground3D({ handoffManifest }: { handoffManifest?: AceAgentMa
   const [toast, setToast] = useState<string | null>(null);
   const [statusLabel, setStatusLabel] = useState<string>("idle");
   const [approvedBy, setApprovedBy] = useState<string>("Ryan Lueckenotte");
+  const [showGuide, setShowGuide] = useState(true);
   const [statusMap, setStatusMap] = useState<Record<string, { text: string; status: string; action?: string; proofSha?: string; policyVerdict?: string; timestamp?: number; latencyMs?: number }>>({});
   const [historyMap, setHistoryMap] = useState<
     Record<string, { status: string; action?: string; message?: string; proofSha?: string; policyVerdict?: string; timestamp?: number; latencyMs?: number }[]>
@@ -112,6 +114,15 @@ export function Playground3D({ handoffManifest }: { handoffManifest?: AceAgentMa
     try {
       const stored = localStorage.getItem(APPROVER_KEY);
       if (stored) setApprovedBy(stored);
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(GUIDE_DISMISS_KEY);
+      if (stored === "true") setShowGuide(false);
     } catch {
       // ignore
     }
@@ -291,6 +302,84 @@ export function Playground3D({ handoffManifest }: { handoffManifest?: AceAgentMa
   return (
     <div className="space-y-3">
       {toast ? <div className="rounded-lg border border-teal-200 bg-teal-50 p-2 text-xs text-teal-800">{toast}</div> : null}
+      {showGuide ? (
+        <div className="relative overflow-hidden rounded-2xl border border-slate-200 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 px-4 py-3 text-sm text-slate-50 shadow-card">
+          <button
+            type="button"
+            onClick={() => {
+              setShowGuide(false);
+              try {
+                localStorage.setItem(GUIDE_DISMISS_KEY, "true");
+              } catch {
+                // ignore
+              }
+            }}
+            className="absolute right-3 top-3 rounded-full bg-white/10 px-2 py-[2px] text-[12px] font-semibold text-slate-100 transition hover:bg-white/20"
+            aria-label="Dismiss Playground tips"
+          >
+            ×
+          </button>
+          <div className="grid gap-3 md:grid-cols-3">
+            <div className="flex items-start gap-2">
+              <span className="mt-[2px] rounded-full bg-white/15 px-2 py-[2px] text-[11px] font-semibold uppercase tracking-wide text-emerald-100">Move</span>
+              <div>
+                <div className="font-semibold text-white">WASD + drag to look</div>
+                <p className="text-[12px] text-slate-100/80">Press E or Enter when you reach a kiosk entry to step inside.</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-2">
+              <span className="mt-[2px] rounded-full bg-white/15 px-2 py-[2px] text-[11px] font-semibold uppercase tracking-wide text-amber-100">Kiosks</span>
+              <div>
+                <div className="font-semibold text-white">Click glowing kiosks</div>
+                <p className="text-[12px] text-slate-100/80">Each kiosk node loads a manifest; hover to preview, click to select it for actions.</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-2">
+              <span className="mt-[2px] rounded-full bg-white/15 px-2 py-[2px] text-[11px] font-semibold uppercase tracking-wide text-teal-100">Storage</span>
+              <div className="space-y-2">
+                <div>
+                  <div className="font-semibold text-white">Manifest storage</div>
+                  <p className="text-[12px] text-slate-100/80">
+                    Selected manifests save to Playground storage (localStorage + cookie) so actions, proofs, and the ACE wizard can reuse them.
+                  </p>
+                </div>
+                <a
+                  className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-[12px] font-semibold text-teal-50 transition hover:bg-white/20"
+                  href="#tutorial-manifests"
+                >
+                  Jump to tutorial manifests
+                  <span aria-hidden className="text-[10px]">↗</span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-3 py-2 text-[12px] text-slate-700">
+          <span className="font-semibold text-slate-800">Playground tips hidden.</span>
+          <button
+            type="button"
+            onClick={() => {
+              setShowGuide(true);
+              try {
+                localStorage.removeItem(GUIDE_DISMISS_KEY);
+              } catch {
+                // ignore
+              }
+            }}
+            className="rounded-full border border-slate-300 px-3 py-[6px] font-semibold text-slate-800 transition hover:border-teal-500/70 hover:text-teal-800"
+          >
+            Show overlay
+          </button>
+          <a
+            className="inline-flex items-center gap-1 rounded-full border border-teal-200 px-3 py-[6px] font-semibold text-teal-700 transition hover:bg-teal-50"
+            href="#tutorial-manifests"
+          >
+            Tutorial manifests
+            <span aria-hidden className="text-[11px]">↗</span>
+          </a>
+        </div>
+      )}
       <div className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm text-slate-800 shadow-card">
         {selectionText}
         {selected && <span className="ml-2 text-[11px] text-teal-700">(manifest stored to Playground)</span>}
