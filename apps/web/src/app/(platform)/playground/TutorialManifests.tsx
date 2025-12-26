@@ -162,7 +162,7 @@ export function TutorialManifests({ onLoaded }: { onLoaded?: (manifest: AceAgent
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-3" id="tutorial-manifests">
       {message ? <div className="rounded-lg border border-teal-200 bg-teal-50 p-3 text-sm text-teal-800">{message}</div> : null}
       <div className="grid gap-3 md:grid-cols-2">
         {tutorialManifests.map(({ manifest, blurb, stage }) => (
