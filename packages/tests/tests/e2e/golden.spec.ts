@@ -115,13 +115,28 @@ test.describe("ILLUVRSE golden paths (smoke)", () => {
 
   test("Marketplace checkout + Finance receipt", async ({ request }) => {
     test.skip(!webAvailable, `Web server not running at ${webBase}`);
+    const manifestProof = {
+      sha256: "d3be:11ff...9ae1",
+      signer: "kernel-multisig",
+      timestamp: new Date().toISOString(),
+      policyVerdict: "SentinelNet PASS"
+    };
     const checkoutRes = await request.post(`${webBase}/api/marketplace/checkout`, {
-      data: { sku: "agent-bundle-grid-analyst", price: 49, currency: "USD", sha256: "d3be:11ff...9ae1" }
+      data: {
+        sku: "agent-bundle-grid-analyst",
+        price: 49,
+        currency: "USD",
+        sha256: "d3be:11ff...9ae1",
+        manifestProof
+      }
     });
     expect(checkoutRes.ok()).toBeTruthy();
     const json = await checkoutRes.json();
     expect(json.receipt?.id).toBeTruthy();
     expect(json.finance?.receipt?.sha256 ?? json.sha256).toBeTruthy();
+    expect(json.delivery?.downloadUrl ?? json.finance?.delivery?.downloadUrl).toBeTruthy();
+    expect(json.payment?.status).toBeTruthy();
+    expect(json.manifestProof?.sha256 ?? json.proof?.sha256).toBeTruthy();
   });
 
   test("Artifact publish delivers proof", async ({ request }) => {
