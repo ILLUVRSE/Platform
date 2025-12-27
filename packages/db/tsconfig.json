@@ -4,8 +4,11 @@
     "outDir": "dist",
     "rootDir": "src",
     "composite": true,
-    "moduleResolution": "bundler",
-    "types": ["node"]
+    "moduleResolution": "node",
+    "types": ["node"],
+    "declaration": true,
+    "declarationMap": true,
+    "noEmit": false
   },
   "include": ["src/**/*"]
 }

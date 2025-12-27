@@ -5,15 +5,17 @@ type Fetcher = typeof fetch;
 export class AgentManagerClient {
   private baseUrl: string;
   private fetcher: Fetcher;
+  private token?: string;
 
-  constructor(baseUrl: string, opts?: { fetcher?: Fetcher }) {
+  constructor(baseUrl: string, opts?: { fetcher?: Fetcher; token?: string }) {
     this.baseUrl = baseUrl.replace(/\/$/, "");
     this.fetcher = opts?.fetcher ?? fetch;
+    this.token = opts?.token;
   }
 
   private async request<T>(path: string, init?: RequestInit): Promise<T> {
     const res = await this.fetcher(`${this.baseUrl}${path}`, {
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", ...(this.token ? { Authorization: `Bearer ${this.token}` } : {}) },
       ...init
     });
     if (!res.ok) {

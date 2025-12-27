@@ -66,10 +66,10 @@ export const GridManager: React.FC<GridManagerProps> = ({
               setDragGridId(null);
             }}
             onClick={() => onSelectGrid(grid.id)}
-            className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+            className={`px-4 py-2 rounded-full text-sm font-semibold transition-all border ${
               activeGridId === grid.id
-                ? "bg-white text-black"
-                : "bg-gray-800 text-gray-300 hover:bg-gray-700"
+                ? "bg-[rgb(var(--grid-accent))] text-slate-950 border-transparent shadow-[0_10px_24px_-18px_rgba(52,211,153,0.8)]"
+                : "bg-[color:var(--grid-panel)] text-slate-200 border-[color:var(--grid-border)] hover:border-[rgb(var(--grid-accent)/0.4)]"
             }`}
           >
             <span>{grid.name}</span>
@@ -82,7 +82,7 @@ export const GridManager: React.FC<GridManagerProps> = ({
         {!isCreating && (
           <button
             onClick={() => setIsCreating(true)}
-            className="px-4 py-2 rounded-full text-sm font-medium bg-gray-800 border border-dashed border-gray-600 text-gray-400 hover:text-white hover:border-gray-500 transition-colors"
+            className="px-4 py-2 rounded-full text-sm font-semibold bg-[color:var(--grid-panel)] border border-dashed border-[color:var(--grid-border)] text-slate-400 hover:text-white hover:border-[rgb(var(--grid-accent)/0.4)] transition-colors"
           >
             + New Grid
           </button>
@@ -105,10 +105,10 @@ export const GridManager: React.FC<GridManagerProps> = ({
       
       {grids.length > 0 && activeGridId && (
         <div className="sm:ml-auto flex flex-col sm:flex-row items-start sm:items-center gap-3">
-          <div className="flex items-center gap-2 text-xs text-gray-400">
+          <div className="flex items-center gap-2 text-xs text-slate-400">
             <span>Poll</span>
             <select
-              className="bg-gray-800 text-xs px-2 py-1 rounded border border-gray-700"
+              className="gs-select text-xs px-2 py-1 rounded-full"
               value={activeGrid?.pollIntervalMs ?? 4000}
               onChange={(e) => {
                 if (!activeGrid) return;

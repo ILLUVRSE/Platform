@@ -47,7 +47,7 @@ export const StockChart: React.FC<StockChartProps> = ({ isPositive, symbol }) =>
   }, [series]);
 
   return (
-    <div className="w-full h-64 bg-gray-900/30 rounded-xl border border-gray-800 p-4 relative overflow-hidden">
+    <div className="w-full h-64 gs-panel-soft rounded-2xl p-4 relative overflow-hidden">
       <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
         <defs>
           <linearGradient id="gradient" x1="0" x2="0" y1="0" y2="1">
@@ -68,7 +68,7 @@ export const StockChart: React.FC<StockChartProps> = ({ isPositive, symbol }) =>
          {['1D', '1W', '1M', '3M', '1Y', 'ALL'].map(t => (
             <button 
               key={t} 
-              className={`text-xs font-bold px-2 py-1 rounded ${t === '1D' ? 'bg-gray-700 text-white' : 'text-gray-500 hover:text-gray-300'}`}
+              className={`text-xs font-semibold px-2 py-1 rounded-full border ${t === '1D' ? 'bg-[color:var(--grid-panel-strong)] border-[color:var(--grid-border-strong)] text-white' : 'border-transparent text-slate-400 hover:text-white'}`}
             >
               {t}
             </button>
@@ -76,7 +76,7 @@ export const StockChart: React.FC<StockChartProps> = ({ isPositive, symbol }) =>
       </div>
 
       {loading && (
-        <div className="absolute top-2 right-3 text-xs text-gray-400">Updating…</div>
+        <div className="absolute top-2 right-3 text-xs text-slate-400">Updating…</div>
       )}
     </div>
   );

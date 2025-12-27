@@ -8,14 +8,18 @@ interface BadgeProps {
 
 export const Badge: React.FC<BadgeProps> = ({ children, variant = 'neutral' }) => {
   const variants = {
-    success: "bg-green-500/10 text-green-500 border-green-500/20",
-    danger: "bg-red-500/10 text-red-500 border-red-500/20",
-    warning: "bg-yellow-500/10 text-yellow-500 border-yellow-500/20",
-    neutral: "bg-gray-700 text-gray-300 border-gray-600"
+    success:
+      "bg-[rgb(var(--grid-success)/0.14)] text-[rgb(var(--grid-success))] border-[rgb(var(--grid-success)/0.4)]",
+    danger:
+      "bg-[rgb(var(--grid-danger)/0.14)] text-[rgb(var(--grid-danger))] border-[rgb(var(--grid-danger)/0.4)]",
+    warning:
+      "bg-[rgb(var(--grid-warning)/0.14)] text-[rgb(var(--grid-warning))] border-[rgb(var(--grid-warning)/0.4)]",
+    neutral:
+      "bg-[rgba(148,163,184,0.14)] text-[color:var(--grid-muted)] border-[rgba(148,163,184,0.28)]"
   };
 
   return (
-    <span className={`px-2 py-0.5 rounded text-xs font-medium border ${variants[variant]}`}>
+    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold border ${variants[variant]}`}>
       {children}
     </span>
   );

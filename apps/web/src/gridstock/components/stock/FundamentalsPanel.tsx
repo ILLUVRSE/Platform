@@ -14,7 +14,7 @@ export const FundamentalsPanel: React.FC<Props> = ({ data, loading, error }) => 
     <Card className="space-y-3">
       <div className="flex items-center justify-between">
         <h3 className="font-bold text-lg">Fundamentals</h3>
-        {loading && <span className="text-xs text-gray-400">Updating…</span>}
+        {loading && <span className="text-xs text-slate-400">Updating…</span>}
       </div>
       {error && (
         <div className="text-red-400 text-sm bg-red-500/10 border border-red-500/30 p-2 rounded">
@@ -33,7 +33,7 @@ export const FundamentalsPanel: React.FC<Props> = ({ data, loading, error }) => 
           <Fact label="Beta" value={fmtNumber(data.beta)} />
         </div>
       ) : (
-        !loading && <div className="text-gray-500 text-sm">No fundamentals available.</div>
+        !loading && <div className="text-slate-500 text-sm">No fundamentals available.</div>
       )}
     </Card>
   );
@@ -41,7 +41,7 @@ export const FundamentalsPanel: React.FC<Props> = ({ data, loading, error }) => 
 
 const Fact = ({ label, value }: { label: string; value: string }) => (
   <div>
-    <div className="text-xs text-gray-500">{label}</div>
+    <div className="text-xs text-slate-500">{label}</div>
     <div className="font-semibold text-white">{value}</div>
   </div>
 );

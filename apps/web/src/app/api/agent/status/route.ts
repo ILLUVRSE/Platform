@@ -9,9 +9,14 @@ export async function GET(req: NextRequest) {
   const id = searchParams.get("id");
   if (!id) return NextResponse.json({ error: "id required" }, { status: 400 });
   const backend = env.AGENT_BACKEND_URL ?? "http://localhost:4040";
+  const token = env.AGENT_BACKEND_TOKEN;
+  const authHeaders = token ? { Authorization: `Bearer ${token}` } : {};
   if (backend) {
     try {
-      const res = await fetch(`${backend.replace(/\/$/, "")}/status?id=${encodeURIComponent(id)}`, { cache: "no-store" });
+      const res = await fetch(`${backend.replace(/\/$/, "")}/status?id=${encodeURIComponent(id)}`, {
+        cache: "no-store",
+        headers: authHeaders
+      });
       if (res.ok) {
         return NextResponse.json(await res.json());
       }

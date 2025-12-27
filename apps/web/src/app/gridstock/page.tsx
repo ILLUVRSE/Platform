@@ -582,56 +582,65 @@ export default function Dashboard() {
   }, [activeGridId, grids, newsRefreshKey]);
 
   return (
-    <div className="space-y-6">
-      <header className="mb-8">
-        <h1 className="text-4xl font-extrabold tracking-tight mb-2">
-          Market Overview
-        </h1>
-        <p className="text-gray-400">
-          Track your favorite sectors and stocks in real-time.
-        </p>
+    <div className="space-y-8">
+      <header className="gs-panel-strong rounded-3xl p-6 sm:p-8 animate-rise">
+        <div className="flex flex-col gap-4">
+          <div>
+            <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight mb-2">
+              Market Overview
+            </h1>
+            <p className="text-slate-300">
+              Track your favorite sectors and stocks in real-time.
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center gap-3 text-xs sm:text-sm text-slate-400">
+            <Badge variant={marketMode === "Live" ? "success" : "warning"}>
+              {marketMode === "Live" ? "Live feed" : "Simulated feed"}
+            </Badge>
+            <span className="gs-chip-muted rounded-full px-3 py-1">
+              Last update {lastUpdatedLabel}
+            </span>
+            {activeGrid && (
+              <span className="gs-chip-muted rounded-full px-3 py-1">
+                Poll {((activeGrid.pollIntervalMs ?? 4000) / 1000).toFixed(1)}s
+              </span>
+            )}
+            {isStale && <Badge variant="warning">Stale</Badge>}
+            {quoteError && <span className="text-rose-300">Refresh issues detected</span>}
+          </div>
+        </div>
       </header>
 
-      <div className="flex flex-wrap items-center gap-3 text-sm text-gray-400">
-        <Badge variant={marketMode === "Live" ? "success" : "warning"}>
-          {marketMode === "Live" ? "Live feed" : "Simulated feed"}
-        </Badge>
-        <span>Last update {lastUpdatedLabel}</span>
-        {activeGrid && (
-          <span>Poll {((activeGrid.pollIntervalMs ?? 4000) / 1000).toFixed(1)}s</span>
-        )}
-        {isStale && <Badge variant="warning">Stale</Badge>}
-        {quoteError && <span className="text-red-400">Refresh issues detected</span>}
+      <div className="animate-rise animate-rise-delay-1">
+        <GridManager
+          grids={grids}
+          activeGridId={activeGridId}
+          onSelectGrid={setActiveGridId}
+          onCreateGrid={handleCreateGrid}
+          onDeleteGrid={handleDeleteGrid}
+          onReorderGrids={handleReorderGrids}
+          onUpdateGrid={handleUpdateGrid}
+          dragGridId={dragGridId}
+          setDragGridId={setDragGridId}
+        />
       </div>
 
-      <GridManager
-        grids={grids}
-        activeGridId={activeGridId}
-        onSelectGrid={setActiveGridId}
-        onCreateGrid={handleCreateGrid}
-        onDeleteGrid={handleDeleteGrid}
-        onReorderGrids={handleReorderGrids}
-        onUpdateGrid={handleUpdateGrid}
-        dragGridId={dragGridId}
-        setDragGridId={setDragGridId}
-      />
-
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 animate-rise animate-rise-delay-2">
         <div className="xl:col-span-2 space-y-4">
           {activeGrid ? (
             <>
               {loadingQuotes && activeGrid.tickers.length > 0 && (
-                <div className="text-gray-500 text-center py-4">
+                <div className="text-slate-400 text-center py-4">
                   Refreshing quotes...
                 </div>
               )}
 
               {activeGrid.tickers.length === 0 && (
-                <div className="text-center py-12 border border-dashed border-gray-800 rounded-xl bg-gray-900/50">
-                  <h3 className="text-lg font-medium text-gray-300 mb-2">
+                <div className="text-center py-12 border border-dashed border-[color:var(--grid-border)] rounded-2xl gs-panel-soft">
+                  <h3 className="text-lg font-medium text-slate-200 mb-2">
                     This grid is empty
                   </h3>
-                  <p className="text-gray-500 mb-4">
+                  <p className="text-slate-400 mb-4">
                     Add some stocks to start tracking.
                   </p>
                   <Button onClick={() => setIsAddingTicker(true)}>
@@ -641,10 +650,10 @@ export default function Dashboard() {
               )}
 
           {/* Filters */}
-          <div className="flex flex-wrap items-center gap-3 bg-gray-900 border border-gray-800 rounded-lg p-3">
-            <div className="text-sm text-gray-400">Filters:</div>
+          <div className="gs-panel rounded-2xl p-4 flex flex-wrap items-center gap-3">
+            <div className="text-sm text-slate-400">Filters:</div>
             <select
-              className="bg-gray-800 text-sm px-3 py-2 rounded border border-gray-700"
+              className="gs-select text-sm px-3 py-2 rounded-full"
               value={sectorFilter}
               onChange={(e) => {
                 setSectorFilter(e.target.value);
@@ -659,7 +668,7 @@ export default function Dashboard() {
               ))}
             </select>
             <select
-              className="bg-gray-800 text-sm px-3 py-2 rounded border border-gray-700"
+              className="gs-select text-sm px-3 py-2 rounded-full"
               value={capFilter}
               onChange={(e) => {
                 setCapFilter(e.target.value);
@@ -673,7 +682,7 @@ export default function Dashboard() {
               <option value="small">Small (&lt; $2B)</option>
             </select>
             <select
-              className="bg-gray-800 text-sm px-3 py-2 rounded border border-gray-700"
+              className="gs-select text-sm px-3 py-2 rounded-full"
               value={trendFilter}
               onChange={(e) => {
                 setTrendFilter(e.target.value as TrendFilter);
@@ -685,7 +694,7 @@ export default function Dashboard() {
               <option value="losers">Losers</option>
             </select>
             <select
-              className="bg-gray-800 text-sm px-3 py-2 rounded border border-gray-700"
+              className="gs-select text-sm px-3 py-2 rounded-full"
               value={sortBy}
               onChange={(e) => {
                 setSortBy(e.target.value as SortBy);
@@ -697,7 +706,7 @@ export default function Dashboard() {
               <option value="change">Sort: % Change</option>
             </select>
             <select
-              className="bg-gray-800 text-sm px-3 py-2 rounded border border-gray-700"
+              className="gs-select text-sm px-3 py-2 rounded-full"
               value={activePresetId}
               onChange={(e) => {
                 const id = e.target.value;
@@ -716,7 +725,7 @@ export default function Dashboard() {
               <button
                 type="button"
                 onClick={() => handleDeletePreset(activePresetId)}
-                className="text-xs text-gray-400 hover:text-white"
+                className="text-xs text-slate-400 hover:text-white"
               >
                 Delete preset
               </button>
@@ -773,11 +782,11 @@ export default function Dashboard() {
           </div>
 
           {/* Alerts */}
-          <div className="bg-gray-900 border border-gray-800 rounded-lg p-4 space-y-4">
+          <div className="gs-panel rounded-2xl p-5 space-y-4">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
                 <h3 className="text-sm font-semibold text-white">Alerts</h3>
-                <p className="text-xs text-gray-500">Track price triggers with an inbox.</p>
+                <p className="text-xs text-slate-400">Track price triggers with an inbox.</p>
               </div>
               <Button
                 size="sm"
@@ -789,7 +798,7 @@ export default function Dashboard() {
             </div>
 
             <div className="flex flex-wrap items-center gap-2">
-              <span className="text-sm text-gray-400">Create alert:</span>
+              <span className="text-sm text-slate-400">Create alert:</span>
               <Input
                 placeholder="Symbol"
                 value={alertSymbol}
@@ -797,7 +806,7 @@ export default function Dashboard() {
                 className="w-28"
               />
               <select
-                className="bg-gray-800 text-sm px-3 py-2 rounded border border-gray-700"
+                className="gs-select text-sm px-3 py-2 rounded-full"
                 value={alertDirection}
                 onChange={(e) => setAlertDirection(e.target.value as AlertDirection)}
               >
@@ -829,9 +838,9 @@ export default function Dashboard() {
                   return (
                     <div
                       key={a.id}
-                      className="flex flex-wrap items-center justify-between gap-2 bg-gray-800/60 border border-gray-800 rounded-lg px-3 py-2 text-xs text-gray-300"
+                      className="flex flex-wrap items-center justify-between gap-2 gs-panel-soft rounded-xl px-3 py-2 text-xs text-slate-300"
                     >
-                      <span className="font-medium text-gray-100">
+                      <span className="font-medium text-slate-100">
                         {a.symbol} {a.direction === "above" ? "≥" : "≤"} ${a.target.toFixed(2)}
                       </span>
                       <div className="flex flex-wrap items-center gap-2">
@@ -839,21 +848,21 @@ export default function Dashboard() {
                           {snoozeLabel}
                         </span>
                         <button
-                          className="text-gray-400 hover:text-white"
+                          className="text-slate-400 hover:text-white"
                           onClick={() => handleSnoozeAlert(a.id, 60)}
                         >
                           Snooze 1h
                         </button>
                         {snoozed && (
                           <button
-                            className="text-gray-400 hover:text-white"
+                            className="text-slate-400 hover:text-white"
                             onClick={() => handleClearSnooze(a.id)}
                           >
                             Clear
                           </button>
                         )}
                         <button
-                          className="text-red-300 hover:text-red-200"
+                          className="text-rose-300 hover:text-rose-200"
                           onClick={() => handleDeleteAlert(a.id)}
                         >
                           Delete
@@ -864,11 +873,11 @@ export default function Dashboard() {
                 })}
               </div>
             ) : (
-              <div className="text-xs text-gray-500">No active alerts yet.</div>
+              <div className="text-xs text-slate-500">No active alerts yet.</div>
             )}
 
-            <div className="border-t border-gray-800 pt-3 space-y-3">
-              <div className="flex items-center justify-between text-xs uppercase tracking-wide text-gray-500">
+            <div className="border-t border-[color:var(--grid-border)] pt-3 space-y-3">
+              <div className="flex items-center justify-between text-xs uppercase tracking-wide text-slate-500">
                 <span>Triggered</span>
                 <span>{triggeredAlerts.length} new</span>
               </div>
@@ -877,7 +886,7 @@ export default function Dashboard() {
                   {triggeredAlerts.map((a) => (
                     <div
                       key={a.id}
-                      className="flex flex-wrap items-center justify-between gap-2 bg-green-500/10 border border-green-500/40 text-green-200 text-xs px-3 py-2 rounded"
+                      className="flex flex-wrap items-center justify-between gap-2 bg-[rgb(var(--grid-success)/0.14)] border border-[rgb(var(--grid-success)/0.4)] text-emerald-200 text-xs px-3 py-2 rounded-xl"
                     >
                       <span>
                         Alert hit: {a.symbol} {a.direction === "above" ? "≥" : "≤"} ${a.target.toFixed(2)}
@@ -885,12 +894,12 @@ export default function Dashboard() {
                       <div className="flex items-center gap-2">
                         <Link
                           href={`/gridstock/stock/${a.symbol}`}
-                          className="text-green-100 hover:text-white"
+                          className="text-emerald-100 hover:text-white"
                         >
                           Open
                         </Link>
                         <button
-                          className="text-green-100 hover:text-white"
+                          className="text-emerald-100 hover:text-white"
                           onClick={() =>
                             setTriggeredAlerts((prev) =>
                               prev.filter((t) => t.id !== a.id)
@@ -904,14 +913,14 @@ export default function Dashboard() {
                   ))}
                 </div>
               ) : (
-                <div className="text-xs text-gray-500">No new triggers.</div>
+                <div className="text-xs text-slate-500">No new triggers.</div>
               )}
 
-              <div className="flex items-center justify-between text-xs uppercase tracking-wide text-gray-500">
+              <div className="flex items-center justify-between text-xs uppercase tracking-wide text-slate-500">
                 <span>History</span>
                 {alertHistory.length > 0 && (
                   <button
-                    className="text-gray-400 hover:text-white"
+                    className="text-slate-400 hover:text-white"
                     onClick={handleClearAlertHistory}
                   >
                     Clear
@@ -923,7 +932,7 @@ export default function Dashboard() {
                   {alertHistory.slice(0, 6).map((event) => (
                     <div
                       key={event.id}
-                      className="flex flex-wrap items-center justify-between gap-2 text-xs text-gray-400"
+                      className="flex flex-wrap items-center justify-between gap-2 text-xs text-slate-400"
                     >
                       <span>
                         {event.symbol} {event.direction === "above" ? "≥" : "≤"} ${event.target.toFixed(2)} at ${event.price.toFixed(2)}
@@ -937,7 +946,7 @@ export default function Dashboard() {
                         </span>
                         <Link
                           href={`/gridstock/stock/${event.symbol}`}
-                          className="text-gray-300 hover:text-white"
+                          className="text-slate-300 hover:text-white"
                         >
                           Open
                         </Link>
@@ -946,13 +955,13 @@ export default function Dashboard() {
                   ))}
                 </div>
               ) : (
-                <div className="text-xs text-gray-500">No history yet.</div>
+                <div className="text-xs text-slate-500">No history yet.</div>
               )}
             </div>
           </div>
 
               {quoteError && (
-                <div className="text-red-400 text-sm bg-red-500/10 border border-red-500/30 p-2 rounded">
+                <div className="text-rose-200 text-sm bg-rose-500/10 border border-rose-500/40 p-3 rounded-xl">
                   {quoteError}{" "}
                   {lastQuoteUpdatedAt
                     ? `Showing last update at ${lastUpdatedLabel}.`
@@ -993,7 +1002,7 @@ export default function Dashboard() {
                 {/* Add Ticker Tile */}
                 <div className="min-h-32 flex items-center justify-center">
                   {!isAddingTicker ? (
-                    <div className="w-full h-full min-h-[128px] border-2 border-dashed border-gray-800 rounded-lg flex flex-col items-center justify-center text-gray-500 hover:text-white hover:border-gray-600 transition-colors gap-2">
+                    <div className="w-full h-full min-h-[128px] border-2 border-dashed border-[color:var(--grid-border)] rounded-2xl gs-panel-soft flex flex-col items-center justify-center text-slate-400 hover:text-white hover:border-[rgb(var(--grid-accent)/0.4)] transition-colors gap-2">
                       <button
                         onClick={() => {
                           setIsAddingTicker(true);
@@ -1002,17 +1011,17 @@ export default function Dashboard() {
                         className="flex flex-col items-center"
                       >
                         <span className="text-4xl font-light mb-1">+</span>
-                        <span className="text-sm font-medium">Add Ticker</span>
+                        <span className="text-sm font-semibold">Add Ticker</span>
                       </button>
                       <button
                         onClick={() => setIsQuickAddOpen(true)}
-                        className="text-xs text-gray-400 hover:text-white"
+                        className="text-xs text-slate-400 hover:text-white"
                       >
                         Quick add multiple
                       </button>
                     </div>
                   ) : (
-                    <div className="w-full h-full min-h-[128px] bg-gray-900 border border-gray-700 rounded-lg p-4 flex flex-col justify-center gap-3">
+                    <div className="w-full h-full min-h-[128px] gs-panel rounded-2xl p-4 flex flex-col justify-center gap-3">
                       <Input
                         placeholder="Symbol (e.g. AAPL)"
                         value={newTicker}
@@ -1022,21 +1031,21 @@ export default function Dashboard() {
                         ref={tickerInputRef}
                       />
                       {tickerError && (
-                        <p className="text-red-400 text-xs">{tickerError}</p>
+                        <p className="text-rose-300 text-xs">{tickerError}</p>
                       )}
                       {searchResults.length > 0 && (
-                        <div className="bg-gray-800 border border-gray-700 rounded-lg p-2 text-sm text-gray-200 space-y-1 max-h-40 overflow-y-auto">
+                        <div className="gs-panel-soft rounded-xl p-2 text-sm text-slate-200 space-y-1 max-h-40 overflow-y-auto">
                           {searchResults.map((s) => (
                             <button
                               key={s.symbol}
-                              className="w-full text-left px-2 py-1 rounded hover:bg-gray-700"
+                              className="w-full text-left px-2 py-1 rounded hover:bg-white/5"
                               onClick={() => {
                                 setNewTicker(s.symbol);
                                 setTickerError("");
                               }}
                             >
                               <span className="font-bold">{s.symbol}</span>
-                              <span className="text-gray-400 ml-2">{s.name}</span>
+                              <span className="text-slate-400 ml-2">{s.name}</span>
                             </button>
                           ))}
                         </div>
@@ -1068,57 +1077,57 @@ export default function Dashboard() {
             </>
           ) : (
             <div className="text-center py-20">
-              <p className="text-gray-500">Create a grid to get started.</p>
+              <p className="text-slate-500">Create a grid to get started.</p>
             </div>
           )}
         </div>
 
         <div className="space-y-4">
-          <div className="bg-gray-900 border border-gray-800 rounded-xl p-4 space-y-4">
+          <div className="gs-panel rounded-2xl p-5 space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold">Top Movers</h3>
-              <span className="text-xs text-gray-500">Active grid</span>
+              <span className="text-xs text-slate-500">Active grid</span>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <div className="text-xs uppercase tracking-wide text-gray-500">Gainers</div>
+                <div className="text-xs uppercase tracking-wide text-slate-500">Gainers</div>
                 {topMovers.gainers.length > 0 ? (
                   topMovers.gainers.map((q) => (
                     <div key={q.symbol} className="flex items-center justify-between text-sm">
-                      <span className="text-gray-200">{q.symbol}</span>
+                      <span className="text-slate-200">{q.symbol}</span>
                       <span className="text-green-400">+{q.changePercent.toFixed(2)}%</span>
                     </div>
                   ))
                 ) : (
-                  <div className="text-xs text-gray-500">No data yet.</div>
+                  <div className="text-xs text-slate-500">No data yet.</div>
                 )}
               </div>
               <div className="space-y-2">
-                <div className="text-xs uppercase tracking-wide text-gray-500">Losers</div>
+                <div className="text-xs uppercase tracking-wide text-slate-500">Losers</div>
                 {topMovers.losers.length > 0 ? (
                   topMovers.losers.map((q) => (
                     <div key={q.symbol} className="flex items-center justify-between text-sm">
-                      <span className="text-gray-200">{q.symbol}</span>
+                      <span className="text-slate-200">{q.symbol}</span>
                       <span className="text-red-400">{q.changePercent.toFixed(2)}%</span>
                     </div>
                   ))
                 ) : (
-                  <div className="text-xs text-gray-500">No data yet.</div>
+                  <div className="text-xs text-slate-500">No data yet.</div>
                 )}
               </div>
             </div>
           </div>
 
-          <div className="bg-gray-900 border border-gray-800 rounded-xl p-4 space-y-3">
+          <div className="gs-panel rounded-2xl p-5 space-y-3">
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold">Sector Rollup</h3>
-              <span className="text-xs text-gray-500">Avg change</span>
+              <span className="text-xs text-slate-500">Avg change</span>
             </div>
             {sectorRollup.length > 0 ? (
               <div className="space-y-2">
                 {sectorRollup.map((s) => (
                   <div key={s.sector} className="flex items-center justify-between text-sm">
-                    <span className="text-gray-200">{s.sector}</span>
+                    <span className="text-slate-200">{s.sector}</span>
                     <span className={s.avg >= 0 ? "text-green-400" : "text-red-400"}>
                       {s.avg >= 0 ? "+" : ""}{s.avg.toFixed(2)}% | {s.count}
                     </span>
@@ -1126,7 +1135,7 @@ export default function Dashboard() {
                 ))}
               </div>
             ) : (
-              <div className="text-xs text-gray-500">No sector data yet.</div>
+              <div className="text-xs text-slate-500">No sector data yet.</div>
             )}
           </div>
 
@@ -1149,19 +1158,19 @@ export default function Dashboard() {
       {isQuickAddOpen && (
         <div className="fixed inset-0 z-50">
           <div
-            className="absolute inset-0 bg-black/60"
+            className="absolute inset-0 bg-black/70"
             onClick={() => setIsQuickAddOpen(false)}
           />
-          <div className="absolute right-0 top-0 h-full w-full sm:w-[420px] bg-gray-900 border-l border-gray-800 p-5 space-y-4 overflow-y-auto">
+          <div className="absolute right-0 top-0 h-full w-full sm:w-[420px] gs-panel-strong border-l border-[color:var(--grid-border)] p-5 space-y-4 overflow-y-auto">
             <div className="flex items-start justify-between gap-4">
               <div>
                 <h3 className="text-lg font-semibold">Quick Add</h3>
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-slate-400">
                   Add multiple tickers to {activeGrid?.name || "your grid"}.
                 </p>
               </div>
               <button
-                className="text-sm text-gray-400 hover:text-white"
+                className="text-sm text-slate-400 hover:text-white"
                 onClick={() => setIsQuickAddOpen(false)}
               >
                 Close
@@ -1184,7 +1193,7 @@ export default function Dashboard() {
                   return (
                     <label
                       key={symbol}
-                      className={`flex items-center justify-between gap-3 rounded-lg border border-gray-800 px-3 py-2 text-sm ${isDisabled ? "opacity-50" : "hover:border-gray-600"}`}
+                      className={`flex items-center justify-between gap-3 rounded-xl border border-[color:var(--grid-border)] px-3 py-2 text-sm ${isDisabled ? "opacity-50" : "hover:border-[rgb(var(--grid-accent)/0.4)]"} gs-panel-soft`}
                     >
                       <div className="flex items-center gap-3">
                         <input
@@ -1192,25 +1201,25 @@ export default function Dashboard() {
                           checked={isSelected}
                           disabled={isDisabled}
                           onChange={() => toggleQuickAddSelection(symbol)}
-                          className="accent-green-500"
+                          className="accent-emerald-400"
                         />
                         <div>
-                          <div className="text-gray-100 font-semibold">{symbol}</div>
-                          <div className="text-xs text-gray-500">{result.name}</div>
+                          <div className="text-slate-100 font-semibold">{symbol}</div>
+                          <div className="text-xs text-slate-400">{result.name}</div>
                         </div>
                       </div>
-                      {isDisabled && <span className="text-xs text-gray-500">In grid</span>}
+                      {isDisabled && <span className="text-xs text-slate-500">In grid</span>}
                     </label>
                   );
                 })
               ) : (
-                <div className="text-xs text-gray-500">Search for symbols to add.</div>
+                <div className="text-xs text-slate-500">Search for symbols to add.</div>
               )}
             </div>
 
             {quickAddSelected.length > 0 && (
               <div>
-                <div className="text-xs uppercase tracking-wide text-gray-500 mb-2">
+                <div className="text-xs uppercase tracking-wide text-slate-500 mb-2">
                   Selected
                 </div>
                 <div className="flex flex-wrap gap-2">
@@ -1218,7 +1227,7 @@ export default function Dashboard() {
                     <button
                       key={symbol}
                       onClick={() => toggleQuickAddSelection(symbol)}
-                      className="px-2 py-1 rounded-full bg-gray-800 border border-gray-700 text-xs text-gray-200 hover:border-gray-500"
+                      className="px-2 py-1 rounded-full bg-[color:var(--grid-panel-strong)] border border-[color:var(--grid-border)] text-xs text-slate-200 hover:border-[rgb(var(--grid-accent)/0.4)]"
                     >
                       {symbol} x
                     </button>

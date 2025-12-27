@@ -1,7 +1,103 @@
 @import "tailwindcss";
 
 .gridstock-surface {
-  background: #0a0a0a;
-  color: #ededed;
-  font-family: Arial, Helvetica, sans-serif;
+  --grid-bg: #050608;
+  --grid-panel: rgba(10, 14, 20, 0.86);
+  --grid-panel-strong: rgba(15, 20, 28, 0.96);
+  --grid-border: rgba(148, 163, 184, 0.16);
+  --grid-border-strong: rgba(148, 163, 184, 0.32);
+  --grid-text: #e2e8f0;
+  --grid-muted: #94a3b8;
+  --grid-accent: 52 211 153;
+  --grid-accent-2: 56 189 248;
+  --grid-success: 34 197 94;
+  --grid-danger: 248 113 113;
+  --grid-warning: 251 191 36;
+  background:
+    radial-gradient(900px circle at 15% -10%, rgba(52, 211, 153, 0.18), transparent 45%),
+    radial-gradient(720px circle at 90% 10%, rgba(56, 189, 248, 0.16), transparent 40%),
+    linear-gradient(180deg, #050608 0%, #090d13 45%, #050709 100%);
+  color: var(--grid-text);
+  font-family: var(--font-body), "Space Grotesk", sans-serif;
+  position: relative;
+  isolation: isolate;
+}
+
+.gridstock-surface::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 80px 80px;
+  opacity: 0.2;
+  z-index: -1;
+}
+
+.gridstock-surface h1,
+.gridstock-surface h2,
+.gridstock-surface h3,
+.gridstock-surface h4 {
+  font-family: var(--font-heading), var(--font-body), sans-serif;
+  letter-spacing: -0.02em;
+}
+
+.gridstock-surface code,
+.gridstock-surface pre {
+  font-family: var(--font-mono), monospace;
+}
+
+@layer utilities {
+  .gs-panel {
+    background: var(--grid-panel);
+    border: 1px solid var(--grid-border);
+    box-shadow: 0 18px 40px -28px rgba(0, 0, 0, 0.75);
+  }
+
+  .gs-panel-strong {
+    background: var(--grid-panel-strong);
+    border: 1px solid var(--grid-border-strong);
+    box-shadow: 0 20px 42px -30px rgba(0, 0, 0, 0.85);
+  }
+
+  .gs-panel-soft {
+    background: rgba(12, 16, 22, 0.66);
+    border: 1px solid var(--grid-border);
+  }
+
+  .gs-chip {
+    background: rgb(var(--grid-accent) / 0.15);
+    color: rgb(var(--grid-accent));
+    border: 1px solid rgb(var(--grid-accent) / 0.35);
+  }
+
+  .gs-chip-muted {
+    background: rgba(148, 163, 184, 0.14);
+    color: var(--grid-muted);
+    border: 1px solid rgba(148, 163, 184, 0.28);
+  }
+
+  .gs-chip-warning {
+    background: rgb(var(--grid-warning) / 0.16);
+    color: rgb(var(--grid-warning));
+    border: 1px solid rgb(var(--grid-warning) / 0.4);
+  }
+
+  .gs-input {
+    background: rgba(10, 14, 20, 0.8);
+    border: 1px solid var(--grid-border);
+    color: var(--grid-text);
+  }
+
+  .gs-input::placeholder {
+    color: rgba(148, 163, 184, 0.7);
+  }
+
+  .gs-select {
+    background: rgba(10, 14, 20, 0.8);
+    border: 1px solid var(--grid-border);
+    color: var(--grid-text);
+  }
 }

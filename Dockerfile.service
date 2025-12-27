@@ -1,0 +1,26 @@
+# syntax=docker/dockerfile:1
+ARG SERVICE_NAME=@illuvrse/kernel
+ARG SERVICE_PATH=apps/kernel
+ARG SERVICE_ENTRY=apps/kernel/dist/index.js
+
+FROM node:20-alpine AS builder
+WORKDIR /repo
+RUN corepack enable
+
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY packages ./packages
+COPY ${SERVICE_PATH} ./${SERVICE_PATH}
+
+RUN pnpm install --frozen-lockfile --filter ${SERVICE_NAME}...
+RUN pnpm --filter ${SERVICE_NAME} build
+
+FROM node:20-alpine
+WORKDIR /app
+RUN corepack enable
+
+COPY --from=builder /repo/node_modules ./node_modules
+COPY --from=builder /repo/packages ./packages
+COPY --from=builder /repo/${SERVICE_PATH} ./apps/${SERVICE_PATH}
+
+ENV NODE_ENV=production
+CMD ["sh", "-c", "node ${SERVICE_ENTRY}"]

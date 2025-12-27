@@ -49,14 +49,31 @@ export function summarizeDiff(current: AceAgentManifest, next: AceAgentManifest)
   if (current.name !== next.name) changes.push(`name: ${current.name} → ${next.name}`);
   if (current.version !== next.version) changes.push(`version: ${current.version} → ${next.version}`);
   if ((current.description ?? "") !== (next.description ?? "")) changes.push("description updated");
+  if ((current.archetype ?? "") !== (next.archetype ?? "")) changes.push("archetype updated");
   if ((current.capabilities ?? []).join(",") !== (next.capabilities ?? []).join(",")) changes.push("capabilities updated");
   if (current.runtime.container.image !== next.runtime.container.image) changes.push("runtime image updated");
   if (JSON.stringify(current.triggers) !== JSON.stringify(next.triggers)) changes.push("triggers updated");
   if (current.modelBindings?.llm?.id !== next.modelBindings?.llm?.id) changes.push("LLM binding updated");
   if (current.modelBindings?.tts?.id !== next.modelBindings?.tts?.id) changes.push("TTS binding updated");
   if (current.resources?.cpu !== next.resources?.cpu || current.resources?.memory !== next.resources?.memory) changes.push("resources updated");
+  if (JSON.stringify(current.tools ?? []) !== JSON.stringify(next.tools ?? [])) changes.push("tools updated");
+  if (JSON.stringify(current.memory ?? {}) !== JSON.stringify(next.memory ?? {})) changes.push("memory policy updated");
+  if (JSON.stringify(current.presence ?? {}) !== JSON.stringify(next.presence ?? {})) changes.push("presence updated");
   if ((current.metadata?.publishToLiveLoop ?? false) !== (next.metadata?.publishToLiveLoop ?? false)) changes.push("LiveLoop publish flag updated");
   if ((current.avatar?.appearance?.assets ?? []).join(",") !== (next.avatar?.appearance?.assets ?? []).join(",")) changes.push("avatar assets updated");
+  if ((current.avatar?.profileId ?? "") !== (next.avatar?.profileId ?? "")) changes.push("avatar profile updated");
+  if (
+    (current.avatar?.personality?.archetype ?? "") !==
+    (next.avatar?.personality?.archetype ?? "")
+  ) {
+    changes.push("personality archetype updated");
+  }
+  if (
+    JSON.stringify(current.avatar?.personality?.traits ?? []) !==
+    JSON.stringify(next.avatar?.personality?.traits ?? [])
+  ) {
+    changes.push("traits updated");
+  }
   if ((current.avatar?.voice?.activationLine ?? "") !== (next.avatar?.voice?.activationLine ?? "")) changes.push("activation line updated");
   if ((current.avatar?.voice?.sampleUrl ?? "") !== (next.avatar?.voice?.sampleUrl ?? "")) changes.push("voice sample URL updated");
   return changes.length ? changes : ["No differences detected"];

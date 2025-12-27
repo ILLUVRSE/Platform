@@ -3,26 +3,47 @@ import Link from "next/link";
 import { TraceViewer } from "./trace-viewer";
 import { AuditLog } from "./audit-log";
 import { ApprovalQueue } from "./approval-queue";
+import { buildMetadata, buildJsonLd } from "@/lib/metadata";
+
+const title = "Control-Panel | Operator surface for proofs and policy";
+const description =
+  "Gated operator controls with Kernel RBAC, SentinelNet policy verdicts, and Reasoning Graph traces.";
+
+export const metadata = buildMetadata({
+  title,
+  description,
+  path: "/control-panel",
+  noIndex: true
+});
+
+const pageJsonLd = buildJsonLd({
+  title,
+  description,
+  path: "/control-panel",
+  type: "WebPage"
+});
 
 export default function ControlPanelPage() {
   const gated = process.env.NODE_ENV === "production";
   return (
-    <div className="space-y-10">
-        <section className="rounded-3xl border border-rose-200 bg-rose-50 px-8 py-6 shadow-card">
-          <h2 className="text-xl font-semibold text-rose-700">Restricted — admin only</h2>
-          <p className="text-sm text-rose-600">
-            Control-Panel is gated and not visible on the public site. Authentication required.
-          </p>
-        </section>
-        <section className="rounded-3xl border border-slate-200 bg-white px-8 py-10 shadow-card">
-          <Pill className="bg-gold-500/20 text-gold-400">Control-Panel</Pill>
-          <h1 className="mt-3 text-4xl font-semibold">Operator surface with proofs and policy</h1>
-          <p className="mt-3 max-w-2xl text-lg text-slate-700">
-            Gated operator controls backed by Kernel RBAC, SentinelNet policy verdicts, and
-            Reasoning Graph traces. Use it to ship changes, run canaries, or roll back with audit
-            evidence.
-          </p>
-        </section>
+    <>
+      <script type="application/ld+json">{JSON.stringify(pageJsonLd)}</script>
+      <div className="space-y-10">
+          <section className="rounded-3xl border border-rose-200 bg-rose-50 px-8 py-6 shadow-card">
+            <h2 className="text-xl font-semibold text-rose-700">Restricted — admin only</h2>
+            <p className="text-sm text-rose-600">
+              Control-Panel is gated and not visible on the public site. Authentication required.
+            </p>
+          </section>
+          <section className="rounded-3xl border border-slate-200 bg-white px-8 py-10 shadow-card">
+            <Pill className="bg-gold-500/20 text-gold-400">Control-Panel</Pill>
+            <h1 className="mt-3 text-4xl font-semibold">Operator surface with proofs and policy</h1>
+            <p className="mt-3 max-w-2xl text-lg text-slate-700">
+              Gated operator controls backed by Kernel RBAC, SentinelNet policy verdicts, and
+              Reasoning Graph traces. Use it to ship changes, run canaries, or roll back with audit
+              evidence.
+            </p>
+          </section>
 
         <PageSection eyebrow="Operator controls" title="Built-in guardrails">
           <div className="grid gap-4 md:grid-cols-3">
@@ -77,26 +98,34 @@ export default function ControlPanelPage() {
             >
               Open approval ledger
             </Link>
+            <span className="mx-3 text-slate-300">·</span>
+            <Link
+              href="/control-panel/tasks"
+              className="text-sm font-semibold text-teal-700 underline underline-offset-4"
+            >
+              Open task graph
+            </Link>
           </div>
         </PageSection>
 
-        <PageSection eyebrow="Proof" title="Recent signed change">
-          <ProofCard
-            sha="f41c:0022...aa9b"
-            signer="Kernel multisig"
-            timestamp="2025-02-03 15:00 UTC"
-            ledgerLink="/developers#ledger"
-            policyVerdict="SentinelNet PASS"
-          />
-          <div className="mt-6">
-            <div className="text-xs uppercase tracking-[0.2em] text-slate-500">Reasoning trace</div>
-            <TraceViewer />
-          </div>
-          <div className="mt-6">
-            <div className="text-xs uppercase tracking-[0.2em] text-slate-500">Audit log</div>
-            <AuditLog />
-          </div>
-        </PageSection>
-    </div>
+          <PageSection eyebrow="Proof" title="Recent signed change">
+            <ProofCard
+              sha="f41c:0022...aa9b"
+              signer="Kernel multisig"
+              timestamp="2025-02-03 15:00 UTC"
+              ledgerLink="/developers#ledger"
+              policyVerdict="SentinelNet PASS"
+            />
+            <div className="mt-6">
+              <div className="text-xs uppercase tracking-[0.2em] text-slate-500">Reasoning trace</div>
+              <TraceViewer />
+            </div>
+            <div className="mt-6">
+              <div className="text-xs uppercase tracking-[0.2em] text-slate-500">Audit log</div>
+              <AuditLog />
+            </div>
+          </PageSection>
+      </div>
+    </>
   );
 }

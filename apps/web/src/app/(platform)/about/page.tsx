@@ -1,15 +1,35 @@
 import { Card, PageSection, Pill, ProofCard } from "@illuvrse/ui";
+import { buildMetadata, buildJsonLd } from "@/lib/metadata";
+
+const title = "About | ILLUVRSE trust-first platform";
+const description =
+  "Learn how ILLUVRSE delivers signed artifacts, policy enforcement, and explainable operator controls.";
+
+export const metadata = buildMetadata({
+  title,
+  description,
+  path: "/about"
+});
+
+const pageJsonLd = buildJsonLd({
+  title,
+  description,
+  path: "/about",
+  type: "AboutPage"
+});
 
 export default function AboutPage() {
   return (
-    <div className="space-y-10">
-      <section className="rounded-3xl border border-slate-200 bg-white px-8 py-10 shadow-card">
-        <Pill className="bg-teal-50 text-teal-700">About / Trust</Pill>
-        <h1 className="mt-3 text-4xl font-semibold text-slate-900">Trust-first by design</h1>
-        <p className="mt-3 max-w-2xl text-lg text-slate-700">
-          ILLUVRSE is the governed platform for creators and operators: every artifact, agent, and publish event ships with signatures, policy verdicts, and explainability.
-        </p>
-      </section>
+    <>
+      <script type="application/ld+json">{JSON.stringify(pageJsonLd)}</script>
+      <div className="space-y-10">
+        <section className="rounded-3xl border border-slate-200 bg-white px-8 py-10 shadow-card">
+          <Pill className="bg-teal-50 text-teal-700">About / Trust</Pill>
+          <h1 className="mt-3 text-4xl font-semibold text-slate-900">Trust-first by design</h1>
+          <p className="mt-3 max-w-2xl text-lg text-slate-700">
+            ILLUVRSE is the governed platform for creators and operators: every artifact, agent, and publish event ships with signatures, policy verdicts, and explainability.
+          </p>
+        </section>
 
       <PageSection eyebrow="Platform Mission" title="ILLUVRSE">
         <div className="grid gap-4 md:grid-cols-2">
@@ -76,15 +96,16 @@ export default function AboutPage() {
         </div>
       </PageSection>
 
-      <PageSection eyebrow="Proof" title="Sample signed artifact">
-        <ProofCard
-          sha="f41c:0022...aa9b"
-          signer="Kernel multisig"
-          timestamp="2025-02-03 15:00 UTC"
-          ledgerLink="/developers#ledger"
-          policyVerdict="SentinelNet PASS"
-        />
-      </PageSection>
-    </div>
+        <PageSection eyebrow="Proof" title="Sample signed artifact">
+          <ProofCard
+            sha="f41c:0022...aa9b"
+            signer="Kernel multisig"
+            timestamp="2025-02-03 15:00 UTC"
+            ledgerLink="/developers#ledger"
+            policyVerdict="SentinelNet PASS"
+          />
+        </PageSection>
+      </div>
+    </>
   );
 }

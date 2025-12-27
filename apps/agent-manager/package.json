@@ -1,0 +1,19 @@
+{
+  "name": "@illuvrse/agent-manager-service",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "@aws-sdk/client-sqs": "^3.758.0",
+    "@illuvrse/agent-manager": "workspace:*",
+    "@illuvrse/contracts": "workspace:*",
+    "@illuvrse/db": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5"
+  }
+}

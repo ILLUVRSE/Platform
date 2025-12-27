@@ -123,21 +123,21 @@ export const TradeModal: React.FC<TradeModalProps> = ({ isOpen, onClose, quote, 
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-      <div className="bg-gray-900 border border-gray-800 rounded-xl w-full max-w-md p-6 space-y-6 shadow-2xl animate-in fade-in zoom-in-95">
+      <div className="gs-panel-strong rounded-2xl w-full max-w-md p-6 space-y-6 shadow-2xl animate-in fade-in zoom-in-95">
          <div className="flex justify-between items-center">
             <h2 className="text-xl font-bold">Trade {ticker}</h2>
-            <button onClick={onClose} className="text-gray-500 hover:text-white">✕</button>
+            <button onClick={onClose} className="text-slate-400 hover:text-white">✕</button>
          </div>
 
-         <div className="flex bg-gray-800 rounded-lg p-1">
+         <div className="flex gs-panel-soft rounded-full p-1">
             <button 
-              className={`flex-1 py-2 rounded-md font-medium text-sm transition-colors ${type === 'BUY' ? 'bg-green-600 text-white' : 'text-gray-400 hover:text-gray-200'}`}
+              className={`flex-1 py-2 rounded-full font-semibold text-xs uppercase tracking-wide transition-colors ${type === 'BUY' ? 'bg-[rgb(var(--grid-success)/0.2)] text-emerald-200 border border-[rgb(var(--grid-success)/0.5)]' : 'text-slate-400 hover:text-white'}`}
               onClick={() => setType('BUY')}
             >
               Buy
             </button>
             <button 
-              className={`flex-1 py-2 rounded-md font-medium text-sm transition-colors ${type === 'SELL' ? 'bg-red-600 text-white' : 'text-gray-400 hover:text-gray-200'}`}
+              className={`flex-1 py-2 rounded-full font-semibold text-xs uppercase tracking-wide transition-colors ${type === 'SELL' ? 'bg-[rgb(var(--grid-danger)/0.2)] text-rose-200 border border-[rgb(var(--grid-danger)/0.5)]' : 'text-slate-400 hover:text-white'}`}
               onClick={() => setType('SELL')}
             >
               Sell
@@ -145,37 +145,38 @@ export const TradeModal: React.FC<TradeModalProps> = ({ isOpen, onClose, quote, 
          </div>
 
          <div className="space-y-4">
-            <div className="flex justify-between text-sm text-gray-400">
+            <div className="flex justify-between text-sm text-slate-400">
                <span>Available Cash: ${portfolio.cashBalance.toFixed(2)}</span>
                <span>Owned: {ownedQuantity} shares</span>
             </div>
 
             <div>
-               <label className="text-sm text-gray-400 mb-1 block">Shares</label>
+               <label className="text-sm text-slate-400 mb-1 block">Shares</label>
                <input 
                   type="number" 
                   min="1"
                   value={quantity}
                   onChange={(e) => setQuantity(parseInt(e.target.value) || 0)}
-                  className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-3 text-2xl font-bold text-white focus:outline-none focus:border-green-500"
+                  className="w-full gs-input rounded-lg px-3 py-3 text-2xl font-bold text-white focus:outline-none focus:ring-2 focus:ring-[rgb(var(--grid-accent)/0.35)]"
                />
             </div>
 
-            <div className="flex justify-between items-center py-2 border-t border-gray-800">
-               <span className="text-gray-400">Market Price</span>
+            <div className="flex justify-between items-center py-2 border-t border-[color:var(--grid-border)]">
+               <span className="text-slate-400">Market Price</span>
                <span className="font-medium">${currentPrice.toFixed(2)}</span>
             </div>
             
-            <div className="flex justify-between items-center py-2 border-t border-gray-800">
-               <span className="text-gray-400">Estimated Total</span>
+            <div className="flex justify-between items-center py-2 border-t border-[color:var(--grid-border)]">
+               <span className="text-slate-400">Estimated Total</span>
                <span className="font-bold text-xl">${estimatedTotal.toFixed(2)}</span>
             </div>
             
-            {error && <div className="text-red-500 text-sm bg-red-500/10 p-2 rounded">{error}</div>}
-            {success && <div className="text-green-500 text-sm bg-green-500/10 p-2 rounded">{success}</div>}
+            {error && <div className="text-rose-200 text-sm bg-rose-500/10 p-2 rounded">{error}</div>}
+            {success && <div className="text-emerald-200 text-sm bg-emerald-500/10 p-2 rounded">{success}</div>}
 
             <Button 
-               className={`w-full py-3 text-lg ${type === 'BUY' ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700'}`}
+               className="w-full py-3 text-lg"
+               variant={type === "BUY" ? "primary" : "danger"}
                onClick={handleTrade}
             >
                {type} {ticker}

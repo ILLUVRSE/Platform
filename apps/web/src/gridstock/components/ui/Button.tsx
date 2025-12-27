@@ -13,19 +13,24 @@ export const Button: React.FC<ButtonProps> = ({
   className = '', 
   ...props 
 }) => {
-  const baseStyles = "font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2";
+  const baseStyles =
+    "inline-flex items-center justify-center gap-2 font-semibold rounded-lg transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-black/60 disabled:cursor-not-allowed disabled:opacity-50";
   
   const variants = {
-    primary: "bg-green-500 hover:bg-green-600 text-white focus:ring-green-500",
-    secondary: "bg-gray-800 hover:bg-gray-700 text-white border border-gray-600 focus:ring-gray-500",
-    danger: "bg-red-500 hover:bg-red-600 text-white focus:ring-red-500",
-    ghost: "bg-transparent hover:bg-gray-800 text-gray-300 hover:text-white"
+    primary:
+      "bg-[rgb(var(--grid-accent))] text-slate-950 shadow-[0_12px_26px_-18px_rgba(52,211,153,0.8)] hover:bg-[rgb(var(--grid-accent)/0.9)] focus:ring-[rgb(var(--grid-accent)/0.6)]",
+    secondary:
+      "bg-[color:var(--grid-panel-strong)] text-slate-100 border border-[color:var(--grid-border-strong)] hover:border-[rgb(var(--grid-accent)/0.5)] hover:text-white focus:ring-[rgb(var(--grid-accent)/0.4)]",
+    danger:
+      "bg-[rgb(var(--grid-danger))] text-slate-950 shadow-[0_12px_26px_-18px_rgba(248,113,113,0.7)] hover:bg-[rgb(var(--grid-danger)/0.9)] focus:ring-[rgb(var(--grid-danger)/0.5)]",
+    ghost:
+      "bg-transparent text-[color:var(--grid-muted)] hover:text-white hover:bg-white/5 border border-transparent focus:ring-white/20"
   };
 
   const sizes = {
-    sm: "px-3 py-1.5 text-sm",
-    md: "px-4 py-2 text-base",
-    lg: "px-6 py-3 text-lg"
+    sm: "px-3 py-1.5 text-xs",
+    md: "px-4 py-2 text-sm",
+    lg: "px-6 py-3 text-base"
   };
 
   return (

@@ -1,0 +1,70 @@
+name: Deploy Staging (Kernel/Sentinel/AgentManager)
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - "apps/kernel/**"
+      - "apps/sentinel/**"
+      - "apps/agent-manager/**"
+      - "packages/**"
+      - "Dockerfile.service"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
+
+env:
+  AWS_REGION: us-east-1
+  ECS_CLUSTER: illuvrse-staging-cluster
+  IMAGE_TAG: staging
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - name: kernel
+            service_name: "@illuvrse/kernel"
+            service_path: "apps/kernel"
+            service_entry: "apps/kernel/dist/index.js"
+            ecr_repo: "illuvrse/kernel"
+            ecs_service: "illuvrse-staging-kernel"
+          - name: sentinel
+            service_name: "@illuvrse/sentinel"
+            service_path: "apps/sentinel"
+            service_entry: "apps/sentinel/dist/index.js"
+            ecr_repo: "illuvrse/sentinel"
+            ecs_service: "illuvrse-staging-sentinel"
+          - name: agent-manager
+            service_name: "@illuvrse/agent-manager-service"
+            service_path: "apps/agent-manager"
+            service_entry: "apps/agent-manager/dist/index.js"
+            ecr_repo: "illuvrse/agent-manager"
+            ecs_service: "illuvrse-staging-agent-manager"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+      - uses: docker/setup-buildx-action@v3
+      - uses: aws-actions/amazon-ecr-login@v2
+        id: login-ecr
+      - name: Build and push ${{ matrix.name }}
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: Dockerfile.service
+          push: true
+          tags: ${{ steps.login-ecr.outputs.registry }}/${{ matrix.ecr_repo }}:${{ env.IMAGE_TAG }}
+          build-args: |
+            SERVICE_NAME=${{ matrix.service_name }}
+            SERVICE_PATH=${{ matrix.service_path }}
+            SERVICE_ENTRY=${{ matrix.service_entry }}
+      - name: Deploy ${{ matrix.name }}
+        run: |
+          aws ecs update-service --cluster "${ECS_CLUSTER}" --service "${{ matrix.ecs_service }}" --force-new-deployment
+          aws ecs wait services-stable --cluster "${ECS_CLUSTER}" --services "${{ matrix.ecs_service }}"

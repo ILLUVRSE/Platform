@@ -73,12 +73,12 @@ export const LiveNewsPanel: React.FC<LiveNewsPanelProps> = ({
   }, [dedupedNews, timeFilter, tickerFilter]);
 
   return (
-    <div className="bg-gray-900 border border-gray-800 rounded-xl p-4 flex flex-col gap-3 h-full">
+    <div className="gs-panel rounded-2xl p-5 flex flex-col gap-3 h-full">
       <div className="flex items-start justify-between gap-3">
         <div className="space-y-1">
           <h3 className="text-lg font-bold">{title}</h3>
-          <p className="text-xs text-gray-500">{subText}</p>
-          <p className="text-[11px] text-gray-500 uppercase tracking-wide">
+          <p className="text-xs text-slate-400">{subText}</p>
+          <p className="text-[11px] text-slate-500 uppercase tracking-wide">
             Tracking: {watching}
           </p>
         </div>
@@ -93,10 +93,10 @@ export const LiveNewsPanel: React.FC<LiveNewsPanelProps> = ({
         </Button>
       </div>
 
-      <div className="flex flex-wrap items-center gap-2 text-xs text-gray-400">
+      <div className="flex flex-wrap items-center gap-2 text-xs text-slate-400">
         <span>Filter:</span>
         <select
-          className="bg-gray-800 text-xs px-2 py-1 rounded border border-gray-700"
+          className="gs-select text-xs px-2 py-1 rounded-full"
           value={timeFilter}
           onChange={(e) =>
             setTimeFilter(e.target.value as "1h" | "6h" | "24h" | "all")
@@ -108,7 +108,7 @@ export const LiveNewsPanel: React.FC<LiveNewsPanelProps> = ({
           <option value="all">All</option>
         </select>
         <select
-          className="bg-gray-800 text-xs px-2 py-1 rounded border border-gray-700"
+          className="gs-select text-xs px-2 py-1 rounded-full"
           value={tickerFilter}
           onChange={(e) => setTickerFilter(e.target.value)}
         >
@@ -135,15 +135,15 @@ export const LiveNewsPanel: React.FC<LiveNewsPanelProps> = ({
           return (
           <div
             key={article.id}
-            className="block bg-gray-800/60 border border-gray-800 rounded-lg p-3 hover:border-gray-600 transition-colors"
+            className="block gs-panel-soft rounded-xl p-3 hover:border-[rgb(var(--grid-accent)/0.35)] transition-colors"
           >
             <div className="flex items-start justify-between gap-2">
-              <div className="text-sm font-semibold text-gray-100 leading-tight">
+              <div className="text-sm font-semibold text-slate-100 leading-tight">
                 {article.headline}
               </div>
               <Badge variant="neutral">{article.source}</Badge>
             </div>
-            <div className="mt-2 flex items-center gap-2 text-xs text-gray-400">
+            <div className="mt-2 flex items-center gap-2 text-xs text-slate-400">
               <span>
                 {new Date(article.timestamp).toLocaleTimeString([], {
                   hour: "2-digit",
@@ -159,8 +159,8 @@ export const LiveNewsPanel: React.FC<LiveNewsPanelProps> = ({
                         key={`${article.id}-${t}`}
                         className={
                           watchSet.has(t.toUpperCase())
-                            ? "text-green-400 font-medium"
-                            : "text-gray-400"
+                            ? "text-emerald-300 font-medium"
+                            : "text-slate-400"
                         }
                       >
                         {t}
@@ -170,11 +170,11 @@ export const LiveNewsPanel: React.FC<LiveNewsPanelProps> = ({
                 </>
               )}
             </div>
-            <div className="mt-3 flex items-center gap-2 text-xs text-gray-400">
+            <div className="mt-3 flex items-center gap-2 text-xs text-slate-400">
               {primaryTicker && (
                 <Link
                   href={`/gridstock/stock/${primaryTicker}`}
-                  className="px-2 py-1 rounded bg-gray-900 border border-gray-700 hover:border-gray-500 text-gray-200"
+                  className="px-2 py-1 rounded-full bg-[color:var(--grid-panel-strong)] border border-[color:var(--grid-border-strong)] hover:border-[rgb(var(--grid-accent)/0.5)] text-slate-200"
                 >
                   Open {primaryTicker}
                 </Link>
@@ -184,7 +184,7 @@ export const LiveNewsPanel: React.FC<LiveNewsPanelProps> = ({
                   href={article.url}
                   target="_blank"
                   rel="noreferrer"
-                  className="px-2 py-1 rounded bg-gray-900 border border-gray-700 hover:border-gray-500 text-gray-300"
+                  className="px-2 py-1 rounded-full bg-[color:var(--grid-panel-strong)] border border-[color:var(--grid-border-strong)] hover:border-[rgb(var(--grid-accent)/0.5)] text-slate-300"
                 >
                   Source
                 </a>
@@ -195,13 +195,13 @@ export const LiveNewsPanel: React.FC<LiveNewsPanelProps> = ({
         })}
 
         {!loading && filteredNews.length === 0 && (
-          <div className="text-sm text-gray-500">
+          <div className="text-sm text-slate-500">
             No headlines yet. We will keep watching your symbols.
           </div>
         )}
 
         {loading && filteredNews.length === 0 && (
-          <div className="text-sm text-gray-500">Loading headlines...</div>
+          <div className="text-sm text-slate-500">Loading headlines...</div>
         )}
       </div>
     </div>

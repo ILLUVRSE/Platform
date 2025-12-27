@@ -9,10 +9,12 @@ export async function GET(req: NextRequest) {
   const filterId = searchParams.get("id");
 
   const backend = env.AGENT_BACKEND_URL ?? "http://localhost:4040";
+  const token = env.AGENT_BACKEND_TOKEN;
+  const authHeaders = token ? { Authorization: `Bearer ${token}` } : {};
   if (backend) {
     try {
       const upstream = await fetch(`${backend.replace(/\/$/, "")}/stream${filterId ? `?id=${encodeURIComponent(filterId)}` : ""}`, {
-        headers: { Accept: "text/event-stream" },
+        headers: { Accept: "text/event-stream", ...authHeaders },
         cache: "no-store"
       });
       if (upstream.ok && upstream.body) {

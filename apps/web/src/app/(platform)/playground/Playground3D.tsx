@@ -2,7 +2,7 @@
 
 import { Canvas, useFrame } from "@react-three/fiber";
 import { OrbitControls, Html, Float, Stars } from "@react-three/drei";
-import { XR, Controllers, VRButton } from "@react-three/xr";
+import { XR, createXRStore } from "@react-three/xr";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { AceAgentManifest } from "@illuvrse/contracts";
 import { tutorialManifests } from "./TutorialManifests";
@@ -13,6 +13,13 @@ type NodeProps = {
   position: [number, number, number];
   onSelect: (manifest: AceAgentManifest) => void;
   selected: boolean;
+};
+
+type WorldEntity = {
+  id: string;
+  type: string;
+  label?: string;
+  position: { x: number; y: number; z: number };
 };
 
 const capabilityColors: Record<string, string> = {
@@ -109,6 +116,11 @@ export function Playground3D({ handoffManifest }: { handoffManifest?: AceAgentMa
     Record<string, { status: string; action?: string; message?: string; proofSha?: string; policyVerdict?: string; timestamp?: number; latencyMs?: number }[]>
   >({});
   const [filterAction, setFilterAction] = useState<string>("all");
+  const xrStore = useMemo(() => createXRStore({ offerSession: false }), []);
+  const worldUrl = process.env.NEXT_PUBLIC_WORLD_URL;
+  const clientId = useMemo(() => crypto.randomUUID(), []);
+  const worldSocketRef = useRef<WebSocket | null>(null);
+  const [worldEntities, setWorldEntities] = useState<Record<string, WorldEntity>>({});
 
   useEffect(() => {
     try {
@@ -147,6 +159,85 @@ export function Playground3D({ handoffManifest }: { handoffManifest?: AceAgentMa
       mounted = false;
     };
   }, []);
+
+  useEffect(() => {
+    const unsubscribe = xrStore.subscribe((state) => {
+      setXrEnabled(Boolean(state.session));
+    });
+    return unsubscribe;
+  }, [xrStore]);
+
+  useEffect(() => {
+    if (!worldUrl) return;
+    const wsBase = worldUrl.startsWith("ws") ? worldUrl : worldUrl.replace(/^http/, "ws");
+    const ws = new WebSocket(`${wsBase.replace(/\/$/, "")}/ws?room=playground&clientId=${clientId}&label=${encodeURIComponent(approvedBy)}`);
+    worldSocketRef.current = ws;
+
+    ws.onmessage = (event) => {
+      try {
+        const payload = JSON.parse(event.data) as {
+          type: string;
+          action?: string;
+          id?: string;
+          entity?: WorldEntity;
+          entities?: WorldEntity[];
+        };
+        if (payload.type === "world.snapshot" && payload.entities) {
+          const next: Record<string, WorldEntity> = {};
+          payload.entities.forEach((entity) => {
+            if (entity?.id) next[entity.id] = entity;
+          });
+          setWorldEntities(next);
+        }
+        if (payload.type === "world.entity") {
+          if (payload.action === "remove" || payload.action === "leave") {
+            if (payload.id) {
+              setWorldEntities((prev) => {
+                const next = { ...prev };
+                delete next[payload.id as string];
+                return next;
+              });
+            }
+          } else if (payload.entity?.id) {
+            setWorldEntities((prev) => ({ ...prev, [payload.entity!.id]: payload.entity! }));
+          }
+        }
+      } catch {
+        // ignore malformed events
+      }
+    };
+
+    ws.onopen = () => {
+      ws.send(
+        JSON.stringify({
+          type: "entity.update",
+          id: clientId,
+          kind: "operator",
+          label: approvedBy,
+          position: { x: 0, y: 0.2, z: 0 }
+        })
+      );
+    };
+
+    return () => {
+      ws.close();
+      worldSocketRef.current = null;
+    };
+  }, [worldUrl, clientId]);
+
+  useEffect(() => {
+    const ws = worldSocketRef.current;
+    if (!ws || ws.readyState !== WebSocket.OPEN) return;
+    ws.send(
+      JSON.stringify({
+        type: "entity.update",
+        id: clientId,
+        kind: "operator",
+        label: approvedBy,
+        position: { x: 0, y: 0.2, z: 0 }
+      })
+    );
+  }, [approvedBy, clientId]);
 
   function applyStoredManifest(parsed: AceAgentManifest, label: string) {
     const match = tutorialManifests.find((m) => m.manifest.id === parsed.id);
@@ -401,12 +492,23 @@ export function Playground3D({ handoffManifest }: { handoffManifest?: AceAgentMa
           <>
             <button
               type="button"
-              onClick={() => setXrEnabled((prev) => !prev)}
+              onClick={async () => {
+                if (xrEnabled) {
+                  xrStore.getState().session?.end();
+                  return;
+                }
+                try {
+                  await xrStore.enterVR();
+                } catch (err) {
+                  const message = err instanceof Error ? err.message : "Unable to start VR session";
+                  setToast(message);
+                  setTimeout(() => setToast(null), 2500);
+                }
+              }}
               className="rounded-full border border-slate-300 px-3 py-1 text-[12px] font-semibold text-slate-700 transition hover:border-teal-500/70"
             >
               {xrEnabled ? "Exit VR mode" : "Enter VR mode"}
             </button>
-            {xrEnabled && <VRButton />}
           </>
         ) : (
           <span className="rounded-full border border-slate-300 px-3 py-1 text-[12px] text-slate-400">VR not supported in this browser</span>
@@ -439,8 +541,12 @@ export function Playground3D({ handoffManifest }: { handoffManifest?: AceAgentMa
                     avatarActivation: selected.avatar?.voice?.activationLine ?? "",
                     avatarAssets: (selected.avatar?.appearance?.assets ?? []).join(", "),
                     avatarVoiceUrl: selected.avatar?.voice?.sampleUrl ?? "",
+                    avatarProfileId: selected.avatar?.profileId ?? "",
                     cpu: selected.resources?.cpu ?? "",
-                    memory: selected.resources?.memory ?? ""
+                    memory: selected.resources?.memory ?? "",
+                    toolsJson: selected.tools ? JSON.stringify(selected.tools, null, 2) : "",
+                    memoryJson: selected.memory ? JSON.stringify(selected.memory, null, 2) : "",
+                    presenceJson: selected.presence ? JSON.stringify(selected.presence, null, 2) : ""
                   })
                 );
               } catch {
@@ -491,7 +597,7 @@ export function Playground3D({ handoffManifest }: { handoffManifest?: AceAgentMa
       <div className="h-[420px] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-card">
         <Canvas camera={{ position: [0, 4, 8], fov: 50 }}>
           <color attach="background" args={["#f2ece2"]} />
-          <XR enabled={xrEnabled}>
+          <XR store={xrStore}>
             <ambientLight intensity={0.6} />
             <directionalLight position={[5, 8, 5]} intensity={1} />
             <Stars radius={40} depth={50} count={1200} factor={4} fade />
@@ -525,7 +631,21 @@ export function Playground3D({ handoffManifest }: { handoffManifest?: AceAgentMa
                 policyVerdict={statusMap[customManifest.id]?.policyVerdict}
               />
             ) : null}
-            {xrEnabled ? <Controllers /> : null}
+            {Object.values(worldEntities)
+              .filter((entity) => entity.id !== clientId)
+              .map((entity) => (
+                <Float key={entity.id} floatIntensity={0.6} speed={1.6} position={[entity.position.x, entity.position.y + 0.4, entity.position.z]}>
+                  <mesh scale={0.25}>
+                    <sphereGeometry args={[1, 16, 16]} />
+                    <meshStandardMaterial color="#8DE3FF" emissive="#8DE3FF" emissiveIntensity={0.35} />
+                  </mesh>
+                  <Html distanceFactor={12}>
+                    <div className="rounded-full border border-slate-200 bg-white/90 px-2 py-[2px] text-[10px] text-slate-700 shadow-card">
+                      {entity.label ?? entity.type}
+                    </div>
+                  </Html>
+                </Float>
+              ))}
           </XR>
           {!xrEnabled && <OrbitControls enablePan enableZoom enableRotate />}
         </Canvas>
@@ -538,7 +658,7 @@ export function Playground3D({ handoffManifest }: { handoffManifest?: AceAgentMa
           </div>
           <div className="mb-2 flex flex-wrap items-center gap-2 text-[11px] text-slate-600">
             <span>Filter:</span>
-            {["all", "generate.preview", "publish.marketplace", "publish.liveloop", "verify.proofs"].map((f) => (
+            {["all", "generate.preview", "publish.marketplace", "publish.liveloop", "verify.proofs", "news.pitch", "news.alert"].map((f) => (
               <button
                 key={f}
                 type="button"

@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { validateAceAgentManifest } from "@illuvrse/contracts";
 import { emitAudit } from "../../../../lib/audit";
+import { callUpstream } from "../../../../lib/upstream";
+import { loadConfig } from "../../../../lib/config";
 
 export async function POST(request: Request) {
   const body = await request.json().catch(() => ({}));
@@ -15,6 +17,19 @@ export async function POST(request: Request) {
       data: { error: (err as Error).message }
     });
     return NextResponse.json({ verdict: "REJECT", reason: (err as Error).message }, { status: 400 });
+  }
+
+  const config = loadConfig();
+  const upstream = config.sentinelUrl;
+  const upstreamRes = await callUpstream({
+    baseUrl: upstream,
+    path: "/evaluate",
+    method: "POST",
+    body,
+    tokenEnv: "SENTINEL_TOKEN"
+  });
+  if (upstreamRes.ok) {
+    return NextResponse.json(upstreamRes.data);
   }
 
   const verdict = {

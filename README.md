@@ -10,6 +10,19 @@ Monorepo for the governed creator platform and StorySphere studio.
   - `/food` Moms Kitchen (recipes, menus, meal planning).
   - `/gridstock` GridStock market terminal (dashboard, portfolio, games).
 
+## Services
+- `apps/kernel` – Kernel signing/verify service (default :4000).
+- `apps/sentinel` – Sentinel policy evaluation (default :4105).
+- `apps/marketplace` – Marketplace listing/checkout (default :4100).
+- `apps/finance` – Finance receipts/verify (default :4300).
+- `apps/artifact-publisher` – Artifact delivery proofs (default :4400).
+- `apps/agent-manager` – Agent job queue + SSE (default :4040).
+- `apps/memory` – Agent memory service (default :4500).
+- `apps/world-state` – World state + realtime presence (default :4600).
+- `apps/avatar-registry` – Avatar registry (default :4700).
+- `apps/voice` – TTS/STT + viseme stub service (default :4800).
+- Docker builds: `Dockerfile.service` with build args (see `docs/services.md`).
+
 ## Shared packages
 - `@illuvrse/ui` – design tokens and shared UI primitives.
 - `@illuvrse/config` – shared tsconfig and Tailwind preset.
@@ -20,6 +33,9 @@ Monorepo for the governed creator platform and StorySphere studio.
 - `pnpm start:platform` – start the production build on port 3000 (requires `pnpm build` first).
 - `pnpm lint` – lint the unified platform.
 - `pnpm test:smoke` – Playwright smoke tests (skipped by default). Set `RUN_UI_SMOKE=true WEB_URL=http://localhost:3000 STUDIO_URL=http://localhost:3000/news` and run `pnpm dev`.
+
+## Infra (Terraform)
+See `infra/README.md` for AWS + Cloudflare provisioning and secret bootstrapping.
 
 ## Local operator (RYAN)
 RYAN runs offline and logs actions in `.ryan/audit.log`. Memory is stored locally in `.ryan/memory.db` (via `better-sqlite3`).
@@ -48,11 +64,21 @@ Examples:
 
 ## Environment
 - `KERNEL_URL` – forward Kernel sign/verify requests to a real Kernel endpoint (defaults to stub).
+- `SENTINEL_URL` – forward policy evaluation to Sentinel service (defaults to stub).
 - `MARKETPLACE_URL` – forward listing/checkout to a real Marketplace endpoint (defaults to stub).
 - `STORYSPHERE_BACKEND_URL` – forward generate/publish to a StorySphere backend (defaults to stub).
 - `FINANCE_URL` – forward Finance receipt/verify to a Finance service.
 - `ARTIFACT_PUBLISHER_URL` – forward artifact publish to a publisher service.
 - `AGENT_BACKEND_URL` – AgentManager base URL for `/api/agent/*` (exec/status/stream polling).
+- `MEMORY_URL` – Agent memory service base URL.
+- `WORLD_STATE_URL` – World state service base URL.
+- `VOICE_URL` – Voice pipeline service base URL.
+- `AVATAR_REGISTRY_URL` – Avatar registry base URL.
+- `KERNEL_TOKEN` / `SENTINEL_TOKEN` / `MARKETPLACE_TOKEN` / `FINANCE_TOKEN` / `ARTIFACT_PUBLISHER_TOKEN` / `AGENT_BACKEND_TOKEN` – service-to-service auth tokens.
+- `MEMORY_TOKEN` – auth token for the memory service.
+- `WORLD_TOKEN` – auth token for the world state service.
+- `VOICE_TOKEN` – auth token for the voice service.
+- `KERNEL_KMS_KEY_ID` – KMS key for Kernel signing (required for production signing).
 - `AGENT_APPROVAL_REQUIRED` – set to `false` to bypass operator approval gating (defaults to required).
 - `AGENT_APPROVER` – comma-separated list of approved operator names (defaults to `Ryan Lueckenotte`).
 - `DATABASE_URL` – Postgres connection for News (required for `/news`).

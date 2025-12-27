@@ -2,9 +2,11 @@ import { readJson } from "./dataLoader";
 import { jobs as defaultJobs, type Job } from "./jobsData";
 import { playlist as defaultPlaylist, type LiveLoopItem } from "./liveloopData";
 import { moviesCatalog, seriesCatalog } from "./libraryData";
+import { defaultStudioProject } from "./studioProject";
+import { defaultEpisodePlan } from "./episodePlan";
 import { client } from "./db";
 
-type KVKeys = "jobs" | "playlist" | "library";
+type KVKeys = "jobs" | "playlist" | "library" | "studio" | "episode";
 
 async function ensureSeeds() {
   const existingJobs = await getKV("jobs");
@@ -18,6 +20,12 @@ async function ensureSeeds() {
     const defaults = await readJson("data/library.json", { movies: moviesCatalog, series: seriesCatalog });
     await setKV("library", defaults);
   }
+
+  const existingStudio = await getKV("studio");
+  if (!existingStudio) await setKV("studio", defaultStudioProject);
+
+  const existingEpisode = await getKV("episode");
+  if (!existingEpisode) await setKV("episode", defaultEpisodePlan);
 }
 
 ensureSeeds();
@@ -119,5 +127,9 @@ export const store = {
     return list;
   },
   getLibrary: async () => (await getKV<{ movies: typeof moviesCatalog; series: typeof seriesCatalog }>("library")) ?? { movies: moviesCatalog, series: seriesCatalog },
-  setLibrary: async (lib: { movies: unknown; series: unknown }) => setKV("library", lib)
+  setLibrary: async (lib: { movies: unknown; series: unknown }) => setKV("library", lib),
+  getStudioProject: async () => (await getKV<typeof defaultStudioProject>("studio")) ?? defaultStudioProject,
+  setStudioProject: async (project: typeof defaultStudioProject) => setKV("studio", project),
+  getEpisodePlan: async () => (await getKV<typeof defaultEpisodePlan>("episode")) ?? defaultEpisodePlan,
+  setEpisodePlan: async (plan: typeof defaultEpisodePlan) => setKV("episode", plan)
 };

@@ -36,9 +36,10 @@ Use this checklist to get the platform running locally and to align on workstrea
 
 ## Playground status
 - Tutorial manifests (StoryWeaver, Scheduler, Proof Guardian, Asset Curator, Voice Stylist, Engagement Monitor) load to storage/cookie; upload accepts signed manifests; local handoff loads from `.ryan/ace` and syncs to storage.
-- 3D preview is currently disabled in this build (React 19 + react-three mismatch; `ReactSharedInternals` / `ReactCurrentOwner` undefined). When re-enabled, the 3D scene (react-three-fiber + XR) includes a VR toggle; nodes show status badges via SSE `/api/agent/stream`; actions: Send to ACE, Generate preview (exec), Publish (stub), Verify (stub); history panel shows proof/policy fields plus action/timestamps.
+- 3D preview runs via react-three-fiber + XR with VR toggle; nodes show status badges via SSE `/api/agent/stream`; actions: Send to ACE, Generate preview (exec), Publish (stub), Verify (stub); history panel shows proof/policy fields plus action/timestamps. If imports fail, align React 19 with latest react-three versions.
 - Custom handoff manifests appear as a dedicated node in the 3D scene for live actions.
 - Lightened HUD/tooltips; stored manifest controls (reload/clear); publish drawer triggers checkout/publish/verify stubs.
+- World state service (`apps/world-state`) broadcasts presence to the 3D scene when `NEXT_PUBLIC_WORLD_URL` is set.
 - Needs: align React 19 + react-three stack to re-enable 3D preview; replace in-memory exec/stream with real queue/backend; add more commands (publish/verify) and status edges; continue theme alignment across 3D panel.
 
 ## Agent APIs (stubs)

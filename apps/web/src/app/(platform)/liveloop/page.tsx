@@ -1,27 +1,20 @@
-import type { Metadata } from "next";
 import LiveLoopClient from "./LiveLoopClient";
 import { playlist as defaultPlaylist } from "@studio/lib/liveloopData";
 import prisma from "@news/lib/prisma";
+import { buildMetadata } from "@/lib/metadata";
 
 export const revalidate = 60;
 
-export const metadata: Metadata = {
-  title: "LiveLoop | ILLUVRSE channel guide",
-  description:
-    "LiveLoop is the channel guide for StorySphere, LiveLoop, News, Radio, and LiveStreams with proof-backed slots and schedule visibility.",
-  openGraph: {
-    title: "LiveLoop | ILLUVRSE channel guide",
-    description:
-      "LiveLoop is the channel guide for StorySphere, LiveLoop, News, Radio, and LiveStreams with proof-backed slots and schedule visibility.",
-    url: "https://www.illuvrse.com/liveloop"
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "LiveLoop | ILLUVRSE channel guide",
-    description:
-      "LiveLoop is the channel guide for StorySphere, LiveLoop, News, Radio, and LiveStreams with proof-backed slots and schedule visibility."
-  }
-};
+const title = "LiveLoop | ILLUVRSE channel guide";
+const description =
+  "LiveLoop is the channel guide for StorySphere, LiveLoop, News, Radio, and LiveStreams with proof-backed slots and schedule visibility.";
+const pageUrl = "https://www.illuvrse.com/liveloop";
+
+export const metadata = buildMetadata({
+  title,
+  description,
+  path: "/liveloop"
+});
 
 const onAirItem = defaultPlaylist.find((item) => item.status === "On Air") ?? defaultPlaylist[0];
 const nowIso = new Date().toISOString();
@@ -31,9 +24,8 @@ const liveLoopJsonLd = {
   "@context": "https://schema.org",
   "@type": "BroadcastService",
   name: "ILLUVRSE LiveLoop",
-  description:
-    "Channel guide for StorySphere, LiveLoop, News, Radio, and LiveStreams with proof-backed slots and scheduled programming.",
-  url: "https://www.illuvrse.com/liveloop",
+  description,
+  url: pageUrl,
   broadcaster: {
     "@type": "Organization",
     name: "ILLUVRSE"

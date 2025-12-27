@@ -34,6 +34,68 @@ export const tutorialManifests: { manifest: AceAgentManifest; blurb: string; sta
     }
   },
   {
+    stage: "Executive Suite",
+    blurb: "CEO agent steering ILLUVRSE News strategy and approvals.",
+    manifest: {
+      id: "agent.otteryan.exec.001",
+      name: "OTTERYAN",
+      version: "0.1.0",
+      description: "CEO of ILLUVRSE guiding News direction and ops priorities.",
+      archetype: "Visionary",
+      capabilities: ["assistant", "monitor", "scheduler"],
+      triggers: [{ type: "event", event: "news.directive" }],
+      modelBindings: {
+        llm: { id: "gpt-4o", provider: "openai" },
+        tts: { id: "eleven.v1", provider: "elevenlabs", voice: "commanding" }
+      },
+      permissions: { network: { outbound: true } },
+      resources: { cpu: "700m", memory: "1Gi" },
+      runtime: { container: { image: "illuvrse/agent-otteryan:demo" } },
+      metadata: {
+        role: "CEO, ILLUVRSE",
+        hub: "Orchestration Atrium",
+        location: "Orchestration Atrium",
+        department: "Executive"
+      },
+      avatar: {
+        appearance: { assets: ["s3://avatars/otteryan"], stylePreset: "stylized" },
+        voice: { activationLine: "CEO online. What's the call?" },
+        personality: { traits: ["Visionary", "Calm", "Strategic"], archetype: "Leader" }
+      }
+    }
+  },
+  {
+    stage: "News Desk",
+    blurb: "Editor in Chief agent curating stories and approvals.",
+    manifest: {
+      id: "agent.ollieowl.editor.001",
+      name: "OLLIEOWL",
+      version: "0.1.0",
+      description: "Editor in Chief for ILLUVRSE News coverage and standards.",
+      archetype: "Editor",
+      capabilities: ["catalog", "moderator", "assistant"],
+      triggers: [{ type: "event", event: "news.pitch" }],
+      modelBindings: {
+        llm: { id: "gpt-4o-mini", provider: "openai" },
+        tts: { id: "eleven.v1", provider: "elevenlabs", voice: "crisp" }
+      },
+      permissions: { storage: { write: ["news/"] }, network: { outbound: true } },
+      resources: { cpu: "600m", memory: "1Gi" },
+      runtime: { container: { image: "illuvrse/agent-ollieowl:demo" } },
+      metadata: {
+        role: "Editor in Chief",
+        hub: "News Tower",
+        location: "News Tower",
+        department: "News"
+      },
+      avatar: {
+        appearance: { assets: ["s3://avatars/ollieowl"], stylePreset: "stylized" },
+        voice: { activationLine: "News desk ready. Bring me the pitch." },
+        personality: { traits: ["Editorial", "Exacting", "Curious"], archetype: "Editor" }
+      }
+    }
+  },
+  {
     stage: "LiveLoop Scheduler",
     blurb: "Cron publisher that sequences playlists into LiveLoop slots.",
     manifest: {

@@ -1,0 +1,21 @@
+aws_region = "us-east-1"
+project_name = "illuvrse"
+environment = "prod"
+
+vpc_cidr = "10.20.0.0/16"
+public_subnet_cidrs = ["10.20.0.0/20", "10.20.16.0/20"]
+private_subnet_cidrs = ["10.20.32.0/20", "10.20.48.0/20"]
+
+single_nat_gateway = false
+
+db_name = "illuvrse"
+db_username = "illuvrse_admin"
+db_instance_class = "db.m6g.large"
+db_allocated_storage = 100
+db_max_allocated_storage = 500
+db_engine_version = "15.7"
+
+domain_name = "illuvrse.com"
+cloudflare_zone_id = ""
+cloudflare_plan = "pro"
+cloudflare_proxied = true

@@ -23,6 +23,8 @@ const actionOptions = [
   { value: "repo.scan", label: "Scan repo for changes" },
   { value: "assets.index", label: "Index local assets" },
   { value: "platform.health", label: "Check platform APIs" },
+  { value: "news.pitch", label: "News pitch (suggest)" },
+  { value: "news.alert", label: "News alert (suggest)" },
   { value: "storysphere.draft", label: "Draft StorySphere beat" },
   { value: "liveloop.schedule", label: "Prepare LiveLoop rundown" }
 ];
@@ -248,6 +250,26 @@ const fallbackAgents = [
     hub: "Orchestration Atrium",
     location: "Orchestration Atrium",
     capabilities: ["assistant", "scheduler"]
+  },
+  {
+    id: "otteryan",
+    name: "OTTERYAN",
+    role: "CEO, ILLUVRSE",
+    hub: "Orchestration Atrium",
+    location: "Orchestration Atrium",
+    capabilities: ["assistant", "monitor", "scheduler"],
+    species: "Otter",
+    traits: ["Visionary", "Calm", "Strategic"]
+  },
+  {
+    id: "ollieowl",
+    name: "OLLIEOWL",
+    role: "Editor in Chief",
+    hub: "News Tower",
+    location: "News Tower",
+    capabilities: ["catalog", "moderator", "assistant"],
+    species: "Owl",
+    traits: ["Editorial", "Exacting", "Curious"]
   },
   {
     id: "mission-planner",
@@ -1263,7 +1285,13 @@ function rebuildKiosks() {
 
 function renderAgentTags(agent) {
   agentTagsEl.innerHTML = "";
-  const tags = [agent.location, agent.hub, ...(agent.capabilities || [])].filter(Boolean);
+  const tags = [
+    agent.species,
+    agent.location,
+    agent.hub,
+    ...(agent.capabilities || []),
+    ...(agent.traits || [])
+  ].filter(Boolean);
   const uniqueTags = [...new Set(tags)];
   uniqueTags.forEach((tag) => {
     const span = document.createElement("span");

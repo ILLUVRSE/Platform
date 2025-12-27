@@ -1,10 +1,10 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import type { AceAgentManifest } from "@illuvrse/contracts";
 import { validateAceAgentManifest } from "@illuvrse/contracts";
-import { Card, PageSection, Pill, ProofCard, StatBadge } from "@illuvrse/ui";
+import { Card, PageSection, Pill, ProofCard } from "@illuvrse/ui";
 import { AgentManagerClient } from "@illuvrse/agent-manager";
 import {
   computeStageErrors,
@@ -47,6 +47,17 @@ const allCapabilities: AceAgentManifest["capabilities"] = [
   "monitor",
   "assistant"
 ];
+const archetypeOptions = ["Oracle", "Guide", "Guardian", "Architect", "Scout", "Spark"];
+const traitOptions = [
+  "Curious",
+  "Protective",
+  "Playful",
+  "Analytical",
+  "Bold",
+  "Empathic",
+  "Whimsical",
+  "Steady"
+];
 
 const stageAnchors = [
   { key: "identity", label: "Identity", desc: "id, name, version, runtime image" },
@@ -55,6 +66,26 @@ const stageAnchors = [
   { key: "avatar", label: "Avatar & activation", desc: "activation line + assets/voice" },
   { key: "review", label: "Review & export", desc: "JSON, SHA, policy, register" }
 ];
+
+const aceTheme: CSSProperties = {
+  "--ace-ink": "#132b25",
+  "--ace-forest": "#1f6e5d",
+  "--ace-mint": "#cfeee0",
+  "--ace-sky": "#bfe6f1",
+  "--ace-sun": "#f3c77a",
+  "--ace-cream": "#f7f3eb",
+  "--ace-panel": "#f5f1e8",
+  "--ace-border": "#d8d2c6",
+  "--ace-foam": "#ffffff"
+};
+
+const inputClass =
+  "w-full rounded-2xl border border-[color:var(--ace-border)] bg-white/90 px-4 py-2 text-slate-900 shadow-sm focus:border-[color:var(--ace-forest)] focus:outline-none focus:ring-2 focus:ring-[color:var(--ace-forest)]/20";
+const inputMonoClass = `${inputClass} font-mono text-[12px]`;
+const chipBaseClass =
+  "rounded-full border px-3 py-1 text-xs font-semibold transition hover:border-[color:var(--ace-forest)]";
+const sectionClass =
+  "relative overflow-hidden border-[color:var(--ace-border)] bg-[linear-gradient(145deg,var(--ace-panel),#ffffff)]";
 
 type Verdict = { verdict: string; severity?: string; rules?: { id: string; result: string; message?: string }[] } | null;
 
@@ -67,11 +98,24 @@ function bumpVersion(v: string) {
   return v;
 }
 
+function parseJsonField<T>(raw: string, label: string, validator?: (value: unknown) => string | null) {
+  if (!raw.trim()) return { value: undefined as T | undefined, error: null as string | null };
+  try {
+    const parsed = JSON.parse(raw);
+    const error = validator ? validator(parsed) : null;
+    if (error) return { value: undefined, error };
+    return { value: parsed as T, error: null };
+  } catch (err) {
+    return { value: undefined, error: `${label} JSON invalid: ${(err as Error).message}` };
+  }
+}
+
 export default function AceCreatePage() {
   const [id, setId] = useState("agent.story-weaver.001");
   const [name, setName] = useState("StoryWeaver");
   const [version, setVersion] = useState("0.1.0");
   const [description, setDescription] = useState("Generator + catalog agent for StorySphere previews");
+  const [archetype, setArchetype] = useState("Oracle");
   const [capabilities, setCapabilities] = useState<AceAgentManifest["capabilities"]>(["generator", "catalog"]);
   const [runtimeImage, setRuntimeImage] = useState("illuvrse/agent-storyweaver:dev");
   const [trigger, setTrigger] = useState("event:job.requested");
@@ -83,6 +127,11 @@ export default function AceCreatePage() {
   const [avatarActivation, setAvatarActivation] = useState("Initialization complete. I'm ready to move with you.");
   const [avatarAssets, setAvatarAssets] = useState<string>("s3://avatars/demo");
   const [avatarVoiceUrl, setAvatarVoiceUrl] = useState<string>("https://cdn.example.com/voice-sample.wav");
+  const [avatarProfileId, setAvatarProfileId] = useState<string>("");
+  const [avatarTraits, setAvatarTraits] = useState<string[]>(["Curious", "Protective"]);
+  const [toolsJson, setToolsJson] = useState<string>("");
+  const [memoryJson, setMemoryJson] = useState<string>("");
+  const [presenceJson, setPresenceJson] = useState<string>("");
 
   const [sha, setSha] = useState<string>("");
   const [manifestJson, setManifestJson] = useState<string>("");
@@ -102,6 +151,34 @@ export default function AceCreatePage() {
   const [registeredOnce, setRegisteredOnce] = useState(false);
   const [playgroundNewTab, setPlaygroundNewTab] = useState(false);
 
+  const toolsParsed = useMemo(
+    () =>
+      parseJsonField<AceAgentManifest["tools"]>(
+        toolsJson,
+        "Tools",
+        (value) => (Array.isArray(value) ? null : "Tools must be a JSON array")
+      ),
+    [toolsJson]
+  );
+  const memoryParsed = useMemo(
+    () =>
+      parseJsonField<AceAgentManifest["memory"]>(
+        memoryJson,
+        "Memory",
+        (value) => (value && typeof value === "object" && !Array.isArray(value) ? null : "Memory must be a JSON object")
+      ),
+    [memoryJson]
+  );
+  const presenceParsed = useMemo(
+    () =>
+      parseJsonField<AceAgentManifest["presence"]>(
+        presenceJson,
+        "Presence",
+        (value) => (value && typeof value === "object" && !Array.isArray(value) ? null : "Presence must be a JSON object")
+      ),
+    [presenceJson]
+  );
+
   const manifest: AceAgentManifest = useMemo(() => {
     const cpuValue = normalizeCpu(cpu);
     const memValue = normalizeMemory(memory);
@@ -117,7 +194,7 @@ export default function AceCreatePage() {
       name,
       version,
       description,
-      archetype: "Oracle",
+      archetype,
       capabilities,
       triggers: [triggerObj as AceAgentManifest["triggers"][number]],
       modelBindings: {
@@ -128,16 +205,40 @@ export default function AceCreatePage() {
         storage: { write: ["previews/", "final/"] },
         network: { outbound: true }
       },
+      tools: toolsParsed.value,
       resources: { cpu: cpuValue, memory: memValue },
+      memory: memoryParsed.value,
+      presence: presenceParsed.value,
       runtime: { container: { image: runtimeImage } },
       metadata: { publishToLiveLoop: publishLiveLoop },
       avatar: {
+        profileId: avatarProfileId || undefined,
         appearance: { assets: parseAvatarAssets(avatarAssets) },
         voice: { activationLine: avatarActivation, sampleUrl: avatarVoiceUrl || undefined },
-        personality: { traits: ["Curious", "Protective"], archetype: "Guide" }
+        personality: { traits: avatarTraits, archetype }
       }
     };
-  }, [id, name, version, description, capabilities, runtimeImage, trigger, llmId, ttsId, publishLiveLoop, avatarActivation, avatarAssets, avatarVoiceUrl]);
+  }, [
+    id,
+    name,
+    version,
+    description,
+    archetype,
+    capabilities,
+    runtimeImage,
+    trigger,
+    llmId,
+    ttsId,
+    publishLiveLoop,
+    avatarActivation,
+    avatarAssets,
+    avatarVoiceUrl,
+    avatarProfileId,
+    avatarTraits,
+    toolsParsed.value,
+    memoryParsed.value,
+    presenceParsed.value
+  ]);
 
   // Load draft from localStorage
   useEffect(() => {
@@ -150,6 +251,7 @@ export default function AceCreatePage() {
         setName(draft.name ?? name);
         setVersion(draft.version ?? version);
         setDescription(draft.description ?? description);
+        setArchetype(draft.archetype ?? archetype);
         setCapabilities(draft.capabilities ?? capabilities);
         setRuntimeImage(draft.runtimeImage ?? runtimeImage);
         setTrigger(draft.trigger ?? trigger);
@@ -161,6 +263,11 @@ export default function AceCreatePage() {
         setAvatarActivation(draft.avatarActivation ?? avatarActivation);
         setAvatarAssets(draft.avatarAssets ?? avatarAssets);
         setAvatarVoiceUrl(draft.avatarVoiceUrl ?? avatarVoiceUrl);
+        setAvatarProfileId(draft.avatarProfileId ?? avatarProfileId);
+        setAvatarTraits(Array.isArray(draft.avatarTraits) ? draft.avatarTraits : avatarTraits);
+        setToolsJson(draft.toolsJson ?? toolsJson);
+        setMemoryJson(draft.memoryJson ?? memoryJson);
+        setPresenceJson(draft.presenceJson ?? presenceJson);
         hydrated = true;
       }
     } catch {
@@ -235,6 +342,7 @@ export default function AceCreatePage() {
           name,
           version,
           description,
+          archetype,
           capabilities,
           runtimeImage,
           trigger,
@@ -245,7 +353,12 @@ export default function AceCreatePage() {
           publishLiveLoop,
           avatarActivation,
           avatarAssets,
-          avatarVoiceUrl
+          avatarVoiceUrl,
+          avatarProfileId,
+          avatarTraits,
+          toolsJson,
+          memoryJson,
+          presenceJson
         })
       );
     } catch {
@@ -279,11 +392,37 @@ export default function AceCreatePage() {
     setCapabilities((prev) => (prev.includes(cap) ? prev.filter((c) => c !== cap) : [...prev, cap]));
   }
 
+  function toggleTrait(trait: string) {
+    setAvatarTraits((prev) => (prev.includes(trait) ? prev.filter((t) => t !== trait) : [...prev, trait]));
+  }
+
+  function normalizeAgentId(value: string) {
+    return value
+      .trim()
+      .toLowerCase()
+      .replace(/\s+/g, "-")
+      .replace(/[^a-z0-9\-._]/g, "")
+      .replace(/-+/g, "-")
+      .replace(/\.+/g, ".");
+  }
+
+  function handleFormatId() {
+    const base = id.trim() ? id : name;
+    const normalized = normalizeAgentId(base);
+    if (normalized) {
+      setId(normalized);
+      showToast("ID formatted", "success");
+    } else {
+      showToast("ID format failed", "error");
+    }
+  }
+
   function applyManifestFields(m: AceAgentManifest) {
     setId(m.id);
     setName(m.name);
     setVersion(m.version);
     setDescription(m.description ?? "");
+    setArchetype(m.archetype ?? m.avatar?.personality?.archetype ?? archetype);
     setCapabilities(m.capabilities ?? []);
     setRuntimeImage(m.runtime?.container?.image ?? runtimeImage);
     const trig = m.triggers?.[0];
@@ -298,6 +437,13 @@ export default function AceCreatePage() {
     setAvatarActivation(m.avatar?.voice?.activationLine ?? avatarActivation);
     setAvatarAssets((m.avatar?.appearance?.assets ?? []).join(", "));
     setAvatarVoiceUrl(m.avatar?.voice?.sampleUrl ?? avatarVoiceUrl);
+    setAvatarProfileId(m.avatar?.profileId ?? avatarProfileId);
+    setAvatarTraits(
+      Array.isArray(m.avatar?.personality?.traits) ? m.avatar?.personality?.traits : avatarTraits
+    );
+    setToolsJson(m.tools ? JSON.stringify(m.tools, null, 2) : "");
+    setMemoryJson(m.memory ? JSON.stringify(m.memory, null, 2) : "");
+    setPresenceJson(m.presence ? JSON.stringify(m.presence, null, 2) : "");
   }
 
   async function handleImport() {
@@ -319,6 +465,16 @@ export default function AceCreatePage() {
     a.download = `${id || "ace-agent"}.manifest.json`;
     a.click();
     URL.revokeObjectURL(url);
+  }
+
+  async function copySha() {
+    if (!sha) return;
+    try {
+      await navigator.clipboard.writeText(sha);
+      showToast("SHA copied to clipboard", "success");
+    } catch {
+      showToast("Clipboard copy failed", "error");
+    }
   }
 
   function applyPreset(preset: Partial<AceAgentManifest> & { name: string }) {
@@ -644,8 +800,15 @@ export default function AceCreatePage() {
     }
   }
 
+  const completedStages = stageAnchors.filter((stage) => stageIsValid(stage.key)).length;
+  const progressPercent = Math.round((completedStages / stageAnchors.length) * 100);
+  const capabilitiesStepIndex = Math.max(
+    0,
+    stageAnchors.findIndex((stage) => stage.key === "capabilities")
+  );
+
   return (
-    <div className="space-y-10">
+    <div className="space-y-10" style={aceTheme}>
       {toast && (
         <div
           className={`fixed right-6 top-6 z-40 rounded-xl border px-4 py-3 text-sm shadow-card ${toast.type === "success" ? "border-teal-200 bg-white text-teal-800" : "border-rose-200 bg-rose-50 text-rose-700"}`}
@@ -653,68 +816,174 @@ export default function AceCreatePage() {
           {toast.message}
         </div>
       )}
-      <section className="rounded-3xl border border-slate-200 bg-white px-8 py-10 shadow-card">
-        <div className="flex flex-wrap items-start justify-between gap-6">
-          <div className="max-w-3xl space-y-4">
+      <section className="relative overflow-hidden rounded-[36px] border border-[color:var(--ace-border)] bg-[linear-gradient(135deg,var(--ace-cream),#ffffff)] px-8 py-10 shadow-card">
+        <div className="pointer-events-none absolute -left-24 -top-20 h-72 w-72 rounded-full bg-[radial-gradient(circle,var(--ace-sky),transparent_70%)] opacity-70 blur-3xl" />
+        <div className="pointer-events-none absolute -right-24 bottom-0 h-80 w-80 rounded-full bg-[radial-gradient(circle,var(--ace-mint),transparent_70%)] opacity-80 blur-3xl" />
+        <div className="pointer-events-none absolute left-1/2 top-6 h-10 w-10 -translate-x-1/2 rotate-45 rounded-[6px] border border-[color:var(--ace-sun)]/70 bg-[color:var(--ace-sun)]/30" />
+        <div className="relative grid gap-8 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
+          <div className="space-y-6">
             <Pill className="bg-teal-50 text-teal-700">ACE Creation Wizard</Pill>
-            <h1 className="text-4xl font-semibold leading-tight text-slate-900">Identity → Capabilities → Runtime/Models → Avatar → Review</h1>
-            <p className="text-lg text-slate-700">
-              Build an ACE manifest with live JSON + SHA preview, autosave drafts, policy/proof checks, and one-click handoff to the Playground + local registry.
+            <h1 className="text-4xl font-semibold leading-tight text-[color:var(--ace-ink)] animate-rise">
+              Build your agent persona, sign it, and send it live.
+            </h1>
+            <p className="text-lg text-slate-700 animate-rise animate-rise-delay-1">
+              A playful creation zone for ID, capabilities, runtime, and avatar activation, with
+              live JSON, SHA-256, policy checks, and instant handoff to Playground.
             </p>
+            <div className="rounded-2xl border border-[color:var(--ace-border)] bg-white/80 p-4 shadow-sm animate-rise animate-rise-delay-2">
+              <div className="flex items-center justify-between text-xs uppercase tracking-[0.2em] text-slate-500">
+                <span>Build progress</span>
+                <span>
+                  {completedStages}/{stageAnchors.length} stages
+                </span>
+              </div>
+              <div className="mt-2 h-2 rounded-full bg-[color:var(--ace-mint)]/70">
+                <div
+                  className="h-2 rounded-full bg-[linear-gradient(90deg,var(--ace-forest),var(--ace-sun))]"
+                  style={{ width: `${progressPercent}%` }}
+                />
+              </div>
+              <div className="mt-3 flex flex-wrap gap-2 text-xs text-slate-600">
+                <span className="rounded-full bg-white px-3 py-1 shadow-sm">Autosave ON</span>
+                <span className="rounded-full bg-white px-3 py-1 shadow-sm">
+                  SHA {sha ? `${sha.slice(0, 8)}…` : "computing"}
+                </span>
+                <span className="rounded-full bg-white px-3 py-1 shadow-sm">
+                  Policy {policy?.verdict ?? "not run"}
+                </span>
+              </div>
+            </div>
             <label className="flex items-center gap-2 text-sm text-slate-700">
-              <input type="checkbox" checked={playgroundNewTab} onChange={(e) => setPlaygroundNewTab(e.target.checked)} />
+              <input
+                type="checkbox"
+                checked={playgroundNewTab}
+                onChange={(e) => setPlaygroundNewTab(e.target.checked)}
+              />
               Open Playground in new tab (keep wizard open)
             </label>
             <div className="flex flex-wrap gap-3">
               <button
                 type="button"
                 onClick={validateAndCheck}
-                className="rounded-full bg-gradient-to-r from-gold-500 to-teal-500 px-5 py-3 text-sm font-semibold text-slate-900 shadow-card transition hover:opacity-95"
+                className="rounded-full bg-[color:var(--ace-forest)] px-5 py-3 text-sm font-semibold text-white shadow-card transition hover:opacity-90"
               >
                 Validate & Run Checks
               </button>
               <button
                 type="button"
                 onClick={sendToPlayground}
-                className="rounded-full border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:border-teal-500/70 hover:text-teal-700"
+                className="rounded-full border border-[color:var(--ace-border)] bg-white/80 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:border-[color:var(--ace-forest)] hover:text-[color:var(--ace-forest)]"
               >
                 Send to Playground
               </button>
               <button
                 type="button"
                 onClick={registerWithAgentManager}
-                className="rounded-full border border-teal-300 px-5 py-3 text-sm font-semibold text-teal-700 transition hover:bg-teal-50"
+                className="rounded-full border border-[color:var(--ace-forest)]/70 bg-white/80 px-5 py-3 text-sm font-semibold text-[color:var(--ace-forest)] transition hover:bg-[color:var(--ace-mint)]"
               >
                 Register with AgentManager
               </button>
               <button
                 type="button"
                 onClick={duplicateAsNewAgent}
-                className="rounded-full border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-800 transition hover:border-teal-500/70"
+                className="rounded-full border border-[color:var(--ace-border)] bg-white/80 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:border-[color:var(--ace-forest)]"
               >
                 Duplicate as new agent
               </button>
+              <button
+                type="button"
+                onClick={() => goToStep(capabilitiesStepIndex)}
+                className="rounded-full border border-[color:var(--ace-border)] bg-[color:var(--ace-mint)]/60 px-4 py-2 text-xs font-semibold text-[color:var(--ace-forest)] transition hover:border-[color:var(--ace-forest)]"
+              >
+                Jump to presets
+              </button>
             </div>
             <div className="flex flex-wrap gap-2 text-xs text-slate-600">
-              <StatBadge label="Draft" value="Autosave ON" variant="success" />
-              <StatBadge label="SHA" value={sha ? `${sha.slice(0, 8)}…` : "computing"} variant="neutral" />
-              <StatBadge label="Policy" value={policy?.verdict ?? "not run"} variant={policy?.severity === "high" ? "warning" : "neutral"} />
+              {registerStatus && <span className="rounded-full bg-white px-3 py-1 shadow-sm">{registerStatus}</span>}
+              {registerBlockedReason && (
+                <span className="rounded-full bg-amber-50 px-3 py-1 text-amber-700 shadow-sm">
+                  {registerBlockedReason}
+                </span>
+              )}
+              {agentManagerSummary && (
+                <span className="rounded-full bg-teal-50 px-3 py-1 text-teal-800 shadow-sm">
+                  {agentManagerSummary}
+                </span>
+              )}
             </div>
-            {registerStatus && <div className="text-xs text-slate-700">{registerStatus}</div>}
-            {registerBlockedReason && <div className="text-xs text-amber-700">{registerBlockedReason}</div>}
-            {agentManagerSummary && <div className="text-xs text-teal-800">{agentManagerSummary}</div>}
           </div>
-          <div className="w-full max-w-sm rounded-2xl border border-slate-200 bg-white p-4 shadow-card">
-            <div className="text-xs uppercase tracking-[0.2em] text-slate-500">Proof snapshot</div>
-            <ProofCard
-              sha={proof?.sha256 ?? sha}
-              signer={proof?.signer ?? "kernel-multisig"}
-              timestamp={proof?.timestamp ?? "pending"}
-              ledgerLink={proof?.ledgerUrl}
-              policyVerdict={proof?.policyVerdict ?? policy?.verdict}
-              error={!proof && !sha ? "No proof yet" : undefined}
-            />
-            {registeredOnce && <div className="text-[11px] text-teal-800">Registered badge: last register succeeded.</div>}
+
+          <div className="grid gap-4">
+            <div className="rounded-3xl border border-[color:var(--ace-border)] bg-white/90 p-5 shadow-card">
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="relative h-14 w-14 rounded-2xl bg-[radial-gradient(circle_at_30%_20%,var(--ace-sun),transparent_60%),radial-gradient(circle_at_70%_80%,var(--ace-sky),transparent_60%)] shadow-inner">
+                    <div className="absolute -top-2 right-3 h-4 w-4 rotate-45 rounded-sm bg-[color:var(--ace-sun)] shadow-sm" />
+                  </div>
+                  <div>
+                    <div className="text-xs uppercase tracking-[0.2em] text-slate-500">Agent</div>
+                    <div className="text-xl font-semibold text-[color:var(--ace-ink)]">
+                      {name || "Untitled Agent"}
+                    </div>
+                    <div className="text-xs text-slate-600">{id || "agent.placeholder"}</div>
+                  </div>
+                </div>
+                <span className="rounded-full border border-[color:var(--ace-forest)]/40 bg-[color:var(--ace-mint)] px-3 py-1 text-xs font-semibold text-[color:var(--ace-forest)]">
+                  {archetype}
+                </span>
+              </div>
+              <div className="mt-4 flex flex-wrap gap-2">
+                {avatarTraits.length ? (
+                  avatarTraits.map((trait) => (
+                    <span
+                      key={trait}
+                      className="rounded-full border border-[color:var(--ace-border)] bg-white px-3 py-1 text-xs font-semibold text-slate-700"
+                    >
+                      {trait}
+                    </span>
+                  ))
+                ) : (
+                  <span className="rounded-full bg-white px-3 py-1 text-xs text-slate-500">
+                    Add traits to define the vibe.
+                  </span>
+                )}
+              </div>
+              <div className="mt-3 rounded-2xl bg-[color:var(--ace-panel)] p-3 text-xs text-slate-700">
+                <div className="text-[11px] uppercase tracking-[0.2em] text-slate-500">
+                  Activation line
+                </div>
+                <div className="mt-1 text-sm text-slate-800">
+                  {avatarActivation || "No activation line set"}
+                </div>
+              </div>
+              <div className="mt-3 flex flex-wrap gap-2 text-xs text-slate-600">
+                <span className="rounded-full bg-white px-3 py-1 shadow-sm">
+                  {capabilities.length ? `${capabilities.length} capabilities` : "No capabilities"}
+                </span>
+                <span className="rounded-full bg-white px-3 py-1 shadow-sm">
+                  {publishLiveLoop ? "LiveLoop ready" : "LiveLoop off"}
+                </span>
+              </div>
+            </div>
+
+            <div className="rounded-3xl border border-[color:var(--ace-border)] bg-white/90 p-5 shadow-card">
+              <div className="text-xs uppercase tracking-[0.2em] text-slate-500">Proof snapshot</div>
+              <div className="mt-3">
+                <ProofCard
+                  sha={proof?.sha256 ?? sha}
+                  signer={proof?.signer ?? "kernel-multisig"}
+                  timestamp={proof?.timestamp ?? "pending"}
+                  ledgerLink={proof?.ledgerUrl}
+                  policyVerdict={proof?.policyVerdict ?? policy?.verdict}
+                  error={!proof && !sha ? "No proof yet" : undefined}
+                />
+              </div>
+              {registeredOnce && (
+                <div className="mt-2 text-[11px] text-teal-800">
+                  Registered badge: last register succeeded.
+                </div>
+              )}
+            </div>
           </div>
         </div>
         {policy && policy.severity && policy.severity !== "low" ? (
@@ -728,22 +997,32 @@ export default function AceCreatePage() {
               key={stage.key}
               href={`#${stage.key}`}
               onClick={() => goToStep(idx)}
-              className={`flex cursor-pointer items-start gap-3 rounded-2xl border px-3 py-3 transition ${
-                currentStep === idx ? "border-teal-500/70 bg-teal-50" : "border-slate-200 bg-white hover:border-teal-300"
+              aria-current={currentStep === idx ? "step" : undefined}
+              className={`flex cursor-pointer items-start gap-3 rounded-3xl border px-4 py-4 transition ${
+                currentStep === idx
+                  ? "border-[color:var(--ace-forest)]/70 bg-[color:var(--ace-mint)]/60 shadow-sm"
+                  : "border-[color:var(--ace-border)] bg-white/80 hover:border-[color:var(--ace-forest)]/60"
               }`}
             >
               <div
-                className={`flex h-9 w-9 items-center justify-center rounded-full text-sm font-semibold ${
-                  currentStep === idx ? "bg-teal-500 text-slate-900" : "bg-teal-100 text-teal-700"
+                className={`flex h-10 w-10 items-center justify-center rounded-2xl text-sm font-semibold ${
+                  currentStep === idx ? "bg-[color:var(--ace-forest)] text-white" : "bg-white text-[color:var(--ace-forest)]"
                 }`}
               >
                 {idx + 1}
               </div>
               <div>
-                <div className="flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-slate-500">
+                <div className="flex flex-wrap items-center gap-2 text-xs uppercase tracking-[0.2em] text-slate-500">
                   <span>{stage.label}</span>
-                  {stageIsValid(stage.key) && <span className="rounded-full bg-teal-50 px-2 py-[2px] text-[11px] font-semibold text-teal-700">✓</span>}
-                  {!stageIsValid(stage.key) && <span className="rounded-full bg-rose-100 px-2 py-[2px] text-[11px] font-semibold text-rose-700">Incomplete</span>}
+                  {stageIsValid(stage.key) ? (
+                    <span className="rounded-full bg-white px-2 py-[2px] text-[11px] font-semibold text-teal-700">
+                      Complete
+                    </span>
+                  ) : (
+                    <span className="rounded-full bg-rose-100 px-2 py-[2px] text-[11px] font-semibold text-rose-700">
+                      Incomplete
+                    </span>
+                  )}
                 </div>
                 <div className="text-sm text-slate-700">{stage.desc}</div>
               </div>
@@ -754,7 +1033,7 @@ export default function AceCreatePage() {
           <button
             type="button"
             onClick={goPrev}
-            className="rounded-full border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-teal-500/70 hover:text-teal-700 disabled:opacity-40"
+            className="rounded-full border border-[color:var(--ace-border)] bg-white/80 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-[color:var(--ace-forest)] hover:text-[color:var(--ace-forest)] disabled:opacity-40"
             disabled={currentStep === 0}
           >
             Previous step
@@ -762,7 +1041,7 @@ export default function AceCreatePage() {
           <button
             type="button"
             onClick={goNext}
-            className="rounded-full bg-teal-600 px-4 py-2 text-sm font-semibold text-white shadow-card transition hover:opacity-95 disabled:opacity-40"
+            className="rounded-full bg-[color:var(--ace-forest)] px-4 py-2 text-sm font-semibold text-white shadow-card transition hover:opacity-90 disabled:opacity-40"
             disabled={currentStep === stageAnchors.length - 1 || !stageIsValid(stageAnchors[currentStep].key)}
           >
             Next step
@@ -770,32 +1049,48 @@ export default function AceCreatePage() {
         </div>
       </section>
 
-      <PageSection eyebrow="Identity" title="Basics" id="identity">
+      <PageSection eyebrow="Identity" title="Basics" id="identity" className={sectionClass}>
         <Card
           title="Identity"
+          className="border-[color:var(--ace-border)] bg-white/90"
           body={
             <div className="space-y-3 text-sm">
               <label className="space-y-1 block">
                 <div className="text-slate-800/80">Agent ID</div>
-                <input className="w-full rounded-lg border border-slate-300 bg-white p-2" value={id} onChange={(e) => setId(e.target.value)} />
+                <div className="flex flex-wrap gap-2">
+                  <input
+                    className={`${inputClass} flex-1`}
+                    value={id}
+                    onChange={(e) => setId(e.target.value)}
+                  />
+                  <button
+                    type="button"
+                    onClick={handleFormatId}
+                    className="rounded-full border border-[color:var(--ace-border)] bg-white/80 px-3 py-2 text-xs font-semibold text-slate-700 transition hover:border-[color:var(--ace-forest)]"
+                  >
+                    Auto-format
+                  </button>
+                </div>
                 {fieldErrors.id && <div className="field-error text-xs text-rose-600">{fieldErrors.id}</div>}
-                <div className="text-[11px] text-slate-500">Allowed: lowercase letters, numbers, dots, underscores, hyphens.</div>
+                <div className="text-[11px] text-slate-500">
+                  Allowed: lowercase letters, numbers, dots, underscores, hyphens.
+                </div>
               </label>
               <label className="space-y-1 block">
                 <div className="text-slate-800/80">Name</div>
-                <input className="w-full rounded-lg border border-slate-300 bg-white p-2" value={name} onChange={(e) => setName(e.target.value)} />
+                <input className={inputClass} value={name} onChange={(e) => setName(e.target.value)} />
                 {fieldErrors.name && <div className="field-error text-xs text-rose-600">{fieldErrors.name}</div>}
               </label>
               <div className="flex gap-3">
                 <label className="space-y-1 flex-1">
                   <div className="text-slate-800/80">Version</div>
-                  <input className="w-full rounded-lg border border-slate-300 bg-white p-2" value={version} onChange={(e) => setVersion(e.target.value)} />
+                  <input className={inputClass} value={version} onChange={(e) => setVersion(e.target.value)} />
                   {fieldErrors.version && <div className="field-error text-xs text-rose-600">{fieldErrors.version}</div>}
                 </label>
                 <label className="space-y-1 flex-1">
                   <div className="text-slate-800/80">Runtime image</div>
                   <select
-                    className="w-full rounded-lg border border-slate-300 bg-white p-2"
+                    className={inputClass}
                     value={runtimeImage}
                     onChange={(e) => setRuntimeImage(e.target.value)}
                   >
@@ -810,16 +1105,49 @@ export default function AceCreatePage() {
               </div>
               <label className="space-y-1 block">
                 <div className="text-slate-800/80">Description</div>
-                <textarea className="w-full rounded-lg border border-slate-300 bg-white p-2" rows={2} value={description} onChange={(e) => setDescription(e.target.value)} />
+                <textarea
+                  className={inputClass}
+                  rows={2}
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                />
               </label>
+              <div className="rounded-2xl border border-[color:var(--ace-border)] bg-[color:var(--ace-panel)] p-3">
+                <div className="text-xs uppercase tracking-[0.2em] text-slate-500">Archetype</div>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {archetypeOptions.map((option) => (
+                    <button
+                      key={option}
+                      type="button"
+                      onClick={() => setArchetype(option)}
+                      className={`${chipBaseClass} ${
+                        archetype === option
+                          ? "border-[color:var(--ace-forest)] bg-[color:var(--ace-forest)] text-white"
+                          : "border-[color:var(--ace-border)] bg-white/80 text-slate-700"
+                      }`}
+                    >
+                      {option}
+                    </button>
+                  ))}
+                </div>
+                <div className="mt-2 text-[11px] text-slate-500">
+                  Personality and operator role baseline for this agent.
+                </div>
+              </div>
             </div>
           }
         />
       </PageSection>
 
-      <PageSection eyebrow="Capabilities" title="Pick what this agent can do" id="capabilities">
+      <PageSection
+        eyebrow="Capabilities"
+        title="Pick what this agent can do"
+        id="capabilities"
+        className={sectionClass}
+      >
         <Card
             title="Capabilities"
+            className="border-[color:var(--ace-border)] bg-white/90"
             body={
               <div className="space-y-3">
                 <div className="flex flex-wrap gap-2">
@@ -828,14 +1156,41 @@ export default function AceCreatePage() {
                       key={cap}
                       type="button"
                       onClick={() => toggleCapability(cap)}
-                      className={`rounded-full px-3 py-1 text-sm transition ${capabilities.includes(cap) ? "bg-teal-100 text-teal-800 border border-teal-200" : "bg-slate-100 text-slate-800 border border-slate-200"}`}
+                      className={`flex items-center gap-2 rounded-full border px-3 py-1 text-sm font-semibold transition ${
+                        capabilities.includes(cap)
+                          ? "border-[color:var(--ace-forest)] bg-[color:var(--ace-mint)] text-[color:var(--ace-forest)]"
+                          : "border-[color:var(--ace-border)] bg-white/80 text-slate-700"
+                      }`}
                     >
-                      {cap}
+                      <span
+                        className={`h-2 w-2 rounded-full ${
+                          capabilities.includes(cap)
+                            ? "bg-[color:var(--ace-sun)]"
+                            : "bg-[color:var(--ace-border)]"
+                        }`}
+                      />
+                      <span className="capitalize">{cap}</span>
                     </button>
                   ))}
                 </div>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={() => setCapabilities([...allCapabilities])}
+                  className="rounded-full border border-[color:var(--ace-border)] bg-white/80 px-3 py-1 text-xs font-semibold text-slate-700 transition hover:border-[color:var(--ace-forest)]"
+                >
+                  Select all
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setCapabilities([])}
+                  className="rounded-full border border-[color:var(--ace-border)] bg-white/80 px-3 py-1 text-xs font-semibold text-slate-700 transition hover:border-[color:var(--ace-forest)]"
+                >
+                  Clear
+                </button>
+              </div>
               {fieldErrors.capabilities && <div className="text-xs text-rose-600">{fieldErrors.capabilities}</div>}
-              <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+              <div className="rounded-2xl border border-[color:var(--ace-border)] bg-[color:var(--ace-panel)] p-4">
                 <div className="mb-2 text-xs uppercase tracking-[0.2em] text-slate-500">Presets</div>
                 <div className="flex flex-wrap gap-2">
                   {[
@@ -880,7 +1235,7 @@ export default function AceCreatePage() {
                       key={preset.name}
                       type="button"
                       onClick={() => applyPreset(preset as AceAgentManifest)}
-                      className="rounded-full border border-slate-300 px-3 py-1 text-xs font-semibold text-slate-700 transition hover:border-teal-500/70"
+                      className={`${chipBaseClass} border-[color:var(--ace-border)] bg-white/80 text-slate-700`}
                     >
                       {preset.name}
                     </button>
@@ -892,22 +1247,42 @@ export default function AceCreatePage() {
         />
       </PageSection>
 
-      <PageSection eyebrow="Runtime/Models" title="Triggers, model bindings, and LiveLoop" id="runtime">
+      <PageSection
+        eyebrow="Runtime/Models"
+        title="Triggers, model bindings, and LiveLoop"
+        id="runtime"
+        className={sectionClass}
+      >
         <Card
           title="Runtime & bindings"
+          className="border-[color:var(--ace-border)] bg-white/90"
           body={
             <div className="space-y-3 text-sm">
               <label className="space-y-1 block">
                 <div className="text-slate-800/80">Trigger (cron:*, event:*, or path)</div>
-                <input className="w-full rounded-lg border border-slate-300 bg-white p-2" value={trigger} onChange={(e) => setTrigger(e.target.value)} />
+                <input className={inputClass} value={trigger} onChange={(e) => setTrigger(e.target.value)} />
                 {fieldErrors.trigger && <div className="text-xs text-rose-600">{fieldErrors.trigger}</div>}
                 <div className="text-[11px] text-slate-500">Examples: cron:*/5 * * * * · event:job.requested · /hook/generate</div>
               </label>
+              <div className="flex flex-wrap gap-2 text-[12px] text-slate-600">
+                {["event:job.requested", "event:asset.uploaded", "cron:*/30 * * * *", "/hook/generate"].map(
+                  (value) => (
+                    <button
+                      key={value}
+                      type="button"
+                      onClick={() => setTrigger(value)}
+                      className="rounded-full border border-[color:var(--ace-border)] bg-white/80 px-3 py-1 text-xs font-semibold text-slate-700 transition hover:border-[color:var(--ace-forest)]"
+                    >
+                      {value}
+                    </button>
+                  )
+                )}
+              </div>
               <div className="flex gap-3">
                 <label className="space-y-1 flex-1">
                   <div className="text-slate-800/80">LLM ID</div>
                   <select
-                    className="w-full rounded-lg border border-slate-300 bg-white p-2"
+                    className={inputClass}
                     value={llmId}
                     onChange={(e) => setLlmId(e.target.value)}
                   >
@@ -922,7 +1297,7 @@ export default function AceCreatePage() {
                 <label className="space-y-1 flex-1">
                   <div className="text-slate-800/80">TTS ID</div>
                   <select
-                    className="w-full rounded-lg border border-slate-300 bg-white p-2"
+                    className={inputClass}
                     value={ttsId}
                     onChange={(e) => setTtsId(e.target.value)}
                   >
@@ -939,7 +1314,7 @@ export default function AceCreatePage() {
                 <label className="space-y-1 block">
                   <div className="text-slate-800/80">CPU</div>
                   <input
-                    className="w-full rounded-lg border border-slate-300 bg-white p-2"
+                    className={inputClass}
                     value={cpu}
                     onChange={(e) => setCpu(e.target.value)}
                     onBlur={(e) => setCpu(normalizeCpu(e.target.value))}
@@ -951,7 +1326,7 @@ export default function AceCreatePage() {
                 <label className="space-y-1 block">
                   <div className="text-slate-800/80">Memory</div>
                   <input
-                    className="w-full rounded-lg border border-slate-300 bg-white p-2"
+                    className={inputClass}
                     value={memory}
                     onChange={(e) => setMemory(e.target.value)}
                     onBlur={(e) => setMemory(normalizeMemory(e.target.value))}
@@ -966,7 +1341,7 @@ export default function AceCreatePage() {
                   <button
                     key={preset.name}
                     type="button"
-                    className="rounded-full border border-slate-300 px-3 py-1 text-slate-700 transition hover:border-teal-500/70"
+                    className="rounded-full border border-[color:var(--ace-border)] bg-white/80 px-3 py-1 text-slate-700 transition hover:border-[color:var(--ace-forest)]"
                     onClick={() => {
                       setCpu(preset.cpu);
                       setMemory(preset.memory);
@@ -983,7 +1358,10 @@ export default function AceCreatePage() {
               </label>
               <div className="text-xs text-slate-500">
                 Need syntax?{" "}
-                <a href="/developers#ace-spec" className="text-teal-700 underline underline-offset-4">
+                <a
+                  href="/developers#ace-spec"
+                  className="text-[color:var(--ace-forest)] underline underline-offset-4"
+                >
                   ACE spec docs
                 </a>
               </div>
@@ -992,19 +1370,47 @@ export default function AceCreatePage() {
         />
       </PageSection>
 
-      <PageSection eyebrow="Avatar" title="Voice & activation" id="avatar">
+      <PageSection eyebrow="Avatar" title="Voice & activation" id="avatar" className={sectionClass}>
         <Card
           title="Activation & assets"
+          className="border-[color:var(--ace-border)] bg-white/90"
           body={
             <div className="space-y-3 text-sm">
               <label className="space-y-1 block">
                 <div className="text-slate-700">Activation line</div>
-                <textarea className="w-full rounded-lg border border-slate-300 bg-white p-2" rows={2} value={avatarActivation} onChange={(e) => setAvatarActivation(e.target.value)} />
+                <textarea
+                  className={inputClass}
+                  rows={2}
+                  value={avatarActivation}
+                  onChange={(e) => setAvatarActivation(e.target.value)}
+                />
               </label>
+              <div className="rounded-2xl border border-[color:var(--ace-border)] bg-[color:var(--ace-panel)] p-3">
+                <div className="text-xs uppercase tracking-[0.2em] text-slate-500">Traits</div>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {traitOptions.map((trait) => (
+                    <button
+                      key={trait}
+                      type="button"
+                      onClick={() => toggleTrait(trait)}
+                      className={`${chipBaseClass} ${
+                        avatarTraits.includes(trait)
+                          ? "border-[color:var(--ace-forest)] bg-[color:var(--ace-forest)] text-white"
+                          : "border-[color:var(--ace-border)] bg-white/80 text-slate-700"
+                      }`}
+                    >
+                      {trait}
+                    </button>
+                  ))}
+                </div>
+                <div className="mt-2 text-[11px] text-slate-500">
+                  Pick 2-4 traits to flavor personality metadata.
+                </div>
+              </div>
               <label className="space-y-1 block">
                 <div className="text-slate-700">Appearance assets (comma-separated URLs)</div>
                 <textarea
-                  className="w-full rounded-lg border border-slate-300 bg-white p-2"
+                  className={inputClass}
                   rows={2}
                   value={avatarAssets}
                   onChange={(e) => setAvatarAssets(e.target.value)}
@@ -1013,7 +1419,7 @@ export default function AceCreatePage() {
                 {fieldErrors.avatarAssets && <div className="field-error text-xs text-rose-600">{fieldErrors.avatarAssets}</div>}
                 <button
                   type="button"
-                  className="rounded-lg border border-slate-300 px-3 py-1 text-[12px] font-semibold text-slate-700 transition hover:border-teal-500/70"
+                  className="rounded-full border border-[color:var(--ace-border)] bg-white/80 px-3 py-1 text-[12px] font-semibold text-slate-700 transition hover:border-[color:var(--ace-forest)]"
                   onClick={() => {
                     setAvatarAssets(
                       avatarAssets
@@ -1029,10 +1435,23 @@ export default function AceCreatePage() {
               </label>
               <label className="space-y-1 block">
                 <div className="text-slate-700">Voice sample URL</div>
-                <input className="w-full rounded-lg border border-slate-300 bg-white p-2" value={avatarVoiceUrl} onChange={(e) => setAvatarVoiceUrl(e.target.value)} />
+                <input
+                  className={inputClass}
+                  value={avatarVoiceUrl}
+                  onChange={(e) => setAvatarVoiceUrl(e.target.value)}
+                />
                 {fieldErrors.avatarVoiceUrl && <div className="field-error text-xs text-rose-600">{fieldErrors.avatarVoiceUrl}</div>}
               </label>
-              <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+              <label className="space-y-1 block">
+                <div className="text-slate-700">Avatar profile ID (registry)</div>
+                <input
+                  className={inputClass}
+                  value={avatarProfileId}
+                  onChange={(e) => setAvatarProfileId(e.target.value)}
+                  placeholder="avatar.ops.001"
+                />
+              </label>
+              <div className="rounded-2xl border border-[color:var(--ace-border)] bg-[color:var(--ace-panel)] p-3">
                 <div className="text-xs uppercase tracking-[0.2em] text-slate-500">Preview</div>
                 <div className="text-sm text-slate-900">{avatarActivation || "No activation line set"}</div>
                 <div className="mt-2 text-xs text-slate-600">
@@ -1052,37 +1471,100 @@ export default function AceCreatePage() {
         />
       </PageSection>
 
-      <PageSection eyebrow="Review" title="Manifest, hash, and proofs" id="review">
+      <PageSection eyebrow="Review" title="Manifest, hash, and proofs" id="review" className={sectionClass}>
         <div className="grid gap-4 md:grid-cols-3">
-          <Card title="Manifest JSON" body={<pre className="max-h-96 overflow-auto rounded-xl bg-slate-50 p-3 text-[12px] leading-relaxed text-slate-900">{manifestJson}</pre>} />
+          <Card
+            title="Manifest JSON"
+            className="border-[color:var(--ace-border)] bg-white/90"
+            body={
+              <pre className="max-h-96 overflow-auto rounded-2xl bg-[color:var(--ace-panel)] p-3 text-[12px] leading-relaxed text-slate-900">
+                {manifestJson}
+              </pre>
+            }
+          />
+          <Card
+            title="Agent OS config"
+            className="border-[color:var(--ace-border)] bg-white/90"
+            body={
+              <div className="space-y-3 text-sm">
+                <label className="space-y-1 block">
+                  <div className="text-slate-700">Tools (JSON array)</div>
+                  <textarea
+                    className={inputMonoClass}
+                    rows={4}
+                    value={toolsJson}
+                    onChange={(e) => setToolsJson(e.target.value)}
+                    placeholder='[{"id":"tool.generate","actions":["generate.preview"]}]'
+                  />
+                  {toolsParsed.error ? <div className="text-xs text-rose-600">{toolsParsed.error}</div> : null}
+                </label>
+                <label className="space-y-1 block">
+                  <div className="text-slate-700">Memory policy (JSON object)</div>
+                  <textarea
+                    className={inputMonoClass}
+                    rows={4}
+                    value={memoryJson}
+                    onChange={(e) => setMemoryJson(e.target.value)}
+                    placeholder='{"shortTerm":{"ttlDays":7,"maxEntries":200},"longTerm":{"enabled":true,"vectorStore":"pgvector"}}'
+                  />
+                  {memoryParsed.error ? <div className="text-xs text-rose-600">{memoryParsed.error}</div> : null}
+                </label>
+                <label className="space-y-1 block">
+                  <div className="text-slate-700">Presence (JSON object)</div>
+                  <textarea
+                    className={inputMonoClass}
+                    rows={3}
+                    value={presenceJson}
+                    onChange={(e) => setPresenceJson(e.target.value)}
+                    placeholder='{"realm":"illuvrse","room":"ops","priority":"normal"}'
+                  />
+                  {presenceParsed.error ? <div className="text-xs text-rose-600">{presenceParsed.error}</div> : null}
+                </label>
+              </div>
+            }
+          />
           <Card
             title="Hash & actions"
+            className="border-[color:var(--ace-border)] bg-white/90"
             body={
               <div className="space-y-3 text-sm">
                 <div>
                   <div className="text-xs uppercase tracking-[0.2em] text-slate-500">SHA-256</div>
                   <div className="break-all font-mono text-[12px] text-slate-900">{sha || "computing..."}</div>
                 </div>
-                {error ? <div className="rounded-lg border border-rose-200 bg-rose-50 p-2 text-rose-700">{error}</div> : <div className="text-teal-700">Valid manifest</div>}
+                {error ? (
+                  <div className="rounded-2xl border border-rose-200 bg-rose-50 p-2 text-rose-700">
+                    {error}
+                  </div>
+                ) : (
+                  <div className="text-[color:var(--ace-forest)]">Valid manifest</div>
+                )}
                 <div className="flex flex-wrap gap-2">
                   <button
                     type="button"
                     onClick={handleDownload}
-                    className="rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-700 transition hover:border-teal-500/70"
+                    className="rounded-full border border-[color:var(--ace-border)] bg-white/80 px-3 py-2 text-xs font-semibold text-slate-700 transition hover:border-[color:var(--ace-forest)]"
                   >
                     Download JSON
                   </button>
                   <button
                     type="button"
+                    onClick={copySha}
+                    className="rounded-full border border-[color:var(--ace-border)] bg-white/80 px-3 py-2 text-xs font-semibold text-slate-700 transition hover:border-[color:var(--ace-forest)]"
+                  >
+                    Copy SHA
+                  </button>
+                  <button
+                    type="button"
                     onClick={sendToPlayground}
-                    className="rounded-lg bg-teal-600 px-3 py-2 text-xs font-semibold text-white transition hover:opacity-95"
+                    className="rounded-full bg-[color:var(--ace-forest)] px-3 py-2 text-xs font-semibold text-white transition hover:opacity-90"
                   >
                     Send to Playground
                   </button>
                   <button
                     type="button"
                     onClick={validateAndCheck}
-                    className="rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-700 transition hover:border-teal-500/70"
+                    className="rounded-full border border-[color:var(--ace-border)] bg-white/80 px-3 py-2 text-xs font-semibold text-slate-700 transition hover:border-[color:var(--ace-forest)]"
                   >
                     Validate & Run Checks
                   </button>
@@ -1092,6 +1574,7 @@ export default function AceCreatePage() {
           />
           <Card
             title="Policy & signature"
+            className="border-[color:var(--ace-border)] bg-white/90"
             body={
               <div className="space-y-3 text-sm">
                 <ProofCard
@@ -1104,7 +1587,7 @@ export default function AceCreatePage() {
                 />
                 {proofLatencyMs ? <div className="text-[11px] text-slate-400">Kernel sign latency: {proofLatencyMs} ms</div> : null}
                 {policy ? (
-                  <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+                  <div className="rounded-2xl border border-[color:var(--ace-border)] bg-[color:var(--ace-panel)] p-3">
                     <div className="text-xs uppercase tracking-[0.2em] text-slate-500">Policy</div>
                     <div className="text-slate-900">{policy.verdict}</div>
                     <div className="text-xs text-slate-500">Severity: {policy.severity ?? "n/a"}</div>
@@ -1112,13 +1595,16 @@ export default function AceCreatePage() {
                       {policy.rules?.map((r) => (
                         <li key={r.id} className="flex items-center justify-between gap-2">
                           <span>{r.id}</span>
-                          <span className="font-semibold text-teal-700">{r.result}</span>
+                          <span className="font-semibold text-[color:var(--ace-forest)]">{r.result}</span>
                         </li>
                       ))}
                     </ul>
                     <div className="mt-2 text-xs text-slate-500">
                       Need guidance?{" "}
-                      <a href="/developers#api" className="text-teal-700 underline underline-offset-4">
+                      <a
+                        href="/developers#api"
+                        className="text-[color:var(--ace-forest)] underline underline-offset-4"
+                      >
                         See API & policy docs
                       </a>
                     </div>
@@ -1135,17 +1621,23 @@ export default function AceCreatePage() {
         <div className="mt-4 grid gap-4 md:grid-cols-2">
           <Card
             title="Stage summary"
+            className="border-[color:var(--ace-border)] bg-white/90"
             body={
               <div className="space-y-2 text-sm">
                 {stageAnchors.map((stage) => (
-                  <div key={stage.key} className="flex items-center justify-between rounded-lg border border-slate-200 bg-white px-3 py-2">
+                  <div
+                    key={stage.key}
+                    className="flex items-center justify-between rounded-2xl border border-[color:var(--ace-border)] bg-white/80 px-3 py-2"
+                  >
                     <div>
                       <div className="text-xs uppercase tracking-[0.2em] text-slate-500">{stage.label}</div>
                       <div className="text-[12px] text-slate-600">{stage.desc}</div>
                     </div>
                     <span
                       className={`rounded-full px-3 py-1 text-[11px] font-semibold ${
-                        stageIsValid(stage.key) ? "bg-teal-50 text-teal-700" : "bg-rose-50 text-rose-700"
+                        stageIsValid(stage.key)
+                          ? "bg-[color:var(--ace-mint)] text-[color:var(--ace-forest)]"
+                          : "bg-rose-50 text-rose-700"
                       }`}
                     >
                       {stageIsValid(stage.key) ? "Complete" : "Incomplete"}
@@ -1158,13 +1650,19 @@ export default function AceCreatePage() {
         </div>
       </PageSection>
 
-      <PageSection eyebrow="Import/Export" title="Load or paste a manifest" id="import">
+      <PageSection
+        eyebrow="Import/Export"
+        title="Load or paste a manifest"
+        id="import"
+        className={sectionClass}
+      >
         <Card
           title="Paste JSON and validate"
+          className="border-[color:var(--ace-border)] bg-white/90"
           body={
             <div className="space-y-3 text-sm">
               <textarea
-                className="w-full rounded-xl border border-slate-300 bg-white p-3 font-mono text-[12px] leading-relaxed text-slate-900"
+                className={`${inputMonoClass} leading-relaxed`}
                 rows={6}
                 placeholder='{"id":"agent.demo","name":"Demo","version":"0.1","capabilities":["generator"],"runtime":{"container":{"image":"img"}}}'
                 value={importJson}
@@ -1186,20 +1684,20 @@ export default function AceCreatePage() {
                 <button
                   type="button"
                   onClick={handleImport}
-                  className="rounded-lg bg-teal-600 px-3 py-2 text-xs font-semibold text-white transition hover:opacity-95"
+                  className="rounded-full bg-[color:var(--ace-forest)] px-3 py-2 text-xs font-semibold text-white transition hover:opacity-90"
                 >
                   Load into wizard
                 </button>
                 <button
                   type="button"
                   onClick={() => setImportJson("")}
-                  className="rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-700 transition hover:border-teal-500/70"
+                  className="rounded-full border border-[color:var(--ace-border)] bg-white/80 px-3 py-2 text-xs font-semibold text-slate-700 transition hover:border-[color:var(--ace-forest)]"
                 >
                   Clear
                 </button>
               </div>
               {pendingImport ? (
-                <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800">
+                <div className="rounded-2xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800">
                   <div className="font-semibold text-amber-900">Confirm import?</div>
                   <ul className="mt-2 space-y-1">
                     {pendingImport.summary.map((item) => (
@@ -1210,14 +1708,14 @@ export default function AceCreatePage() {
                     <button
                       type="button"
                       onClick={confirmPendingImport}
-                      className="rounded-lg bg-amber-400 px-3 py-2 text-[12px] font-semibold text-slate-900 transition hover:opacity-90"
+                      className="rounded-full bg-amber-400 px-3 py-2 text-[12px] font-semibold text-slate-900 transition hover:opacity-90"
                     >
                       Apply import
                     </button>
                     <button
                       type="button"
                       onClick={() => setPendingImport(null)}
-                      className="rounded-lg border border-amber-400/60 px-3 py-2 text-[12px] font-semibold text-amber-700 transition hover:border-amber-300"
+                      className="rounded-full border border-amber-400/60 px-3 py-2 text-[12px] font-semibold text-amber-700 transition hover:border-amber-300"
                     >
                       Cancel
                     </button>

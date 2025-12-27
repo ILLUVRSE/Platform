@@ -90,7 +90,7 @@ export default function PortfolioPage() {
     [portfolio]
   );
 
-  if (!portfolio) return <div className="p-10 text-center text-gray-500">Loading portfolio...</div>;
+  if (!portfolio) return <div className="p-10 text-center text-slate-500">Loading portfolio...</div>;
 
   const handleNewsRefresh = () => setNewsRefreshKey((v) => v + 1);
 
@@ -110,43 +110,43 @@ export default function PortfolioPage() {
 
   return (
     <div className="space-y-8">
-      <header>
-         <h1 className="text-4xl font-extrabold tracking-tight mb-2">My Portfolio</h1>
-         <p className="text-gray-400">Track your performance and open positions.</p>
-         <div className="flex flex-wrap items-center gap-3 text-sm mt-2">
+      <header className="gs-panel-strong rounded-3xl p-6 sm:p-8">
+         <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight mb-2">My Portfolio</h1>
+         <p className="text-slate-300">Track your performance and open positions.</p>
+         <div className="flex flex-wrap items-center gap-3 text-xs sm:text-sm mt-3 text-slate-400">
            <Badge variant={quoteLoading ? "warning" : "success"}>
              {quoteLoading ? "Updating quotes..." : "Live feed active"}
            </Badge>
            {quoteUpdatedAt && (
-             <span className="text-gray-500">
+             <span className="gs-chip-muted rounded-full px-3 py-1">
                Last sync {new Date(quoteUpdatedAt).toLocaleTimeString()}
              </span>
            )}
            <button
-             className="text-green-400 hover:text-green-200 underline-offset-2 hover:underline"
+             className="text-emerald-300 hover:text-emerald-200 underline-offset-2 hover:underline"
              onClick={refreshQuotes}
            >
              Refresh now
            </button>
-           {quoteError && <span className="text-red-400">{quoteError}</span>}
+           {quoteError && <span className="text-rose-300">{quoteError}</span>}
          </div>
       </header>
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-         <Card className="bg-gradient-to-br from-gray-900 to-gray-800 border-gray-700">
-            <div className="text-sm text-gray-400 mb-1">Total Account Value</div>
+         <Card className="gs-panel-strong">
+            <div className="text-sm text-slate-400 mb-1">Total Account Value</div>
             <div className="text-3xl font-bold text-white">${totalValue.toFixed(2)}</div>
          </Card>
          
-         <Card className="bg-gradient-to-br from-gray-900 to-gray-800 border-gray-700">
-            <div className="text-sm text-gray-400 mb-1">Buying Power</div>
+         <Card className="gs-panel-strong">
+            <div className="text-sm text-slate-400 mb-1">Buying Power</div>
             <div className="text-3xl font-bold text-white">${portfolio.cashBalance.toFixed(2)}</div>
          </Card>
          
-         <Card className="bg-gradient-to-br from-gray-900 to-gray-800 border-gray-700">
-            <div className="text-sm text-gray-400 mb-1">Unrealized P/L</div>
-            <div className={`text-3xl font-bold ${openPL >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+         <Card className="gs-panel-strong">
+            <div className="text-sm text-slate-400 mb-1">Unrealized P/L</div>
+            <div className={`text-3xl font-bold ${openPL >= 0 ? 'text-emerald-300' : 'text-rose-300'}`}>
                {openPL >= 0 ? '+' : ''}{openPL.toFixed(2)} ({openPLPercent.toFixed(2)}%)
             </div>
          </Card>
@@ -158,14 +158,14 @@ export default function PortfolioPage() {
             <div className="space-y-4">
                <h2 className="text-2xl font-bold">Positions</h2>
                {portfolio.positions.length === 0 ? (
-                  <div className="text-center py-16 border border-dashed border-gray-800 rounded-xl bg-gray-900/50">
-                     <p className="text-gray-500 mb-4">You have no open positions.</p>
-                     <Link href="/gridstock" className="text-green-500 hover:underline">Browse the market</Link>
+                  <div className="text-center py-16 border border-dashed border-[color:var(--grid-border)] rounded-2xl gs-panel-soft">
+                     <p className="text-slate-400 mb-4">You have no open positions.</p>
+                     <Link href="/gridstock" className="text-emerald-300 hover:underline">Browse the market</Link>
                   </div>
                ) : (
                   <div className="overflow-x-auto">
-                     <table className="w-full text-left text-sm text-gray-400">
-                        <thead className="bg-gray-900 text-xs uppercase font-medium">
+                     <table className="w-full text-left text-sm text-slate-400">
+                        <thead className="bg-[color:var(--grid-panel-strong)] text-xs uppercase font-semibold text-slate-300">
                            <tr>
                               <th className="px-6 py-4 rounded-tl-lg">Symbol</th>
                               <th className="px-6 py-4">Quantity</th>
@@ -176,7 +176,7 @@ export default function PortfolioPage() {
                               <th className="px-6 py-4 rounded-tr-lg">Return</th>
                            </tr>
                         </thead>
-                        <tbody className="divide-y divide-gray-800 bg-gray-900/50">
+                        <tbody className="divide-y divide-[color:var(--grid-border)] bg-[color:var(--grid-panel)]">
                            {portfolio.positions.map((pos) => {
                               const quote = quotes[pos.symbol];
                               const currentPrice = quote?.price || pos.averageCost;
@@ -185,9 +185,9 @@ export default function PortfolioPage() {
                               const gainPercent = (gain / (pos.quantity * pos.averageCost)) * 100;
 
                               return (
-                                 <tr key={pos.symbol} className="hover:bg-gray-800/50 transition-colors">
+                                 <tr key={pos.symbol} className="hover:bg-white/5 transition-colors">
                                     <td className="px-6 py-4 font-bold text-white">
-                                       <Link href={`/gridstock/stock/${pos.symbol}`} className="hover:text-green-500">
+                                       <Link href={`/gridstock/stock/${pos.symbol}`} className="hover:text-emerald-300">
                                           {pos.symbol}
                                        </Link>
                                     </td>
@@ -201,7 +201,7 @@ export default function PortfolioPage() {
                                           {quote.change.toFixed(2)} ({quote.changePercent.toFixed(2)}%)
                                         </Badge>
                                       ) : (
-                                        <span className="text-gray-500 text-xs">Waiting…</span>
+                                        <span className="text-slate-500 text-xs">Waiting…</span>
                                       )}
                                     </td>
                                     <td className="px-6 py-4 text-white font-medium">${marketValue.toFixed(2)}</td>
@@ -224,19 +224,19 @@ export default function PortfolioPage() {
                <h2 className="text-2xl font-bold">Recent Activity</h2>
                <div className="space-y-2">
                   {portfolio.transactions.slice(0, 5).map((tx) => (
-                     <div key={tx.id} className="flex justify-between items-center bg-gray-900 p-4 rounded-lg border border-gray-800">
+                     <div key={tx.id} className="flex justify-between items-center gs-panel-soft p-4 rounded-xl border border-[color:var(--grid-border)]">
                         <div className="flex flex-col">
                            <span className="font-bold text-white">{tx.type} {tx.symbol}</span>
-                           <span className="text-xs text-gray-500">{new Date(tx.timestamp).toLocaleDateString()}</span>
+                           <span className="text-xs text-slate-500">{new Date(tx.timestamp).toLocaleDateString()}</span>
                         </div>
                         <div className="text-right">
                            <div className="font-medium text-white">{tx.quantity} shares @ ${tx.price.toFixed(2)}</div>
-                           <div className="text-sm text-gray-500">Total: ${(tx.quantity * tx.price).toFixed(2)}</div>
+                           <div className="text-sm text-slate-500">Total: ${(tx.quantity * tx.price).toFixed(2)}</div>
                         </div>
                      </div>
                   ))}
                   {portfolio.transactions.length === 0 && (
-                     <p className="text-gray-500 text-sm">No recent transactions.</p>
+                     <p className="text-slate-500 text-sm">No recent transactions.</p>
                   )}
                </div>
             </div>

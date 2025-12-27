@@ -25,10 +25,10 @@ export async function POST(request: Request) {
   }
 
   // AgentManager scheduler path
-  const { agentManagerUrl } = loadConfig();
+  const { agentManagerUrl, tokens } = loadConfig();
   if (agentManagerUrl) {
     try {
-      const client = new AgentManagerClient(agentManagerUrl);
+      const client = new AgentManagerClient(agentManagerUrl, { token: tokens.agentManager });
       const enqueue = await client.enqueueJob(
         "agent.story-weaver.001",
         "schedule",

@@ -1035,14 +1035,14 @@ export default function GamePage() {
         {winnerId !== null && (
           <UICard className="mb-4 border-green-500/50 bg-green-900/20">
             <div className="text-lg font-bold">Winner: {state.players[winnerId]?.name}</div>
-            <div className="text-sm text-gray-300">Game over — reset or load a save to play again.</div>
+            <div className="text-sm text-slate-300">Game over — reset or load a save to play again.</div>
           </UICard>
         )}
-        <div className="grid grid-cols-11 grid-rows-11 gap-1 bg-gray-900 p-2 rounded-xl border border-gray-800">
+        <div className="grid grid-cols-11 grid-rows-11 gap-1 gs-panel rounded-2xl p-2">
           {Array.from({ length: 11 }).map((_, row) =>
             Array.from({ length: 11 }).map((_, col) => {
               const data = tileAt(col, 10 - row);
-              if (!data) return <div key={`${row}-${col}`} className="bg-gray-950" />;
+              if (!data) return <div key={`${row}-${col}`} className="bg-black/70" />;
               const { tile, index } = data;
               const owners = tokenPositions[index] || [];
               return (
@@ -1064,12 +1064,12 @@ export default function GamePage() {
         <UICard>
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-xs text-gray-400">Current Player</div>
+              <div className="text-xs text-slate-400">Current Player</div>
               <div className="text-xl font-bold">{current.name}</div>
             </div>
             <div className="text-right">
-              <div className="text-xs text-gray-400">Cash</div>
-              <div className="text-2xl font-bold text-green-400">${current.cash}</div>
+              <div className="text-xs text-slate-400">Cash</div>
+              <div className="text-2xl font-bold text-emerald-300">${current.cash}</div>
             </div>
           </div>
           <div className="mt-3 flex gap-2 flex-wrap">
@@ -1106,19 +1106,19 @@ export default function GamePage() {
               >
                 Use jail card ({current.getOutOfJail ?? 0})
               </Button>
-              <span className="text-xs text-gray-400">
+              <span className="text-xs text-slate-400">
                 Turns left: {current.jailTurns}
               </span>
             </div>
           )}
           {state.lastRoll && (
-            <div className="mt-2 text-sm text-gray-400">
+            <div className="mt-2 text-sm text-slate-400">
               Last roll: {state.lastRoll[0]} + {state.lastRoll[1]} = {state.lastRoll[0] + state.lastRoll[1]}
             </div>
           )}
-          {rolling && <div className="text-xs text-green-400 mt-1 animate-pulse">Rolling…</div>}
+          {rolling && <div className="text-xs text-emerald-300 mt-1 animate-pulse">Rolling…</div>}
           {pending.type === "buy" && (
-            <div className="mt-2 text-sm text-yellow-400">
+            <div className="mt-2 text-sm text-amber-300">
               Opportunity: buy {renderTileLabel(state.tiles[pending.tileIndex])}
             </div>
           )}
@@ -1127,16 +1127,16 @@ export default function GamePage() {
         <UICard>
           <div className="flex items-center justify-between mb-2">
             <div>
-              <div className="text-xs text-gray-400">Player pulse</div>
-              <div className="text-sm text-gray-200">Net worth & monopolies</div>
+              <div className="text-xs text-slate-400">Player pulse</div>
+              <div className="text-sm text-slate-200">Net worth & monopolies</div>
             </div>
-            <div className="text-xs text-gray-500">Live</div>
+            <div className="text-xs text-slate-500">Live</div>
           </div>
           <div className="space-y-3">
             {playerInsights.map((p) => (
               <div
                 key={p.id}
-                className="flex items-center justify-between rounded border border-gray-800 px-3 py-2 bg-gray-900/40"
+                className="flex items-center justify-between rounded-xl gs-panel-soft px-3 py-2"
               >
                 <div className="flex items-center gap-2">
                   <span
@@ -1153,8 +1153,8 @@ export default function GamePage() {
                   </div>
                 </div>
                 <div className="text-right">
-                  <div className="text-green-300 font-semibold">${p.netWorth.toFixed(0)}</div>
-                  <div className="text-xs text-gray-400">Cash ${p.cash}</div>
+                  <div className="text-emerald-300 font-semibold">${p.netWorth.toFixed(0)}</div>
+                  <div className="text-xs text-slate-400">Cash ${p.cash}</div>
                 </div>
               </div>
             ))}
@@ -1165,7 +1165,7 @@ export default function GamePage() {
           <div className="flex flex-col gap-3">
             <div className="flex items-center justify-between gap-3">
               <div className="flex-1">
-                <div className="text-xs text-gray-400 mb-1">Save slot</div>
+                <div className="text-xs text-slate-400 mb-1">Save slot</div>
                 <Input
                   value={saveName}
                   onChange={(e) => setSaveName(e.target.value)}
@@ -1185,12 +1185,12 @@ export default function GamePage() {
                 </Button>
               </div>
             </div>
-            <div className="flex flex-wrap gap-2 text-xs text-gray-400">
+            <div className="flex flex-wrap gap-2 text-xs text-slate-400">
               {saves.map((s) => (
                 <button
                   key={s.name}
                   onClick={() => handleLoadSave(s.name)}
-                  className="px-2 py-1 rounded border border-gray-700 hover:border-gray-500 text-left"
+                  className="px-2 py-1 rounded border border-[color:var(--grid-border)] hover:border-[rgb(var(--grid-accent)/0.4)] text-left"
                   title={new Date(s.updatedAt).toLocaleString()}
                 >
                   {s.name}
@@ -1205,7 +1205,7 @@ export default function GamePage() {
           <div className="flex flex-col gap-3">
             <div className="flex items-center gap-3 flex-wrap">
               <div>
-                <div className="text-xs text-gray-400">Players</div>
+                <div className="text-xs text-slate-400">Players</div>
                 <Input
                   type="number"
                   min={2}
@@ -1218,9 +1218,9 @@ export default function GamePage() {
                 />
               </div>
               <div>
-                <div className="text-xs text-gray-400">Auto-end</div>
+                <div className="text-xs text-slate-400">Auto-end</div>
                 <select
-                  className="bg-gray-800 border border-gray-700 rounded px-2 py-1 text-sm"
+                  className="gs-select rounded-full px-2 py-1 text-sm"
                   value={settings.autoEndMs}
                   onChange={(e) => setSettings((s) => ({ ...s, autoEndMs: Number(e.target.value) }))}
                 >
@@ -1231,10 +1231,10 @@ export default function GamePage() {
                 </select>
               </div>
               <div className="flex-1 min-w-[200px]">
-                <div className="text-xs text-gray-400 mb-1">AI slots</div>
+                <div className="text-xs text-slate-400 mb-1">AI slots</div>
                 <div className="flex gap-2 flex-wrap">
                   {Array.from({ length: settings.playerCount }).map((_, idx) => (
-                    <label key={idx} className="text-xs flex items-center gap-1 border border-gray-700 rounded px-2 py-1">
+                    <label key={idx} className="text-xs flex items-center gap-1 border border-[color:var(--grid-border)] rounded px-2 py-1">
                       <input
                         type="checkbox"
                         checked={settings.aiSlots.includes(idx)}
@@ -1263,16 +1263,16 @@ export default function GamePage() {
           <UICard>
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-xs text-gray-400">Auction</div>
+                <div className="text-xs text-slate-400">Auction</div>
                 <div className="font-bold">{renderTileLabel(state.tiles[auction.tileIndex])}</div>
-                <div className="text-xs text-gray-500">
+                <div className="text-xs text-slate-500">
                   High bid: ${auction.highBid}{" "}
                   {auction.highBidder !== null ? `by ${state.players[auction.highBidder].name}` : ""}
                 </div>
               </div>
-              <div className="text-xs text-gray-400">Timer: {auction.timer}s</div>
+              <div className="text-xs text-slate-400">Timer: {auction.timer}s</div>
             </div>
-            <div className="mt-2 text-sm text-gray-400">
+            <div className="mt-2 text-sm text-slate-400">
               Current bidder: {state.players[auction.participants[auction.activeBidder]].name}
             </div>
             <div className="mt-3 flex gap-2">
@@ -1288,7 +1288,7 @@ export default function GamePage() {
 
         <UICard>
           <div className="font-bold mb-2">Owned & Upgrades</div>
-          {ownedCompanies.length === 0 && <div className="text-sm text-gray-500">No companies yet.</div>}
+          {ownedCompanies.length === 0 && <div className="text-sm text-slate-500">No companies yet.</div>}
           <div className="space-y-2 max-h-64 overflow-y-auto">
             {ownedCompanies.map((idx) => {
               const tile = state.tiles[idx] as CompanyTile;
@@ -1331,16 +1331,16 @@ export default function GamePage() {
             })}
           </div>
           {fullSets.length > 0 && (
-            <div className="text-xs text-green-400 mt-2">Monopolies: {fullSets.join(", ")}</div>
+            <div className="text-xs text-emerald-300 mt-2">Monopolies: {fullSets.join(", ")}</div>
           )}
         </UICard>
 
         <UICard>
           <div className="font-bold mb-2">Quick Trade</div>
-          <div className="text-xs text-gray-400 mb-1">Swap properties and cash; use cash direction for counteroffers.</div>
+          <div className="text-xs text-slate-400 mb-1">Swap properties and cash; use cash direction for counteroffers.</div>
           <div className="flex flex-col gap-2">
             <select
-              className="bg-gray-800 border border-gray-700 rounded px-2 py-1 text-sm"
+              className="gs-select rounded-full px-2 py-1 text-sm"
               value={tradeProperty ?? ""}
               onChange={(e) => setTradeProperty(e.target.value ? Number(e.target.value) : null)}
             >
@@ -1352,7 +1352,7 @@ export default function GamePage() {
               ))}
             </select>
             <select
-              className="bg-gray-800 border border-gray-700 rounded px-2 py-1 text-sm"
+              className="gs-select rounded-full px-2 py-1 text-sm"
               value={tradeReceiveProperty ?? ""}
               onChange={(e) => setTradeReceiveProperty(e.target.value ? Number(e.target.value) : null)}
             >
@@ -1374,7 +1374,7 @@ export default function GamePage() {
                 ))}
             </select>
             <select
-              className="bg-gray-800 border border-gray-700 rounded px-2 py-1 text-sm"
+              className="gs-select rounded-full px-2 py-1 text-sm"
               value={tradeTarget ?? ""}
               onChange={(e) => setTradeTarget(e.target.value ? Number(e.target.value) : null)}
             >
@@ -1387,10 +1387,10 @@ export default function GamePage() {
                   </option>
                 ))}
             </select>
-            <div className="flex items-center gap-2 text-xs text-gray-400">
+            <div className="flex items-center gap-2 text-xs text-slate-400">
               Cash from
               <select
-                className="bg-gray-800 border border-gray-700 rounded px-2 py-1 text-sm"
+                className="gs-select rounded-full px-2 py-1 text-sm"
                 value={tradeCashDirection}
                 onChange={(e) => setTradeCashDirection(e.target.value as "me" | "them")}
               >
@@ -1416,7 +1416,7 @@ export default function GamePage() {
             {state.players.map((p, idx) => (
               <div
                 key={p.id}
-                className={`flex items-center justify-between text-sm ${idx === state.currentPlayer ? "text-white" : "text-gray-400"}`}
+                className={`flex items-center justify-between text-sm ${idx === state.currentPlayer ? "text-white" : "text-slate-400"}`}
               >
                 <div className="flex items-center gap-2">
                   <span
@@ -1426,9 +1426,9 @@ export default function GamePage() {
                   <Input
                     value={p.name}
                     onChange={(e) => handleRenamePlayer(p.id, e.target.value)}
-                    className="bg-gray-800 border-gray-700 px-2 py-1 text-xs w-28"
+                    className="px-2 py-1 text-xs w-28"
                   />
-                  {p.isAI && <span className="text-[10px] text-green-400 uppercase">AI</span>}
+                  {p.isAI && <span className="text-[10px] text-emerald-300 uppercase">AI</span>}
                 </div>
                 <div>${p.cash}</div>
               </div>
@@ -1438,7 +1438,7 @@ export default function GamePage() {
 
         <UICard>
           <div className="font-bold mb-2">Stats</div>
-          <div className="text-xs text-gray-400 mb-2">Net worth includes cash + property cost (ignores mortgages discounts).</div>
+          <div className="text-xs text-slate-400 mb-2">Net worth includes cash + property cost (ignores mortgages discounts).</div>
           <div className="space-y-1 text-sm">
             {state.players.map((p) => {
               const owned = Object.entries(state.properties).filter(([_, val]) => val.ownerId === p.id);
@@ -1472,7 +1472,7 @@ export default function GamePage() {
 
         <UICard>
           <div className="font-bold mb-2">Log</div>
-          <div className="space-y-1 max-h-60 overflow-y-auto text-xs text-gray-300">
+          <div className="space-y-1 max-h-60 overflow-y-auto text-xs text-slate-300">
             {state.log.map((l, i) => (
               <div key={i}>{l}</div>
             ))}
@@ -1520,7 +1520,7 @@ function TileCell({
     : `${label} ${rentDetails}`;
   return (
     <div
-      className={`relative border border-gray-800 rounded-sm p-1 text-[10px] leading-tight transition transform ${
+      className={`relative border border-[color:var(--grid-border)] rounded-sm p-1 text-[10px] leading-tight transition transform ${
         isCurrent ? "ring-2 ring-white/60 scale-[1.02]" : ""
       }`}
       style={{ background: bg }}

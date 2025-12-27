@@ -64,10 +64,12 @@ export function mapJobToStatus(job: JobRecord, meta: AgentJob): AgentStatus {
 export async function refreshAgentManagerJobs(baseUrl: string, filterId?: string) {
   const jobs = Object.values(jobsById).filter((job) => !filterId || job.agentId === filterId);
   if (!jobs.length) return;
+  const token = process.env.AGENT_BACKEND_TOKEN;
+  const authHeaders = token ? { Authorization: `Bearer ${token}` } : undefined;
   await Promise.all(
     jobs.map(async (meta) => {
       if (meta.lastStatus === "completed" || meta.lastStatus === "failed") return;
-      const res = await fetch(`${baseUrl}/jobs/${meta.id}`, { cache: "no-store" });
+      const res = await fetch(`${baseUrl}/jobs/${meta.id}`, { cache: "no-store", headers: authHeaders });
       if (!res.ok) return;
       const job = (await res.json()) as JobRecord;
       if (meta.lastUpdatedAt === job.updatedAt) return;

@@ -26,25 +26,29 @@ export default function SettingsPage() {
     setTimeout(() => setSaving(false), 300);
   };
 
-  if (!settings) return <div className="p-8 text-gray-500">Loading settings...</div>;
+  if (!settings) return <div className="p-8 text-slate-500">Loading settings...</div>;
 
   return (
     <div className="space-y-8">
       <header>
         <h1 className="text-3xl font-bold tracking-tight mb-2">Settings</h1>
-        <p className="text-gray-400">Control how GridStock refreshes and displays data.</p>
+        <p className="text-slate-400">Control how GridStock refreshes and displays data.</p>
       </header>
 
       <Card className="space-y-6">
         <div>
           <h2 className="text-xl font-semibold mb-1">Refresh cadence</h2>
-          <p className="text-sm text-gray-500">Default poll interval for new grids.</p>
+          <p className="text-sm text-slate-500">Default poll interval for new grids.</p>
           <div className="mt-3 flex gap-2 flex-wrap">
             {POLL_OPTIONS.map((ms) => (
               <button
                 key={ms}
                 onClick={() => updateSetting("defaultPollMs", ms)}
-                className={`px-3 py-2 rounded border ${settings.defaultPollMs === ms ? "border-green-500 text-white bg-green-500/10" : "border-gray-700 text-gray-300 hover:border-gray-500"}`}
+                className={`px-3 py-2 rounded-full border text-sm font-semibold ${
+                  settings.defaultPollMs === ms
+                    ? "border-[rgb(var(--grid-accent))] text-white bg-[rgb(var(--grid-accent)/0.2)]"
+                    : "border-[color:var(--grid-border)] text-slate-300 hover:border-[rgb(var(--grid-accent)/0.4)]"
+                }`}
               >
                 {(ms / 1000).toFixed(1)}s
               </button>
@@ -54,13 +58,17 @@ export default function SettingsPage() {
 
         <div>
           <h2 className="text-xl font-semibold mb-1">View density</h2>
-          <p className="text-sm text-gray-500">Default tile layout on the dashboard.</p>
+          <p className="text-sm text-slate-500">Default tile layout on the dashboard.</p>
           <div className="mt-3 flex gap-2">
             {(["regular", "compact"] as ViewDensitySetting[]).map((opt) => (
               <button
                 key={opt}
                 onClick={() => updateSetting("viewDensity", opt)}
-                className={`px-3 py-2 rounded border ${settings.viewDensity === opt ? "border-green-500 text-white bg-green-500/10" : "border-gray-700 text-gray-300 hover:border-gray-500"}`}
+                className={`px-3 py-2 rounded-full border text-sm font-semibold ${
+                  settings.viewDensity === opt
+                    ? "border-[rgb(var(--grid-accent))] text-white bg-[rgb(var(--grid-accent)/0.2)]"
+                    : "border-[color:var(--grid-border)] text-slate-300 hover:border-[rgb(var(--grid-accent)/0.4)]"
+                }`}
               >
                 {opt === "regular" ? "Spacious" : "Compact"}
               </button>

@@ -2,9 +2,15 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { AvailabilityStatus } from "@illuvrse/db";
 import clsx from "clsx";
 import { LiveCamPlayer, TagChip } from "@news/components/ui";
+
+const AvailabilityStatus = {
+  unknown: "unknown",
+  online: "online",
+  offline: "offline",
+} as const;
+type AvailabilityStatus = (typeof AvailabilityStatus)[keyof typeof AvailabilityStatus];
 
 type StreamView = {
   id: string;

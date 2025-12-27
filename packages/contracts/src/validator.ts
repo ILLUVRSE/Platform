@@ -4,6 +4,9 @@ import {
   AceTrigger,
   AceModelBindings,
   AcePermissions,
+  AceTool,
+  AceMemoryPolicy,
+  AcePresence,
   AceResources,
   AceRuntime,
   AceAvatar,
@@ -22,6 +25,10 @@ const capabilitySet = new Set<AceCapability>([
   "assistant",
   "custom",
 ]);
+
+const httpMethods = ["GET", "POST", "PUT", "DELETE", "PATCH"] as const;
+type AceHttpMethod = (typeof httpMethods)[number];
+const httpMethodSet = new Set<AceHttpMethod>(httpMethods);
 
 function expectObject(value: unknown, field: string): Dict {
   if (!value || typeof value !== "object" || Array.isArray(value)) {
@@ -71,11 +78,17 @@ function parseTriggers(value: unknown): AceTrigger[] | undefined {
     }
     if (type === "http") {
       const method = obj.method;
-      if (method !== undefined && typeof method !== "string") throw new Error("trigger.method must be a string");
+      let parsedMethod: AceHttpMethod | undefined;
+      if (method !== undefined) {
+        if (typeof method !== "string" || !httpMethodSet.has(method as AceHttpMethod)) {
+          throw new Error("trigger.method must be a valid HTTP method");
+        }
+        parsedMethod = method as AceHttpMethod;
+      }
       return {
         type,
         path: expectString(obj.path, "trigger.path"),
-        method: method as AceTrigger["method"],
+        method: parsedMethod,
       } as AceTrigger;
     }
     throw new Error(`invalid trigger type: ${type}`);
@@ -93,7 +106,7 @@ function parseModelBindings(value: unknown): AceModelBindings | undefined {
       ? {
           id: expectString(llm.id, "modelBindings.llm.id"),
           provider: llm.provider ? expectString(llm.provider, "modelBindings.llm.provider") : undefined,
-          params: llm.params && expectObject(llm.params, "modelBindings.llm.params"),
+          params: llm.params !== undefined ? expectObject(llm.params, "modelBindings.llm.params") : undefined,
         }
       : undefined,
     tts: tts
@@ -101,14 +114,14 @@ function parseModelBindings(value: unknown): AceModelBindings | undefined {
           id: expectString(tts.id, "modelBindings.tts.id"),
           provider: tts.provider ? expectString(tts.provider, "modelBindings.tts.provider") : undefined,
           voice: tts.voice ? expectString(tts.voice, "modelBindings.tts.voice") : undefined,
-          params: tts.params && expectObject(tts.params, "modelBindings.tts.params"),
+          params: tts.params !== undefined ? expectObject(tts.params, "modelBindings.tts.params") : undefined,
         }
       : undefined,
     vision: vision
       ? {
           id: expectString(vision.id, "modelBindings.vision.id"),
           provider: vision.provider ? expectString(vision.provider, "modelBindings.vision.provider") : undefined,
-          params: vision.params && expectObject(vision.params, "modelBindings.vision.params"),
+          params: vision.params !== undefined ? expectObject(vision.params, "modelBindings.vision.params") : undefined,
         }
       : undefined,
   };
@@ -136,6 +149,71 @@ function parsePermissions(value: unknown): AcePermissions | undefined {
       : undefined,
     secrets: secrets ? parseStringArray(secrets, "permissions.secrets") : undefined,
     scopes: scopes ? parseStringArray(scopes, "permissions.scopes") : undefined,
+  };
+}
+
+function parseTools(value: unknown): AceTool[] | undefined {
+  if (value === undefined) return undefined;
+  if (!Array.isArray(value)) throw new Error("tools must be an array");
+  return value.map((tool, idx) => {
+    const obj = expectObject(tool, `tools[${idx}]`);
+    const actions = parseStringArray(obj.actions, `tools[${idx}].actions`);
+    return {
+      id: expectString(obj.id, `tools[${idx}].id`),
+      name: obj.name ? expectString(obj.name, `tools[${idx}].name`) : undefined,
+      description: obj.description ? expectString(obj.description, `tools[${idx}].description`) : undefined,
+      actions,
+      scopes: obj.scopes ? parseStringArray(obj.scopes, `tools[${idx}].scopes`) : undefined,
+      metadata: obj.metadata ? expectObject(obj.metadata, `tools[${idx}].metadata`) : undefined,
+    };
+  });
+}
+
+function parseNumber(value: unknown, field: string): number {
+  const num = Number(value);
+  if (!Number.isFinite(num)) throw new Error(`${field} must be a number`);
+  return num;
+}
+
+function parseMemory(value: unknown): AceMemoryPolicy | undefined {
+  if (value === undefined) return undefined;
+  const obj = expectObject(value, "memory");
+  const shortTerm = obj.shortTerm ? expectObject(obj.shortTerm, "memory.shortTerm") : undefined;
+  const longTerm = obj.longTerm ? expectObject(obj.longTerm, "memory.longTerm") : undefined;
+  return {
+    shortTerm: shortTerm
+      ? {
+          ttlDays: shortTerm.ttlDays !== undefined ? parseNumber(shortTerm.ttlDays, "memory.shortTerm.ttlDays") : undefined,
+          maxEntries:
+            shortTerm.maxEntries !== undefined ? parseNumber(shortTerm.maxEntries, "memory.shortTerm.maxEntries") : undefined,
+        }
+      : undefined,
+    longTerm: longTerm
+      ? {
+          enabled: typeof longTerm.enabled === "boolean" ? longTerm.enabled : undefined,
+          retentionDays:
+            longTerm.retentionDays !== undefined ? parseNumber(longTerm.retentionDays, "memory.longTerm.retentionDays") : undefined,
+          vectorStore: longTerm.vectorStore ? expectString(longTerm.vectorStore, "memory.longTerm.vectorStore") : undefined,
+          namespace: longTerm.namespace ? expectString(longTerm.namespace, "memory.longTerm.namespace") : undefined,
+        }
+      : undefined,
+    citations: typeof obj.citations === "boolean" ? obj.citations : undefined,
+  };
+}
+
+function parsePresence(value: unknown): AcePresence | undefined {
+  if (value === undefined) return undefined;
+  const obj = expectObject(value, "presence");
+  const priority = obj.priority ? expectString(obj.priority, "presence.priority") : undefined;
+  if (priority && !["low", "normal", "high"].includes(priority)) {
+    throw new Error("presence.priority must be low, normal, or high");
+  }
+  return {
+    realm: obj.realm ? expectString(obj.realm, "presence.realm") : undefined,
+    room: obj.room ? expectString(obj.room, "presence.room") : undefined,
+    priority: priority as AcePresence["priority"],
+    schedule: obj.schedule ? parseStringArray(obj.schedule, "presence.schedule") : undefined,
+    timezone: obj.timezone ? expectString(obj.timezone, "presence.timezone") : undefined,
   };
 }
 
@@ -178,6 +256,7 @@ function parseAvatar(value: unknown): AceAvatar | undefined {
   const voice = obj.voice ? expectObject(obj.voice, "avatar.voice") : undefined;
   const personality = obj.personality ? expectObject(obj.personality, "avatar.personality") : undefined;
   return {
+    profileId: obj.profileId ? expectString(obj.profileId, "avatar.profileId") : undefined,
     appearance: appearance
       ? {
           assets: appearance.assets ? parseStringArray(appearance.assets, "avatar.appearance.assets") : undefined,
@@ -218,6 +297,25 @@ function expectRecordOfStrings(value: unknown, field: string): Record<string, st
   return record;
 }
 
+function parseSigning(value: unknown): AceAgentManifest["signing"] | undefined {
+  if (value === undefined) return undefined;
+  const obj = expectObject(value, "signing");
+  const proof = obj.proof ? expectObject(obj.proof, "signing.proof") : undefined;
+  return {
+    proof: proof
+      ? {
+          sha256: expectString(proof.sha256, "signing.proof.sha256"),
+          signer: expectString(proof.signer, "signing.proof.signer"),
+          timestamp: expectString(proof.timestamp, "signing.proof.timestamp"),
+          ledgerUrl: proof.ledgerUrl ? expectString(proof.ledgerUrl, "signing.proof.ledgerUrl") : undefined,
+          policyVerdict: proof.policyVerdict ? expectString(proof.policyVerdict, "signing.proof.policyVerdict") : undefined,
+          signature: proof.signature ? expectString(proof.signature, "signing.proof.signature") : undefined,
+        }
+      : undefined,
+    policyVerdict: obj.policyVerdict ? expectString(obj.policyVerdict, "signing.policyVerdict") : undefined,
+  };
+}
+
 export function validateAceAgentManifest(manifest: unknown): AceAgentManifest {
   const obj = expectObject(manifest, "manifest");
 
@@ -226,9 +324,13 @@ export function validateAceAgentManifest(manifest: unknown): AceAgentManifest {
   const triggers = parseTriggers(obj.triggers);
   const modelBindings = parseModelBindings(obj.modelBindings);
   const permissions = parsePermissions(obj.permissions);
+  const tools = parseTools(obj.tools);
   const resources = parseResources(obj.resources);
+  const memory = parseMemory(obj.memory);
+  const presence = parsePresence(obj.presence);
   const metadata = obj.metadata ? expectObject(obj.metadata, "metadata") : undefined;
   const avatar = parseAvatar(obj.avatar);
+  const signing = parseSigning(obj.signing);
 
   return {
     id: expectString(obj.id, "id"),
@@ -240,10 +342,13 @@ export function validateAceAgentManifest(manifest: unknown): AceAgentManifest {
     triggers,
     modelBindings,
     permissions,
+    tools,
     resources,
+    memory,
+    presence,
     runtime,
     metadata,
     avatar,
-    signing: obj.signing && expectObject(obj.signing, "signing"),
+    signing,
   };
 }

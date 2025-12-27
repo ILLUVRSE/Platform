@@ -3,7 +3,14 @@ import { cookies } from 'next/headers';
 import { addUser, findUserByEmail, findUserById, removeSession, upsertSession, readDB, deleteUser, writeDB } from './db';
 import { Session, User } from '../types';
 
-const SESSION_COOKIE = 'mk_session';
+export const SESSION_COOKIE = 'mk_session';
+export const SESSION_COOKIE_OPTIONS = {
+  httpOnly: true,
+  sameSite: 'lax' as const,
+  secure: process.env.NODE_ENV === 'production',
+  path: '/',
+  maxAge: 60 * 60 * 24 * 30, // 30 days
+};
 
 export function hashPassword(password: string) {
   return crypto.createHash('sha256').update(password).digest('hex');
@@ -22,8 +29,8 @@ export async function registerUser(email: string, password: string) {
   };
 
   await addUser({ ...user, passwordHash: hashPassword(password) });
-  await createSession(user.id);
-  return user;
+  const token = await createSession(user.id);
+  return { user, token };
 }
 
 export async function loginUser(email: string, password: string) {
@@ -32,9 +39,9 @@ export async function loginUser(email: string, password: string) {
   if (!user) throw new Error('Invalid credentials');
   const valid = user.passwordHash === hashPassword(password);
   if (!valid) throw new Error('Invalid credentials');
-  await createSession(user.id);
+  const token = await createSession(user.id);
   const { passwordHash, ...safeUser } = user;
-  return safeUser;
+  return { user: safeUser, token };
 }
 
 export async function createSession(userId: string) {
@@ -45,15 +52,7 @@ export async function createSession(userId: string) {
     createdAt: new Date().toISOString(),
   };
   await upsertSession(session);
-
-  const cookieStore = cookies();
-  cookieStore.set(SESSION_COOKIE, token, {
-    httpOnly: true,
-    sameSite: 'lax',
-    secure: process.env.NODE_ENV === 'production',
-    path: '/',
-    maxAge: 60 * 60 * 24 * 30, // 30 days
-  });
+  return token;
 }
 
 export async function getSessionUser() {
@@ -69,13 +68,9 @@ export async function getSessionUser() {
   return safeUser as User;
 }
 
-export async function clearSession() {
-  const cookieStore = cookies();
-  const token = cookieStore.get(SESSION_COOKIE)?.value;
-  if (token) {
-    await removeSession(token);
-  }
-  cookieStore.delete(SESSION_COOKIE);
+export async function clearSession(token?: string) {
+  if (!token) return;
+  await removeSession(token);
 }
 
 export async function changePassword(userId: string, oldPassword: string, newPassword: string) {
@@ -90,20 +85,9 @@ export async function changePassword(userId: string, oldPassword: string, newPas
   const session: Session = { token: crypto.randomUUID(), userId, createdAt: new Date().toISOString() };
   db.sessions.push(session);
   await writeDB(db);
-  const cookieStore = cookies();
-  if (session.token) {
-    cookieStore.set(SESSION_COOKIE, session.token, {
-      httpOnly: true,
-      sameSite: 'lax',
-      secure: process.env.NODE_ENV === 'production',
-      path: '/',
-      maxAge: 60 * 60 * 24 * 30,
-    });
-  }
-  return true;
+  return session.token;
 }
 
 export async function deleteAccount(userId: string) {
   await deleteUser(userId);
-  await clearSession();
 }

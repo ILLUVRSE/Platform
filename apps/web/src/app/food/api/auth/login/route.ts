@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { loginUser } from '@food/lib/server/auth';
+import { loginUser, SESSION_COOKIE, SESSION_COOKIE_OPTIONS } from '@food/lib/server/auth';
 import { isRateLimited } from '@food/lib/server/rateLimit';
 
 export async function POST(req: Request) {
@@ -15,8 +15,10 @@ export async function POST(req: Request) {
     if (!email || !password) {
       return NextResponse.json({ error: 'Email and password required' }, { status: 400 });
     }
-    const user = await loginUser(email, password);
-    return NextResponse.json({ user });
+    const { user, token } = await loginUser(email, password);
+    const response = NextResponse.json({ user });
+    response.cookies.set(SESSION_COOKIE, token, SESSION_COOKIE_OPTIONS);
+    return response;
   } catch (error: any) {
     return NextResponse.json({ error: error.message || 'Login failed' }, { status: 401 });
   }

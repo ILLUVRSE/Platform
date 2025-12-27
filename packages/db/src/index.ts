@@ -1,4 +1,7 @@
 import type { PrismaClient } from "@prisma/client";
+import { createRequire } from "module";
+
+const require = createRequire(import.meta.url);
 
 let client: PrismaClient | undefined;
 

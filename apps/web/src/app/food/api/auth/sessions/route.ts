@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getSessionUser, clearSession } from '@food/lib/server/auth';
+import { getSessionUser } from '@food/lib/server/auth';
 import { readDB, removeSession } from '@food/lib/server/db';
 
 export async function GET() {

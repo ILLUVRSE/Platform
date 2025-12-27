@@ -19,6 +19,9 @@ export function AuditLog() {
 
   return (
     <div className="space-y-2 text-sm text-slate-700">
+      <a href="/api/audit?format=csv" className="text-xs font-semibold text-teal-700 underline underline-offset-4">
+        Export CSV
+      </a>
       {events.map((evt) => (
         <div
           key={evt.id}

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { registerUser } from '@food/lib/server/auth';
+import { registerUser, SESSION_COOKIE, SESSION_COOKIE_OPTIONS } from '@food/lib/server/auth';
 import { isRateLimited } from '@food/lib/server/rateLimit';
 
 export async function POST(req: Request) {
@@ -18,8 +18,10 @@ export async function POST(req: Request) {
     if (password.length < 8) {
       return NextResponse.json({ error: 'Password must be at least 8 characters.' }, { status: 400 });
     }
-    const user = await registerUser(email, password);
-    return NextResponse.json({ user });
+    const { user, token } = await registerUser(email, password);
+    const response = NextResponse.json({ user });
+    response.cookies.set(SESSION_COOKIE, token, SESSION_COOKIE_OPTIONS);
+    return response;
   } catch (error: any) {
     return NextResponse.json({ error: error.message || 'Registration failed' }, { status: 400 });
   }

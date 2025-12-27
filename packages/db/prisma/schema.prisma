@@ -320,6 +320,50 @@ model AgentApproval {
   updatedAt   DateTime             @updatedAt
 }
 
+model AgentJob {
+  id        String   @id
+  agentId   String
+  kind      String
+  action    String?
+  payload   Json?
+  status    String
+  result    Json?
+  error     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([agentId, createdAt])
+}
+
+model AgentStatusEvent {
+  id            String   @id @default(uuid())
+  jobId         String?
+  agentId       String
+  action        String?
+  status        String
+  message       String?
+  proofSha      String?
+  policyVerdict String?
+  latencyMs     Int?
+  timestamp     DateTime @default(now())
+
+  @@index([agentId, timestamp])
+}
+
+model AgentTask {
+  id        String     @id @default(uuid())
+  agentId   String
+  parentId  String?
+  title     String
+  payload   Json?
+  result    Json?
+  status    TaskStatus @default(pending)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  @@index([agentId, parentId])
+}
+
 enum AlertStatus {
   draft
   pending

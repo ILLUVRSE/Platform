@@ -55,6 +55,29 @@ export type AcePermissions = {
   scopes?: string[];
 };
 
+export type AceTool = {
+  id: string;
+  name?: string;
+  description?: string;
+  actions: string[];
+  scopes?: string[];
+  metadata?: Record<string, unknown>;
+};
+
+export type AceMemoryPolicy = {
+  shortTerm?: { ttlDays?: number; maxEntries?: number };
+  longTerm?: { enabled?: boolean; retentionDays?: number; vectorStore?: string; namespace?: string };
+  citations?: boolean;
+};
+
+export type AcePresence = {
+  realm?: string;
+  room?: string;
+  priority?: "low" | "normal" | "high";
+  schedule?: string[];
+  timezone?: string;
+};
+
 export type AceResources = {
   cpu?: string;
   memory?: string;
@@ -68,6 +91,7 @@ export type AceRuntime = {
 };
 
 export type AceAvatar = {
+  profileId?: string;
   appearance?: { assets?: string[]; stylePreset?: string; rig?: string };
   voice?: { sampleUrl?: string; configId?: string; activationLine?: string };
   personality?: { traits?: string[]; archetype?: string; emotionalRange?: string[] };
@@ -83,7 +107,10 @@ export type AceAgentManifest = {
   triggers?: AceTrigger[];
   modelBindings?: AceModelBindings;
   permissions?: AcePermissions;
+  tools?: AceTool[];
   resources?: AceResources;
+  memory?: AceMemoryPolicy;
+  presence?: AcePresence;
   runtime: AceRuntime;
   metadata?: Record<string, unknown>;
   avatar?: AceAvatar;
@@ -178,6 +205,22 @@ export const aceAgentManifestSchema = {
       },
       additionalProperties: false,
     },
+    tools: {
+      type: "array",
+      items: {
+        type: "object",
+        required: ["id", "actions"],
+        properties: {
+          id: { type: "string" },
+          name: { type: "string" },
+          description: { type: "string" },
+          actions: { type: "array", items: { type: "string" } },
+          scopes: { type: "array", items: { type: "string" } },
+          metadata: { type: "object" },
+        },
+        additionalProperties: false,
+      },
+    },
     resources: {
       type: "object",
       properties: {
@@ -189,6 +232,42 @@ export const aceAgentManifestSchema = {
           additionalProperties: false,
         },
         storage: { type: "string" },
+      },
+      additionalProperties: false,
+    },
+    memory: {
+      type: "object",
+      properties: {
+        shortTerm: {
+          type: "object",
+          properties: {
+            ttlDays: { type: "number" },
+            maxEntries: { type: "number" },
+          },
+          additionalProperties: false,
+        },
+        longTerm: {
+          type: "object",
+          properties: {
+            enabled: { type: "boolean" },
+            retentionDays: { type: "number" },
+            vectorStore: { type: "string" },
+            namespace: { type: "string" },
+          },
+          additionalProperties: false,
+        },
+        citations: { type: "boolean" },
+      },
+      additionalProperties: false,
+    },
+    presence: {
+      type: "object",
+      properties: {
+        realm: { type: "string" },
+        room: { type: "string" },
+        priority: { type: "string", enum: ["low", "normal", "high"] },
+        schedule: { type: "array", items: { type: "string" } },
+        timezone: { type: "string" },
       },
       additionalProperties: false,
     },
@@ -215,6 +294,7 @@ export const aceAgentManifestSchema = {
     avatar: {
       type: "object",
       properties: {
+        profileId: { type: "string" },
         appearance: {
           type: "object",
           properties: {

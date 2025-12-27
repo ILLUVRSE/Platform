@@ -16,6 +16,11 @@ const mediaRoots = [
 const allowedExt = [".mp4", ".mov", ".mkv", ".avi", ".mpeg"];
 const browserPreferred = [".mp4", ".mov"]; // browsers most likely to play inline
 
+type Candidate = {
+  path: string;
+  mtimeMs: number;
+};
+
 export async function GET(request: NextRequest) {
   const url = new URL(request.url);
   const requested = url.searchParams.get("file");
@@ -54,15 +59,19 @@ export async function GET(request: NextRequest) {
 }
 
 function getCandidates() {
-  const results: string[] = [];
+  const results: Candidate[] = [];
   for (const root of mediaRoots) {
     try {
-      const entries = fs.readdirSync(root);
-      const files = entries
-        .filter((f) => allowedExt.some((ext) => f.toLowerCase().endsWith(ext)))
-        .map((file) => path.join(root, file))
-        .sort(sortByPreferred);
-      results.push(...files);
+      const entries = fs.readdirSync(root, { withFileTypes: true });
+      const files = entries.filter(
+        (entry) =>
+          entry.isFile() && allowedExt.some((ext) => entry.name.toLowerCase().endsWith(ext))
+      );
+      for (const file of files) {
+        const filePath = path.join(root, file.name);
+        const stat = fs.statSync(filePath);
+        results.push({ path: filePath, mtimeMs: stat.mtimeMs });
+      }
     } catch {
       // ignore missing roots
     }
@@ -70,28 +79,25 @@ function getCandidates() {
   return results;
 }
 
-function sortByPreferred(a: string, b: string) {
-  const preferredOrder = [".mp4", ".mkv", ".mov", ".avi", ".mpeg"];
-  const extA = path.extname(a).toLowerCase();
-  const extB = path.extname(b).toLowerCase();
-  return preferredOrder.indexOf(extA) - preferredOrder.indexOf(extB);
-}
+function pickFile(candidates: Candidate[], requested?: string | null) {
+  const byMtime = [...candidates].sort((a, b) => b.mtimeMs - a.mtimeMs);
+  const preferred = byMtime.filter((item) =>
+    browserPreferred.includes(path.extname(item.path).toLowerCase())
+  );
 
-function pickFile(candidates: string[], requested?: string | null) {
   if (requested) {
     const safeName = path.basename(requested);
-    const found = candidates.find((f) => path.basename(f) === safeName);
+    const found = byMtime.find((f) => path.basename(f.path) === safeName);
     if (found) {
-      if (!browserPreferred.includes(path.extname(found).toLowerCase())) {
+      if (!browserPreferred.includes(path.extname(found.path).toLowerCase())) {
         // fallback to a browser-friendly file if the requested one is likely unsupported
-        const fallback = candidates.find((f) => browserPreferred.includes(path.extname(f).toLowerCase()));
-        if (fallback) return fallback;
+        if (preferred[0]) return preferred[0].path;
       }
-      return found;
+      return found.path;
     }
   }
-  // default to first browser-friendly file, else first candidate
-  return candidates.find((f) => browserPreferred.includes(path.extname(f).toLowerCase())) ?? candidates[0];
+  // default to newest browser-friendly file, else newest candidate
+  return preferred[0]?.path ?? byMtime[0]?.path ?? "";
 }
 
 function parseRange(range: string, fileSize: number) {

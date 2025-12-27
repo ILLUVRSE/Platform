@@ -19,6 +19,19 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm lint
       - run: pnpm build --filter '!@illuvrse/tests'
+      - run: pnpm --filter @illuvrse/contracts build
+      - run: pnpm --filter @illuvrse/agent-manager build
+      - run: pnpm --filter @illuvrse/db build
+      - run: pnpm --filter @illuvrse/kernel build
+      - run: pnpm --filter @illuvrse/sentinel build
+      - run: pnpm --filter @illuvrse/marketplace build
+      - run: pnpm --filter @illuvrse/finance build
+      - run: pnpm --filter @illuvrse/artifact-publisher build
+      - run: pnpm --filter @illuvrse/agent-manager-service build
+      - run: pnpm --filter @illuvrse/memory build
+      - run: pnpm --filter @illuvrse/world-state build
+      - run: pnpm --filter @illuvrse/avatar-registry build
+      - run: pnpm --filter @illuvrse/voice build
   integration:
     runs-on: ubuntu-latest
     steps:

@@ -25,13 +25,17 @@ const links = [
 
 export function PlatformBar() {
   return (
-    <div className="border-b border-gray-800 bg-black/80 backdrop-blur">
-      <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-3 px-4 py-2 text-[12px] text-gray-300">
-        <span className="text-[11px] font-semibold uppercase tracking-[0.2em] text-gray-500">
+    <div className="border-b border-[color:var(--grid-border)] bg-black/60 backdrop-blur">
+      <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-3 px-4 py-2 text-[12px] text-slate-300">
+        <span className="text-[10px] font-semibold uppercase tracking-[0.3em] text-slate-500">
           Platform
         </span>
         {links.map((link) => (
-          <Link key={link.label} href={link.href} className="rounded-full px-2 py-1 transition hover:text-white">
+          <Link
+            key={link.label}
+            href={link.href}
+            className="rounded-full border border-transparent px-2 py-1 transition hover:border-[rgb(var(--grid-accent)/0.4)] hover:bg-white/5 hover:text-white"
+          >
             {link.label}
           </Link>
         ))}

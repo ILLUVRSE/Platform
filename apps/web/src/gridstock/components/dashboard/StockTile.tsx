@@ -39,10 +39,15 @@ export const StockTile: React.FC<StockTileProps> = ({
   isStale = false,
 }) => {
   const isPositive = quote.change >= 0;
-  const colorClass = isPositive ? "bg-green-600" : "bg-red-600";
-  const hoverClass = isPositive ? "hover:bg-green-500" : "hover:bg-red-500";
+  const toneClass = isPositive
+    ? "from-emerald-500/22 via-emerald-500/10 to-slate-950/90 border-emerald-400/40 shadow-[0_18px_34px_-24px_rgba(16,185,129,0.55)]"
+    : "from-rose-500/22 via-rose-500/10 to-slate-950/90 border-rose-400/40 shadow-[0_18px_34px_-24px_rgba(248,113,113,0.5)]";
+  const hoverClass = isPositive
+    ? "hover:border-emerald-300/80 hover:shadow-[0_22px_36px_-24px_rgba(16,185,129,0.7)]"
+    : "hover:border-rose-300/80 hover:shadow-[0_22px_36px_-24px_rgba(248,113,113,0.6)]";
   const [sparkPoints, setSparkPoints] = useState<number[]>([]);
   const [sparkSource, setSparkSource] = useState<"live" | "fallback">("fallback");
+  const sparkColor = isPositive ? "rgb(var(--grid-success))" : "rgb(var(--grid-danger))";
 
   useEffect(() => {
     let active = true;
@@ -83,8 +88,11 @@ export const StockTile: React.FC<StockTileProps> = ({
   return (
     <Link href={`/gridstock/stock/${quote.symbol}`} className="block group">
       <div 
-        className={`${colorClass} ${hoverClass} ${isStale ? "ring-2 ring-yellow-300/60" : ""} rounded-lg ${density === "compact" ? "p-3 h-32" : "p-4 h-36"} flex flex-col justify-between transition-colors cursor-pointer shadow-lg relative`}
+        className={`relative overflow-hidden bg-gradient-to-br ${toneClass} ${hoverClass} ${isStale ? "ring-1 ring-amber-300/70" : ""} rounded-2xl ${density === "compact" ? "p-3 h-32" : "p-4 h-36"} flex flex-col justify-between transition-all cursor-pointer`}
       >
+        <div className="absolute -top-10 right-6 h-24 w-24 rounded-full blur-3xl opacity-0 transition-opacity group-hover:opacity-100">
+          <div className={`h-full w-full ${isPositive ? "bg-emerald-400/30" : "bg-rose-400/30"}`} />
+        </div>
         {onRemove && (
           <button
             type="button"
@@ -93,7 +101,7 @@ export const StockTile: React.FC<StockTileProps> = ({
               e.stopPropagation();
               onRemove(quote.symbol);
             }}
-            className="absolute top-2 right-2 text-white/70 hover:text-white text-xs bg-black/30 hover:bg-black/50 rounded px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity"
+            className="absolute top-3 right-3 text-white/70 hover:text-white text-xs bg-black/30 hover:bg-black/50 rounded-full px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity"
             aria-label={`Remove ${quote.symbol}`}
           >
             Remove
@@ -101,7 +109,7 @@ export const StockTile: React.FC<StockTileProps> = ({
         )}
         <div className="flex justify-between items-start">
           <span className={`font-bold ${density === "compact" ? "text-xl" : "text-2xl"} text-white tracking-wide`}>{quote.symbol}</span>
-          <span className="text-white/90 text-sm font-medium">
+          <span className="text-white/90 text-sm font-semibold">
              {isPositive ? "+" : ""}{quote.changePercent.toFixed(2)}%
           </span>
         </div>
@@ -111,7 +119,7 @@ export const StockTile: React.FC<StockTileProps> = ({
              <svg viewBox="0 0 100 40" className="w-full h-12 opacity-80">
                <polyline
                  fill="none"
-                 stroke="white"
+                 stroke={sparkColor}
                  strokeWidth="2"
                  points={spark.map((v, idx) => `${(idx / (spark.length - 1)) * 100},${40 - (v / 100) * 40}`).join(" ")}
                />
@@ -123,7 +131,7 @@ export const StockTile: React.FC<StockTileProps> = ({
         </div>
 
         <div className="mt-2 flex items-center justify-between text-[10px] text-white/70 uppercase tracking-wide">
-          <span className={isStale ? "text-yellow-100" : ""}>Updated {updatedLabel}</span>
+          <span className={isStale ? "text-amber-100" : ""}>Updated {updatedLabel}</span>
           <span className={marketMode === "Live" ? "text-emerald-100" : ""}>{marketMode}</span>
         </div>
       </div>

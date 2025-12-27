@@ -89,7 +89,7 @@ export default function StockDetail() {
   }, [ticker]);
 
   if (!quote || !stockInfo) {
-    return <div className="flex justify-center items-center h-64 text-gray-500">Loading...</div>;
+    return <div className="flex justify-center items-center h-64 text-slate-500">Loading...</div>;
   }
 
   const isPositive = quote.change >= 0;
@@ -102,7 +102,7 @@ export default function StockDetail() {
            <h1 className="text-4xl font-bold tracking-tight mb-1">{stockInfo.name}</h1>
            <div className="flex items-center gap-3">
              <Badge variant="neutral">{stockInfo.sector || "Stock"}</Badge>
-             <span className="text-gray-400 font-mono">{ticker}</span>
+             <span className="text-slate-400 font-mono">{ticker}</span>
            </div>
         </div>
         
@@ -110,10 +110,10 @@ export default function StockDetail() {
            <div className="text-5xl font-bold tracking-tighter mb-1">
              ${quote.price.toFixed(2)}
            </div>
-           <div className={`font-medium text-lg ${isPositive ? 'text-green-500' : 'text-red-500'}`}>
+           <div className={`font-medium text-lg ${isPositive ? 'text-emerald-300' : 'text-rose-300'}`}>
               {isPositive ? "+" : ""}{quote.change.toFixed(2)} ({isPositive ? "+" : ""}{quote.changePercent.toFixed(2)}%)
            </div>
-           {quoteError && <div className="text-xs text-red-400 mt-1">{quoteError}</div>}
+           {quoteError && <div className="text-xs text-rose-300 mt-1">{quoteError}</div>}
         </div>
       </div>
 
@@ -124,7 +124,7 @@ export default function StockDetail() {
         <div className="lg:col-span-2 space-y-8">
            <StockChart isPositive={isPositive} symbol={ticker} />
 
-           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-6 bg-gray-900 rounded-xl border border-gray-800">
+           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-6 gs-panel rounded-2xl">
               <Stat label="Market Cap" value={`$${(quote.marketCap / 1e9).toFixed(1)}B`} />
               <Stat label="P/E Ratio" value={quote.peRatio.toFixed(2)} />
               <Stat label="52W High" value={quote.high52Week.toFixed(2)} />
@@ -138,7 +138,7 @@ export default function StockDetail() {
            <FundamentalsPanel data={fundamentals} loading={fundamentalsLoading} error={fundamentalsError} />
 
            {newsError && (
-             <div className="text-red-400 text-sm bg-red-500/10 border border-red-500/30 p-2 rounded">
+             <div className="text-rose-200 text-sm bg-rose-500/10 border border-rose-500/30 p-3 rounded-xl">
                {newsError}
              </div>
            )}
@@ -147,9 +147,9 @@ export default function StockDetail() {
 
         {/* Right Col: Actions & Sidebar */}
         <div className="space-y-6">
-           <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4">
+           <div className="gs-panel rounded-2xl p-6 space-y-4">
               <h3 className="font-bold text-lg">Trade {ticker}</h3>
-              <p className="text-sm text-gray-400">
+              <p className="text-sm text-slate-400">
                 Practice trading with virtual currency. No real money involved.
               </p>
               <Button className="w-full text-lg py-4" onClick={() => setIsTradeModalOpen(true)}>
@@ -157,16 +157,16 @@ export default function StockDetail() {
               </Button>
            </div>
 
-           <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-3">
+           <div className="gs-panel rounded-2xl p-6 space-y-3">
               <h3 className="font-bold text-lg">Alert hits</h3>
               {alertHistory.length > 0 ? (
-                <div className="space-y-2 text-sm text-gray-300">
+                <div className="space-y-2 text-sm text-slate-300">
                   {alertHistory.map((event) => (
                     <div key={event.id} className="flex items-center justify-between">
                       <span>
                         {event.direction === "above" ? "Above" : "Below"} ${event.target.toFixed(2)}
                       </span>
-                      <span className="text-xs text-gray-500">
+                      <span className="text-xs text-slate-500">
                         {new Date(event.triggeredAt).toLocaleTimeString([], {
                           hour: "2-digit",
                           minute: "2-digit",
@@ -176,27 +176,27 @@ export default function StockDetail() {
                   ))}
                 </div>
               ) : (
-                <div className="text-sm text-gray-500">No alert hits yet.</div>
+                <div className="text-sm text-slate-500">No alert hits yet.</div>
               )}
               {activeAlerts.length > 0 && (
-                <div className="text-xs text-gray-500">
+                <div className="text-xs text-slate-500">
                   Active alerts: {activeAlerts.map((a) => a.target.toFixed(2)).join(", ")}
                 </div>
               )}
-              <Link href="/gridstock" className="text-xs text-green-400 hover:text-green-200">
+              <Link href="/gridstock" className="text-xs text-emerald-300 hover:text-emerald-200">
                 Manage alerts &gt;
               </Link>
            </div>
 
-           <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
+           <div className="gs-panel rounded-2xl p-6">
               <h3 className="font-bold text-lg mb-4">Analyst Rating</h3>
               <div className="flex items-center gap-2 mb-2">
-                 <div className="flex-1 h-2 bg-gray-800 rounded-full overflow-hidden">
-                    <div className="h-full bg-green-500 w-[60%]"></div>
+                 <div className="flex-1 h-2 bg-[color:var(--grid-panel-strong)] rounded-full overflow-hidden">
+                    <div className="h-full bg-emerald-400 w-[60%]"></div>
                  </div>
-                 <span className="text-green-500 font-bold">Buy</span>
+                 <span className="text-emerald-300 font-bold">Buy</span>
               </div>
-              <p className="text-xs text-gray-500">Based on 24 analyst ratings</p>
+              <p className="text-xs text-slate-500">Based on 24 analyst ratings</p>
            </div>
         </div>
       </div>
@@ -215,7 +215,7 @@ export default function StockDetail() {
 
 const Stat = ({ label, value }: { label: string, value: string | number }) => (
   <div>
-    <div className="text-xs text-gray-500 mb-1">{label}</div>
+    <div className="text-xs text-slate-500 mb-1">{label}</div>
     <div className="font-medium text-white">{value}</div>
   </div>
 );

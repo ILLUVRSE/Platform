@@ -5,9 +5,20 @@ import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 
 type Vec = { x: number; y: number };
-type Mode = "campaign" | "free";
+type Mode = "campaign" | "time" | "free";
 type ControlAction = "serve" | "smash" | "dash" | "pause" | "up" | "down" | "left" | "right";
 type Particle = { x: number; y: number; vx: number; vy: number; life: number; color: string };
+type PowerUpKind = "shield" | "curve" | "boost";
+type PowerUp = { id: string; x: number; y: number; kind: PowerUpKind; ttl: number };
+type Medal = "bronze" | "silver" | "gold";
+type PixelPuckProgress = {
+  maxCompletedStage: number;
+  bestRally: number;
+  bestScore: number;
+  lastStageIndex: number;
+  timeAttackBest: Record<string, number>;
+  timeAttackMedals: Record<string, Medal>;
+};
 
 type Stage = {
   id: string;
@@ -28,6 +39,24 @@ const BASE_AI_SPEED = 360;
 const MAX_PUCK = 950;
 const MIN_PUCK = 160;
 const PARTICLE_COUNT = 8;
+const POWERUP_RADIUS = 12;
+const POWERUP_TTL = 9;
+const POWERUP_LIMIT = 2;
+const POWERUP_MIN_DELAY = 4.5;
+const POWERUP_MAX_DELAY = 8;
+const SPEED_BOOST_DURATION = 3.5;
+const SPEED_BOOST_MULT = 1.35;
+const CURVE_DURATION = 1.6;
+const CURVE_FORCE = 0.02;
+const MAX_SHIELD = 2;
+const PROGRESS_KEY = "gridstock_pixelpuck_progress";
+const TIME_ATTACK_DURATION = 60;
+const TIME_ATTACK_THRESHOLDS: Record<string, { bronze: number; silver: number; gold: number }> = {
+  rookie: { bronze: 6, silver: 9, gold: 12 },
+  glacier: { bronze: 7, silver: 10, gold: 13 },
+  quake: { bronze: 8, silver: 11, gold: 14 },
+  nebula: { bronze: 9, silver: 12, gold: 15 },
+};
 
 const STAGES: Stage[] = [
   {
@@ -75,13 +104,126 @@ const STAGE_COLORS: Record<string, { top: string; bottom: string }> = {
   free: { top: "#0b1224", bottom: "#04070d" },
 };
 
+const POWERUP_STYLES: Record<PowerUpKind, { color: string; label: string; name: string }> = {
+  shield: { color: "#60a5fa", label: "S", name: "Shield" },
+  curve: { color: "#22d3ee", label: "C", name: "Curve" },
+  boost: { color: "#f59e0b", label: "B", name: "Boost" },
+};
+
+const defaultProgress = (): PixelPuckProgress => ({
+  maxCompletedStage: -1,
+  bestRally: 0,
+  bestScore: 0,
+  lastStageIndex: 0,
+  timeAttackBest: {},
+  timeAttackMedals: {},
+});
+
+const parseScoreMap = (value: unknown) => {
+  if (!value || typeof value !== "object") return {};
+  const out: Record<string, number> = {};
+  Object.entries(value as Record<string, unknown>).forEach(([key, val]) => {
+    if (typeof val === "number" && Number.isFinite(val)) {
+      out[key] = Math.max(0, val);
+    }
+  });
+  return out;
+};
+
+const parseMedalMap = (value: unknown) => {
+  if (!value || typeof value !== "object") return {};
+  const out: Record<string, Medal> = {};
+  Object.entries(value as Record<string, unknown>).forEach(([key, val]) => {
+    if (val === "bronze" || val === "silver" || val === "gold") {
+      out[key] = val;
+    }
+  });
+  return out;
+};
+
+const medalRank: Record<Medal, number> = {
+  bronze: 1,
+  silver: 2,
+  gold: 3,
+};
+
+const medalForScore = (score: number, stageId: string): Medal | null => {
+  const thresholds = TIME_ATTACK_THRESHOLDS[stageId];
+  if (!thresholds) return null;
+  if (score >= thresholds.gold) return "gold";
+  if (score >= thresholds.silver) return "silver";
+  if (score >= thresholds.bronze) return "bronze";
+  return null;
+};
+
+const formatTime = (value: number) => {
+  const total = Math.max(0, Math.ceil(value));
+  const minutes = Math.floor(total / 60);
+  const seconds = total % 60;
+  return `${minutes}:${seconds.toString().padStart(2, "0")}`;
+};
+
+const medalLabel = (medal?: Medal | null) =>
+  medal ? `${medal.charAt(0).toUpperCase()}${medal.slice(1)}` : "None";
+
+const medalTone = (medal?: Medal | null) => {
+  if (medal === "gold") return "text-amber-300";
+  if (medal === "silver") return "text-slate-200";
+  if (medal === "bronze") return "text-orange-300";
+  return "text-slate-500";
+};
+
+const loadProgress = (): PixelPuckProgress => {
+  if (typeof window === "undefined") return defaultProgress();
+  try {
+    const raw = localStorage.getItem(PROGRESS_KEY);
+    if (!raw) return defaultProgress();
+    const parsed = JSON.parse(raw) as Partial<PixelPuckProgress>;
+    return {
+      ...defaultProgress(),
+      ...parsed,
+      maxCompletedStage: Number.isFinite(parsed.maxCompletedStage)
+        ? Math.max(-1, parsed.maxCompletedStage ?? -1)
+        : -1,
+      bestRally: Number.isFinite(parsed.bestRally) ? Math.max(0, parsed.bestRally ?? 0) : 0,
+      bestScore: Number.isFinite(parsed.bestScore) ? Math.max(0, parsed.bestScore ?? 0) : 0,
+      lastStageIndex: Number.isFinite(parsed.lastStageIndex)
+        ? Math.max(0, parsed.lastStageIndex ?? 0)
+        : 0,
+      timeAttackBest: parseScoreMap(parsed.timeAttackBest),
+      timeAttackMedals: parseMedalMap(parsed.timeAttackMedals),
+    };
+  } catch {
+    return defaultProgress();
+  }
+};
+
+const saveProgress = (next: PixelPuckProgress) => {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem(PROGRESS_KEY, JSON.stringify(next));
+  } catch {
+    // ignore storage errors
+  }
+};
+
+const maxPlayableStage = (progress: PixelPuckProgress) =>
+  Math.min(progress.maxCompletedStage + 1, STAGES.length - 1);
+
+const clampStageIndex = (value: number, progress: PixelPuckProgress) =>
+  clamp(value, 0, maxPlayableStage(progress));
+
 export default function PixelPuckPage() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const animRef = useRef<number | null>(null);
   const keysRef = useRef<Set<string>>(new Set());
   const scoreRef = useRef({ player: 0, ai: 0 });
   const frozenRef = useRef(true);
+  const pausedRef = useRef(false);
+  const resumeFromPauseRef = useRef(false);
+  const timeLeftRef = useRef(TIME_ATTACK_DURATION);
   const stageStatusRef = useRef<"playing" | "won" | "lost">("playing");
+  const timeAttackStatusRef = useRef<"playing" | "ended">("playing");
 
   const [ready, setReady] = useState(false);
   const [mode, setMode] = useState<Mode>("campaign");
@@ -91,13 +233,22 @@ export default function PixelPuckPage() {
   const [score, setScore] = useState({ player: 0, ai: 0 });
   const [status, setStatus] = useState("Tap or press space to serve.");
   const [frozen, setFrozen] = useState(true);
+  const [paused, setPaused] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(TIME_ATTACK_DURATION);
+  const [timeAttackStatus, setTimeAttackStatus] = useState<"playing" | "ended">("playing");
   const [smashReady, setSmashReady] = useState(false);
   const [autoServe, setAutoServe] = useState(true);
   const [aimAssist, setAimAssist] = useState(true);
   const [dash, setDash] = useState({ ready: true, cooldown: 0 });
+  const [shieldCharges, setShieldCharges] = useState(0);
+  const [curveReady, setCurveReady] = useState(false);
+  const [curveTimer, setCurveTimer] = useState(0);
+  const [speedBoost, setSpeedBoost] = useState({ active: false, timer: 0 });
   const [rally, setRally] = useState(0);
   const [flash, setFlash] = useState<{ color: string; timer: number } | null>(null);
   const [shake, setShake] = useState<{ mag: number; timer: number }>({ mag: 0, timer: 0 });
+  const [progress, setProgress] = useState<PixelPuckProgress>(() => defaultProgress());
+  const [progressLoaded, setProgressLoaded] = useState(false);
   const [controls, setControls] = useState<Record<ControlAction, string>>({
     serve: " ",
     smash: "f",
@@ -123,15 +274,143 @@ export default function PixelPuckPage() {
     lastPlayer: { x: WIDTH / 2, y: HEIGHT - 80 },
     lastPlayerVel: { x: 0, y: 0 },
     particles: [] as Particle[],
+    powerUps: [] as PowerUp[],
+    powerCooldown: 3,
+    shieldCharges: 0,
+    curveReady: false,
+    curveTimer: 0,
+    curveSpin: 0,
+    speedBoostTimer: 0,
   });
 
   const goalToWin = () =>
-    mode === "campaign" ? STAGES[stageIndex].target : 5;
+    mode === "campaign" ? STAGES[stageIndex].target : mode === "free" ? 5 : Number.POSITIVE_INFINITY;
 
   const currentStage = () => STAGES[stageIndex];
 
+  const unlockedCount = Math.min(STAGES.length, progress.maxCompletedStage + 2);
+  const playableStageIndex = maxPlayableStage(progress);
+
+  const schedulePowerUp = () => {
+    state.current.powerCooldown =
+      POWERUP_MIN_DELAY + Math.random() * (POWERUP_MAX_DELAY - POWERUP_MIN_DELAY);
+  };
+
+  const clearPowerField = () => {
+    state.current.powerUps = [];
+    schedulePowerUp();
+  };
+
+  const resetPowerState = () => {
+    clearPowerField();
+    state.current.shieldCharges = 0;
+    state.current.curveReady = false;
+    state.current.curveTimer = 0;
+    state.current.curveSpin = 0;
+    state.current.speedBoostTimer = 0;
+    setShieldCharges(0);
+    setCurveReady(false);
+    setCurveTimer(0);
+    setSpeedBoost({ active: false, timer: 0 });
+  };
+
+  const resetPauseState = () => {
+    pausedRef.current = false;
+    resumeFromPauseRef.current = false;
+    setPaused(false);
+  };
+
+  const resetTimeAttack = (serveDown: boolean) => {
+    resetPauseState();
+    timeLeftRef.current = TIME_ATTACK_DURATION;
+    setTimeLeft(TIME_ATTACK_DURATION);
+    setTimeAttackStatus("playing");
+    timeAttackStatusRef.current = "playing";
+    resetScores(serveDown);
+  };
+
+  const endTimeAttack = () => {
+    if (timeAttackStatusRef.current === "ended") return;
+    timeAttackStatusRef.current = "ended";
+    setTimeAttackStatus("ended");
+    timeLeftRef.current = 0;
+    setTimeLeft(0);
+    setFrozen(true);
+    frozenRef.current = true;
+    setStatus("Time's up!");
+    const stageId = currentStage().id;
+    const runScore = scoreRef.current.player;
+    const medal = medalForScore(runScore, stageId);
+    setProgress((prev) => {
+      const bestMap = { ...prev.timeAttackBest };
+      const medals = { ...prev.timeAttackMedals };
+      const bestScore = Math.max(bestMap[stageId] ?? 0, runScore);
+      bestMap[stageId] = bestScore;
+      if (medal) {
+        const existing = medals[stageId];
+        if (!existing || medalRank[medal] > medalRank[existing]) {
+          medals[stageId] = medal;
+        }
+      }
+      const next = { ...prev, timeAttackBest: bestMap, timeAttackMedals: medals };
+      saveProgress(next);
+      return next;
+    });
+  };
+
+  const spawnPowerUp = () => {
+    if (state.current.powerUps.length >= POWERUP_LIMIT) return;
+    const kinds: PowerUpKind[] = ["shield", "curve", "boost"];
+    const kind = kinds[Math.floor(Math.random() * kinds.length)];
+    const x = clamp(
+      POWERUP_RADIUS + 40 + Math.random() * (WIDTH - POWERUP_RADIUS * 2 - 80),
+      POWERUP_RADIUS + 40,
+      WIDTH - POWERUP_RADIUS - 40
+    );
+    const midBand = HEIGHT * 0.28;
+    const y = clamp(
+      HEIGHT / 2 - midBand + Math.random() * (midBand * 2),
+      HEIGHT / 2 - midBand,
+      HEIGHT / 2 + midBand
+    );
+    state.current.powerUps.push({
+      id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+      x,
+      y,
+      kind,
+      ttl: POWERUP_TTL,
+    });
+    schedulePowerUp();
+  };
+
+  const grantPowerUp = (kind: PowerUpKind, at: Vec) => {
+    const style = POWERUP_STYLES[kind];
+    spawnParticles(at.x, at.y, style.color);
+    if (kind === "shield") {
+      const next = clamp(state.current.shieldCharges + 1, 0, MAX_SHIELD);
+      state.current.shieldCharges = next;
+      setShieldCharges(next);
+      setStatus(next > 1 ? "Shield stacked." : "Shield online.");
+      setFlash({ color: "rgba(96,165,250,0.25)", timer: 0.3 });
+      return;
+    }
+    if (kind === "curve") {
+      state.current.curveReady = true;
+      setCurveReady(true);
+      setStatus("Curve shot ready.");
+      setFlash({ color: "rgba(34,211,238,0.2)", timer: 0.3 });
+      return;
+    }
+    if (kind === "boost") {
+      state.current.speedBoostTimer = SPEED_BOOST_DURATION;
+      setSpeedBoost({ active: true, timer: SPEED_BOOST_DURATION });
+      setStatus("Speed burst!");
+      setFlash({ color: "rgba(245,158,11,0.2)", timer: 0.3 });
+    }
+  };
+
   const resetRound = (serveDown = true) => {
-    const boost = mode === "campaign" ? currentStage().speedBoost : 1;
+    const boost = mode === "campaign" || mode === "time" ? currentStage().speedBoost : 1;
     state.current.puck = {
       x: WIDTH / 2,
       y: HEIGHT / 2,
@@ -141,17 +420,20 @@ export default function PixelPuckPage() {
     state.current.lastTs = 0;
     setFrozen(true);
     setSmashReady(false);
+    clearPowerField();
   };
 
   const resetScores = (serveDown: boolean) => {
     const reset = { player: 0, ai: 0 };
     scoreRef.current = reset;
     setScore(reset);
+    resetPauseState();
     resetRound(serveDown);
     setStageStatus("playing");
     stageStatusRef.current = "playing";
     setRally(0);
     state.current.rallyCount = 0;
+    resetPowerState();
   };
 
   useEffect(() => {
@@ -161,6 +443,66 @@ export default function PixelPuckPage() {
   useEffect(() => {
     frozenRef.current = frozen;
   }, [frozen]);
+
+  useEffect(() => {
+    pausedRef.current = paused;
+  }, [paused]);
+
+  useEffect(() => {
+    timeAttackStatusRef.current = timeAttackStatus;
+  }, [timeAttackStatus]);
+
+  useEffect(() => {
+    const saved = loadProgress();
+    setProgress(saved);
+    setStageIndex(clampStageIndex(saved.lastStageIndex, saved));
+    setProgressLoaded(true);
+  }, []);
+
+  useEffect(() => {
+    if (!progressLoaded) return;
+    if (rally <= progress.bestRally) return;
+    setProgress((prev) => {
+      if (rally <= prev.bestRally) return prev;
+      const next = { ...prev, bestRally: rally };
+      saveProgress(next);
+      return next;
+    });
+  }, [rally, progressLoaded, progress.bestRally]);
+
+  useEffect(() => {
+    if (!progressLoaded) return;
+    if (score.player <= progress.bestScore) return;
+    setProgress((prev) => {
+      if (score.player <= prev.bestScore) return prev;
+      const next = { ...prev, bestScore: score.player };
+      saveProgress(next);
+      return next;
+    });
+  }, [score.player, progressLoaded, progress.bestScore]);
+
+  useEffect(() => {
+    if (!progressLoaded) return;
+    if (mode !== "campaign" || stageStatus !== "won") return;
+    setProgress((prev) => {
+      const nextMax = Math.max(prev.maxCompletedStage, stageIndex);
+      const next = { ...prev, maxCompletedStage: nextMax };
+      saveProgress(next);
+      return next;
+    });
+  }, [mode, stageStatus, stageIndex, progressLoaded]);
+
+  useEffect(() => {
+    if (!progressLoaded) return;
+    if (mode !== "campaign") return;
+    if (progress.lastStageIndex === stageIndex) return;
+    setProgress((prev) => {
+      if (prev.lastStageIndex === stageIndex) return prev;
+      const next = { ...prev, lastStageIndex: stageIndex };
+      saveProgress(next);
+      return next;
+    });
+  }, [stageIndex, mode, progressLoaded, progress.lastStageIndex]);
 
   useEffect(() => {
     const keyDown = (e: KeyboardEvent) => {
@@ -183,12 +525,25 @@ export default function PixelPuckPage() {
       }
       if (key === controls.pause) {
         if (stageStatusRef.current === "playing") {
-          const nextFrozen = !frozenRef.current;
-          frozenRef.current = nextFrozen;
-          setFrozen(nextFrozen);
-          setStatus(nextFrozen ? "Paused (P to resume)" : "");
-          if (!nextFrozen) {
-            animRef.current = requestAnimationFrame(loop);
+          if (!pausedRef.current) {
+            resumeFromPauseRef.current = !frozenRef.current;
+            pausedRef.current = true;
+            setPaused(true);
+            frozenRef.current = true;
+            setFrozen(true);
+            setStatus("Paused (P to resume)");
+          } else {
+            pausedRef.current = false;
+            setPaused(false);
+            if (resumeFromPauseRef.current) {
+              frozenRef.current = false;
+              setFrozen(false);
+              setStatus("");
+              animRef.current = requestAnimationFrame(loop);
+            } else {
+              setStatus("Tap or press space to serve.");
+            }
+            resumeFromPauseRef.current = false;
           }
         }
       }
@@ -218,7 +573,8 @@ export default function PixelPuckPage() {
   }, []);
 
   const movePlayer = (dt: number) => {
-    const speed = 420;
+    const speed =
+      420 * (state.current.speedBoostTimer > 0 ? SPEED_BOOST_MULT : 1);
     const p = state.current.player;
     const prev = { ...state.current.lastPlayer };
     if (keysRef.current.has(controls.left) || keysRef.current.has("a")) p.x -= speed * dt;
@@ -236,7 +592,7 @@ export default function PixelPuckPage() {
   const moveAI = (dt: number) => {
     const puck = state.current.puck;
     const look =
-      mode === "campaign"
+      mode === "campaign" || mode === "time"
         ? 0.9 + currentStage().aiSkill * 0.3
         : difficulty === "hard"
         ? 1.05
@@ -256,7 +612,7 @@ export default function PixelPuckPage() {
     };
     const ai = state.current.ai;
     const base =
-      mode === "campaign"
+      mode === "campaign" || mode === "time"
         ? BASE_AI_SPEED * (0.7 + currentStage().aiSkill * 0.5)
         : difficulty === "hard"
         ? 480
@@ -288,6 +644,16 @@ export default function PixelPuckPage() {
       setFlash({ color: "rgba(34,197,94,0.25)", timer: 0.35 });
       setShake({ mag: 6, timer: 0.4 });
     }
+    if (isPlayer && state.current.curveReady) {
+      const spinDirection = Math.sign(dx) || 1;
+      state.current.curveSpin = spinDirection * 1.1;
+      state.current.curveTimer = CURVE_DURATION;
+      state.current.curveReady = false;
+      setCurveReady(false);
+      setCurveTimer(CURVE_DURATION);
+      setStatus("Curve shot!");
+      setFlash({ color: "rgba(34,211,238,0.2)", timer: 0.35 });
+    }
     // Spin/English from paddle velocity
     const tangentialBoost = isPlayer ? state.current.lastPlayerVel.x * 0.35 : 0;
     const push = isPlayer ? 1 : -1;
@@ -311,8 +677,45 @@ export default function PixelPuckPage() {
         setDash({ ready: false, cooldown: Math.max(0, state.current.dashTimer) });
       }
     }
+    if (state.current.speedBoostTimer > 0) {
+      state.current.speedBoostTimer = Math.max(0, state.current.speedBoostTimer - dt);
+      if (state.current.speedBoostTimer <= 0) {
+        setSpeedBoost({ active: false, timer: 0 });
+      } else {
+        setSpeedBoost({ active: true, timer: state.current.speedBoostTimer });
+      }
+    }
+    if (state.current.curveTimer > 0) {
+      state.current.curveTimer = Math.max(0, state.current.curveTimer - dt);
+      setCurveTimer(state.current.curveTimer);
+      if (state.current.curveTimer === 0) {
+        state.current.curveSpin = 0;
+      }
+    }
+    if (state.current.powerCooldown > 0) {
+      state.current.powerCooldown = Math.max(0, state.current.powerCooldown - dt);
+    }
     movePlayer(dt);
     moveAI(dt);
+    if (state.current.powerUps.length > 0) {
+      for (let i = state.current.powerUps.length - 1; i >= 0; i--) {
+        const power = state.current.powerUps[i];
+        power.ttl -= dt;
+        if (power.ttl <= 0) {
+          state.current.powerUps.splice(i, 1);
+          continue;
+        }
+        const dx = power.x - state.current.player.x;
+        const dy = power.y - state.current.player.y;
+        if (Math.hypot(dx, dy) <= PAD_R + POWERUP_RADIUS) {
+          grantPowerUp(power.kind, power);
+          state.current.powerUps.splice(i, 1);
+        }
+      }
+    }
+    if (state.current.powerCooldown <= 0 && state.current.powerUps.length < POWERUP_LIMIT) {
+      spawnPowerUp();
+    }
     const puck = state.current.puck;
     puck.x += puck.vx * dt;
     puck.y += puck.vy * dt;
@@ -327,6 +730,13 @@ export default function PixelPuckPage() {
       const factor = MIN_PUCK / (speedNow || 1);
       puck.vx *= factor;
       puck.vy *= factor;
+    }
+    if (state.current.curveTimer > 0 && state.current.curveSpin !== 0) {
+      const spinForce = state.current.curveSpin * CURVE_FORCE;
+      const vx = puck.vx;
+      const vy = puck.vy;
+      puck.vx += -vy * spinForce * dt;
+      puck.vy += vx * spinForce * dt;
     }
 
     // Walls
@@ -358,6 +768,17 @@ export default function PixelPuckPage() {
     if (puck.y >= HEIGHT - PUCK_R) {
       const inGoal = Math.abs(puck.x - WIDTH / 2) < GOAL_W / 2;
       if (inGoal) {
+        if (state.current.shieldCharges > 0) {
+          const next = Math.max(0, state.current.shieldCharges - 1);
+          state.current.shieldCharges = next;
+          setShieldCharges(next);
+          setStatus("Shield saved you!");
+          setFlash({ color: "rgba(96,165,250,0.28)", timer: 0.35 });
+          setShake({ mag: 6, timer: 0.3 });
+          puck.vy = -Math.abs(puck.vy) * 1.05;
+          puck.y = HEIGHT - PUCK_R - 2;
+          puck.vx += (Math.random() - 0.5) * 90;
+        } else {
         setScore((s) => {
           const next = { ...s, ai: s.ai + 1 };
           scoreRef.current = next;
@@ -368,6 +789,7 @@ export default function PixelPuckPage() {
         setShake({ mag: 8, timer: 0.35 });
         resetRound(true);
         return;
+        }
       } else {
         puck.vy = -puck.vy;
         puck.y = HEIGHT - PUCK_R;
@@ -440,6 +862,23 @@ export default function PixelPuckPage() {
     ctx.fillStyle = "rgba(239,68,68,0.18)";
     ctx.fillRect(WIDTH / 2 - GOAL_W / 2, HEIGHT - 46, GOAL_W, 46);
 
+    // Power-ups
+    state.current.powerUps.forEach((power) => {
+      const style = POWERUP_STYLES[power.kind];
+      const alpha = Math.max(0.35, power.ttl / POWERUP_TTL);
+      ctx.globalAlpha = alpha;
+      ctx.fillStyle = style.color;
+      ctx.beginPath();
+      ctx.arc(power.x, power.y, POWERUP_RADIUS, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+      ctx.fillStyle = "#0b0f1a";
+      ctx.font = "bold 10px sans-serif";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(style.label, power.x, power.y + 0.5);
+    });
+
     // Paddles
     const p = state.current.player;
     const ai = state.current.ai;
@@ -447,6 +886,26 @@ export default function PixelPuckPage() {
     ctx.beginPath();
     ctx.arc(p.x, p.y, PAD_R, 0, Math.PI * 2);
     ctx.fill();
+    if (state.current.shieldCharges > 0) {
+      ctx.strokeStyle = "rgba(96,165,250,0.8)";
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, PAD_R + 6, 0, Math.PI * 2);
+      ctx.stroke();
+      if (state.current.shieldCharges > 1) {
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, PAD_R + 11, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+    }
+    if (state.current.speedBoostTimer > 0) {
+      ctx.strokeStyle = "rgba(245,158,11,0.7)";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, PAD_R + 14, 0, Math.PI * 2);
+      ctx.stroke();
+    }
     ctx.fillStyle = "#f97316";
     ctx.beginPath();
     ctx.arc(ai.x, ai.y, PAD_R, 0, Math.PI * 2);
@@ -458,6 +917,13 @@ export default function PixelPuckPage() {
     ctx.beginPath();
     ctx.arc(puck.x, puck.y, PUCK_R, 0, Math.PI * 2);
     ctx.fill();
+    if (state.current.curveTimer > 0 || state.current.curveReady) {
+      ctx.strokeStyle = "rgba(34,211,238,0.6)";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(puck.x, puck.y, PUCK_R + 4, 0, Math.PI * 2);
+      ctx.stroke();
+    }
 
     // Aim assist path
     const path = predictPath();
@@ -515,6 +981,13 @@ export default function PixelPuckPage() {
     if (!s.lastTs) s.lastTs = ts;
     const dt = Math.min(0.03, (ts - s.lastTs) / 1000);
     s.lastTs = ts;
+    if (mode === "time" && timeAttackStatusRef.current === "playing" && !pausedRef.current) {
+      timeLeftRef.current = Math.max(0, timeLeftRef.current - dt);
+      setTimeLeft(timeLeftRef.current);
+      if (timeLeftRef.current <= 0) {
+        endTimeAttack();
+      }
+    }
     if (flash && flash.timer > 0) {
       const next = Math.max(0, flash.timer - dt);
       setFlash(next > 0 ? { ...flash, timer: next } : null);
@@ -527,7 +1000,8 @@ export default function PixelPuckPage() {
     draw();
     const target = goalToWin();
     const winning = scoreRef.current.player >= target || scoreRef.current.ai >= target;
-    if (!winning) {
+    const timeOver = mode === "time" && timeAttackStatusRef.current === "ended";
+    if (!winning && !timeOver) {
       animRef.current = requestAnimationFrame(loop);
     }
   };
@@ -555,23 +1029,40 @@ export default function PixelPuckPage() {
 
   useEffect(() => {
     // When stage changes, reset round
-    resetScores(stageIndex % 2 === 0);
-    setStatus("Tap or press space to serve.");
-  }, [stageIndex]);
+    if (mode === "time") {
+      resetTimeAttack(stageIndex % 2 === 0);
+      setStatus("Time attack ready. Tap to serve.");
+    } else {
+      resetScores(stageIndex % 2 === 0);
+      setStatus("Tap or press space to serve.");
+    }
+  }, [stageIndex, mode]);
 
   useEffect(() => {
     if (!autoServe) return;
+    if (pausedRef.current) return;
+    if (mode === "time" && timeAttackStatusRef.current === "ended") return;
     if (!frozenRef.current || stageStatusRef.current !== "playing") return;
     const id = setTimeout(() => {
-      if (frozenRef.current && stageStatusRef.current === "playing") {
+      if (
+        frozenRef.current &&
+        stageStatusRef.current === "playing" &&
+        !pausedRef.current &&
+        !(mode === "time" && timeAttackStatusRef.current === "ended")
+      ) {
         startPlay();
       }
     }, 900);
     return () => clearTimeout(id);
-  }, [frozen, autoServe, stageStatus]);
+  }, [frozen, autoServe, stageStatus, mode]);
 
   const startPlay = () => {
-    if (stageStatusRef.current !== "playing") {
+    resetPauseState();
+    if (mode === "time") {
+      if (timeAttackStatusRef.current === "ended") {
+        resetTimeAttack(true);
+      }
+    } else if (stageStatusRef.current !== "playing") {
       // If stage was over, resume by resetting scores but keep mode/stage
       resetScores(true);
     }
@@ -619,9 +1110,15 @@ export default function PixelPuckPage() {
   };
 
   const campaignComplete = stageIndex === STAGES.length - 1 && stageStatus === "won";
+  const timeAttackStageId = currentStage().id;
+  const timeAttackBest = progress.timeAttackBest[timeAttackStageId] ?? 0;
+  const timeAttackMedal = progress.timeAttackMedals[timeAttackStageId];
+  const runMedal = medalForScore(score.player, timeAttackStageId);
+  const timeAttackThresholds = TIME_ATTACK_THRESHOLDS[timeAttackStageId];
+  const timeLeftLabel = formatTime(timeLeft);
 
   const stageColors = () => {
-    if (mode === "campaign") {
+    if (mode === "campaign" || mode === "time") {
       const palette = STAGE_COLORS[currentStage().id] || STAGE_COLORS.free;
       return palette;
     }
@@ -671,73 +1168,94 @@ export default function PixelPuckPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between gap-4">
+      <div className="gs-panel-strong rounded-3xl p-6 sm:p-7 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-4xl font-extrabold tracking-tight">PixelPuck</h1>
-          <p className="text-gray-400 text-sm">
+          <p className="text-slate-300 text-sm">
             Campaign air hockey with stage bosses, power smashes, and free play.
           </p>
         </div>
-        <Link href="/gridstock/minigames/doomball" className="text-sm text-green-400 hover:underline">
+        <Link
+          href="/gridstock/minigames/doomball"
+          className="text-sm text-emerald-300 hover:text-emerald-200 hover:underline"
+        >
           ← Back to Doomball
         </Link>
       </div>
 
       <div className="flex flex-wrap gap-2">
-        {(["campaign", "free"] as Mode[]).map((m) => (
+        {(["campaign", "time", "free"] as Mode[]).map((m) => (
           <button
             key={m}
             onClick={() => {
               setMode(m);
               setStageStatus("playing");
               stageStatusRef.current = "playing";
-              setStatus("Tap or press space to serve.");
-              resetScores(true);
+              if (m === "time") {
+                setStatus("Time attack ready. Tap to serve.");
+                resetTimeAttack(true);
+              } else {
+                setStatus("Tap or press space to serve.");
+                setTimeAttackStatus("playing");
+                timeAttackStatusRef.current = "playing";
+                timeLeftRef.current = TIME_ATTACK_DURATION;
+                setTimeLeft(TIME_ATTACK_DURATION);
+                resetScores(true);
+              }
             }}
             className={`px-3 py-1 rounded-full text-sm border ${
-              mode === m ? "border-white text-white" : "border-gray-700 text-gray-400 hover:border-gray-500"
+              mode === m
+                ? "border-[rgb(var(--grid-accent))] text-white bg-[rgb(var(--grid-accent)/0.16)]"
+                : "border-[color:var(--grid-border)] text-slate-400 hover:border-[rgb(var(--grid-accent)/0.4)]"
             }`}
           >
-            {m === "campaign" ? "Campaign" : "Free Play"}
+            {m === "campaign" ? "Campaign" : m === "time" ? "Time Attack" : "Free Play"}
           </button>
         ))}
-        <label className="flex items-center gap-2 text-xs text-gray-400">
+        <label className="flex items-center gap-2 text-xs text-slate-400">
           <input
             type="checkbox"
             checked={autoServe}
             onChange={(e) => setAutoServe(e.target.checked)}
-            className="accent-green-500"
+            className="accent-emerald-400"
           />
           Auto-serve after goals
         </label>
-        <label className="flex items-center gap-2 text-xs text-gray-400">
+        <label className="flex items-center gap-2 text-xs text-slate-400">
           <input
             type="checkbox"
             checked={aimAssist}
             onChange={(e) => setAimAssist(e.target.checked)}
-            className="accent-green-500"
+            className="accent-emerald-400"
           />
           Aim guide
         </label>
-        <div className="flex items-center gap-2 text-xs text-gray-400">
+        <div className="flex items-center gap-2 text-xs text-slate-400">
           <span>Stage:</span>
           <select
-            value={mode === "campaign" ? currentStage().id : "free"}
+            value={mode === "campaign" || mode === "time" ? currentStage().id : "free"}
             onChange={(e) => {
               const id = e.target.value;
-              if (mode === "campaign") {
+              if (mode === "campaign" || mode === "time") {
                 const idx = STAGES.findIndex((s) => s.id === id);
-                if (idx >= 0) setStageIndex(idx);
+                if (idx >= 0 && (mode === "time" || idx <= playableStageIndex)) {
+                  setStageIndex(idx);
+                } else {
+                  setStatus("Complete the previous mission to unlock.");
+                }
               }
             }}
-            className="bg-gray-900 border border-gray-700 rounded px-2 py-1 text-white text-xs"
+            className="gs-select rounded-full px-3 py-1 text-xs"
           >
-            {mode === "campaign"
-              ? STAGES.map((s) => (
-                  <option key={s.id} value={s.id}>
-                    {s.name}
-                  </option>
-                ))
+            {mode === "campaign" || mode === "time"
+              ? STAGES.map((s, idx) => {
+                  const locked = idx > playableStageIndex && mode === "campaign";
+                  return (
+                    <option key={s.id} value={s.id} disabled={locked}>
+                      {s.name}{locked ? " (locked)" : ""}
+                    </option>
+                  );
+                })
               : [
                   <option key="free" value="free">
                     Free Play
@@ -748,15 +1266,20 @@ export default function PixelPuckPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-[auto,320px] gap-6">
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
-          <div className="flex flex-wrap justify-between mb-3 text-sm text-gray-400 gap-3">
+        <div className="gs-panel rounded-2xl p-4">
+          <div className="flex flex-wrap justify-between mb-3 text-sm text-slate-400 gap-3">
             <span>
               You: <span className="text-white font-semibold">{score.player}</span>
             </span>
             <span>
               Bot: <span className="text-white font-semibold">{score.ai}</span>
             </span>
-            <span className="text-gray-500">{status}</span>
+            <span className="text-slate-500">{status}</span>
+            {mode === "time" && (
+              <span className="text-xs text-slate-400">
+                Time: <span className="text-white">{timeLeftLabel}</span>
+              </span>
+            )}
           {mode === "free" && (
             <div className="flex items-center gap-2">
               {(["easy", "normal", "hard"] as const).map((d) => (
@@ -769,8 +1292,8 @@ export default function PixelPuckPage() {
                   }}
                   className={`px-3 py-1 rounded-full text-xs font-semibold border ${
                     difficulty === d
-                      ? "border-green-500 text-white bg-green-500/10"
-                      : "border-gray-700 text-gray-400 hover:border-gray-500"
+                      ? "border-[rgb(var(--grid-accent))] text-white bg-[rgb(var(--grid-accent)/0.2)]"
+                      : "border-[color:var(--grid-border)] text-slate-400 hover:border-[rgb(var(--grid-accent)/0.4)]"
                   }`}
                 >
                   {d}
@@ -779,19 +1302,24 @@ export default function PixelPuckPage() {
             </div>
           )}
             {mode === "campaign" && (
-              <span className="text-xs text-gray-400">
+              <span className="text-xs text-slate-400">
                 Mission: <span className="text-white">{currentStage().name}</span> · First to{" "}
                 {currentStage().target}
               </span>
             )}
-            <span className="text-xs text-gray-400">
+            {mode === "time" && (
+              <span className="text-xs text-slate-400">
+                Stage: <span className="text-white">{currentStage().name}</span>
+              </span>
+            )}
+            <span className="text-xs text-slate-400">
               Dash:{" "}
-              <span className={dash.ready ? "text-green-400" : "text-yellow-400"}>
+              <span className={dash.ready ? "text-emerald-300" : "text-amber-300"}>
                 {dash.ready ? "Ready (Shift)" : `${dash.cooldown.toFixed(1)}s`}
               </span>
             </span>
             {rally > 2 && (
-              <span className="text-xs text-green-400 font-semibold">Rally x{rally}</span>
+              <span className="text-xs text-emerald-300 font-semibold">Rally x{rally}</span>
             )}
           </div>
             <div className="relative">
@@ -799,15 +1327,17 @@ export default function PixelPuckPage() {
                 ref={canvasRef}
                 width={WIDTH}
               height={HEIGHT}
-              className="w-full h-auto rounded-lg border border-gray-800 bg-black"
+              className="w-full h-auto rounded-2xl border border-[color:var(--grid-border)] bg-black"
               onClick={() => {
                 startPlay();
               }}
             />
-            {(frozen || stageStatus !== "playing") && (
+            {(frozen || stageStatus !== "playing" || (mode === "time" && timeAttackStatus === "ended")) && (
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <div className="px-4 py-2 bg-black/70 rounded-full text-sm text-white border border-gray-700 text-center">
-                  {stageStatus === "won"
+                <div className="px-4 py-2 bg-black/70 rounded-full text-sm text-white border border-[color:var(--grid-border)] text-center">
+                  {mode === "time" && timeAttackStatus === "ended"
+                    ? `Time's up! Score ${score.player}${runMedal ? ` · ${runMedal.toUpperCase()}` : ""}`
+                    : stageStatus === "won"
                     ? campaignComplete
                       ? "Championship claimed! Tap to replay."
                       : "Mission cleared! Tap to continue."
@@ -821,18 +1351,33 @@ export default function PixelPuckPage() {
           <div className="mt-3 flex gap-2">
             <button
               onClick={startPlay}
-              className="px-3 py-2 rounded bg-white text-black text-sm font-semibold"
+              className="px-3 py-2 rounded bg-[rgb(var(--grid-accent))] text-slate-950 text-sm font-semibold"
             >
-              {stageStatus === "playing" ? (frozen ? "Serve / Start" : "Resume") : "Restart Round"}
+              {mode === "time"
+                ? timeAttackStatus === "ended"
+                  ? "Restart Run"
+                  : frozen
+                  ? "Serve / Start"
+                  : "Resume"
+                : stageStatus === "playing"
+                ? frozen
+                  ? "Serve / Start"
+                  : "Resume"
+                : "Restart Round"}
             </button>
             <button
               onClick={() => {
-                resetScores(true);
-                setStatus("Tap or press space to serve.");
+                if (mode === "time") {
+                  resetTimeAttack(true);
+                  setStatus("Time attack ready. Tap to serve.");
+                } else {
+                  resetScores(true);
+                  setStatus("Tap or press space to serve.");
+                }
               }}
-              className="px-3 py-2 rounded bg-gray-800 border border-gray-700 text-white text-sm"
+              className="px-3 py-2 rounded bg-[color:var(--grid-panel-strong)] border border-[color:var(--grid-border)] text-slate-200 text-sm"
             >
-              Reset Score
+              {mode === "time" ? "Reset Run" : "Reset Score"}
             </button>
           </div>
           {stageStatus !== "playing" && (
@@ -845,7 +1390,7 @@ export default function PixelPuckPage() {
                     resetScores(true);
                     setStatus("Tap or press space to serve.");
                   }}
-                  className="px-3 py-2 rounded bg-red-600 text-white text-sm font-semibold"
+                  className="px-3 py-2 rounded bg-[rgb(var(--grid-danger))] text-slate-950 text-sm font-semibold"
                 >
                   Retry Stage
                 </button>
@@ -863,7 +1408,7 @@ export default function PixelPuckPage() {
                     resetScores(true);
                     setStatus("Tap or press space to serve.");
                   }}
-                  className="px-3 py-2 rounded bg-green-600 text-white text-sm font-semibold"
+                  className="px-3 py-2 rounded bg-[rgb(var(--grid-success))] text-slate-950 text-sm font-semibold"
                 >
                   {campaignComplete ? "Replay Campaign" : "Next Mission"}
                 </button>
@@ -873,21 +1418,28 @@ export default function PixelPuckPage() {
         </div>
 
         <div className="space-y-4">
-          <div className="bg-gray-900 border border-gray-800 rounded-xl p-4 space-y-3">
+          <div className="gs-panel rounded-2xl p-4 space-y-3">
             <h3 className="text-lg font-semibold">Campaign</h3>
+            <div className="text-xs text-slate-500">
+              Unlocked: {unlockedCount}/{STAGES.length} missions
+            </div>
             <div className="flex flex-wrap gap-2">
               {STAGES.map((stage, idx) => {
-                const completed = idx < stageIndex || (idx === stageIndex && stageStatus === "won");
+                const completed =
+                  idx <= progress.maxCompletedStage || (idx === stageIndex && stageStatus === "won");
                 const active = idx === stageIndex;
+                const locked = idx > playableStageIndex;
                 return (
                   <div
                     key={stage.id}
                     className={`px-3 py-2 rounded-lg border text-xs ${
                       completed
-                        ? "border-green-500/60 bg-green-500/10 text-green-100"
+                        ? "border-[rgb(var(--grid-success)/0.5)] bg-[rgb(var(--grid-success)/0.16)] text-emerald-100"
                         : active
-                        ? "border-white/60 text-white"
-                        : "border-gray-700 text-gray-400"
+                        ? "border-[rgb(var(--grid-accent))] text-white"
+                        : locked
+                        ? "border-[color:var(--grid-border)] text-slate-500 opacity-60"
+                        : "border-[color:var(--grid-border)] text-slate-400"
                     }`}
                   >
                     {stage.name} · {stage.target} pts
@@ -895,59 +1447,134 @@ export default function PixelPuckPage() {
                 );
               })}
             </div>
-            <div className="text-sm text-gray-300">
-              {mode === "campaign" ? currentStage().blurb : "Pick your pace in Free Play and practice power smashes."}
+            <div className="text-sm text-slate-300">
+              {mode === "campaign"
+                ? currentStage().blurb
+                : mode === "time"
+                ? "Race the clock and stack medals on every mission."
+                : "Pick your pace in Free Play and practice power smashes."}
             </div>
           </div>
 
-          <div className="bg-gray-900 border border-gray-800 rounded-xl p-4 space-y-3">
+          <div className="gs-panel rounded-2xl p-4 space-y-3">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold">Time Attack</h3>
+              <span className="text-xs text-slate-500">{TIME_ATTACK_DURATION}s</span>
+            </div>
+            <div className="text-xs text-slate-400">
+              Race the clock. Medals are per stage in Time Attack mode.
+            </div>
+            {timeAttackThresholds && (
+              <div className="text-xs text-slate-400">
+                Targets: Bronze {timeAttackThresholds.bronze} · Silver {timeAttackThresholds.silver} · Gold{" "}
+                {timeAttackThresholds.gold}
+              </div>
+            )}
+            <div className="flex items-center justify-between text-xs">
+              <span className="text-slate-400">Best for {currentStage().name}</span>
+              <span className={medalTone(timeAttackMedal)}>
+                {timeAttackBest} · {medalLabel(timeAttackMedal)}
+              </span>
+            </div>
+            <div className="grid grid-cols-2 gap-2 text-xs">
+              {STAGES.map((stage) => {
+                const medal = progress.timeAttackMedals[stage.id];
+                const best = progress.timeAttackBest[stage.id] ?? 0;
+                return (
+                  <div key={stage.id} className="flex items-center justify-between rounded-lg border border-[color:var(--grid-border)] px-2 py-1">
+                    <span className="text-slate-300">{stage.name}</span>
+                    <span className={medalTone(medal)}>
+                      {best} · {medalLabel(medal)}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="gs-panel rounded-2xl p-4 space-y-3">
             <h3 className="text-lg font-semibold">How to play</h3>
-            <ul className="text-sm text-gray-400 space-y-1 list-disc list-inside">
+            <ul className="text-sm text-slate-400 space-y-1 list-disc list-inside">
               <li>Mouse/touch or WASD/arrows move your striker (bottom half).</li>
               <li>Tap canvas or press space to serve. First to target score wins the stage.</li>
               <li>Press <span className="font-semibold text-white">F</span> to arm a power smash; your next hit supercharges the puck.</li>
+              <li>Power-ups spawn mid-ice: Shield blocks one goal, Curve bends your next hit, Boost speeds you up.</li>
               <li>Campaign ramps goalie skill and puck speed each mission. Free Play lets you pick difficulty.</li>
             </ul>
-            <div className="pt-2 text-xs text-gray-500 space-y-1">
+            <div className="pt-2 text-xs text-slate-500 space-y-1">
               <div>Built for GridStock’s arcade corner. Become the PixelPuck champion.</div>
               <div>Controls: Mouse/touch or WASD/arrows to move · Space/click to serve · F = Smash · Shift = Dash · P = Pause</div>
             </div>
           </div>
 
-          <div className="bg-gray-900 border border-gray-800 rounded-xl p-4 space-y-3">
+          <div className="gs-panel rounded-2xl p-4 space-y-3">
             <h3 className="text-lg font-semibold">Telemetry</h3>
-            <div className="grid grid-cols-2 gap-3 text-sm text-gray-200">
+            <div className="grid grid-cols-2 gap-3 text-sm text-slate-200">
               <div className="flex flex-col">
-                <span className="text-xs text-gray-400">Rally</span>
-                <span className="font-semibold text-green-300">{rally}</span>
+                <span className="text-xs text-slate-400">Rally</span>
+                <span className="font-semibold text-emerald-300">{rally}</span>
               </div>
               <div className="flex flex-col">
-                <span className="text-xs text-gray-400">Smash</span>
-                <span className={smashReady ? "text-green-300 font-semibold" : "text-yellow-300"}>
+                <span className="text-xs text-slate-400">Smash</span>
+                <span className={smashReady ? "text-emerald-300 font-semibold" : "text-amber-300"}>
                   {smashReady ? "Armed" : "Hold F"}
                 </span>
               </div>
               <div className="flex flex-col">
-                <span className="text-xs text-gray-400">Dash</span>
-                <span className={dash.ready ? "text-green-300 font-semibold" : "text-yellow-300"}>
+                <span className="text-xs text-slate-400">Dash</span>
+                <span className={dash.ready ? "text-emerald-300 font-semibold" : "text-amber-300"}>
                   {dash.ready ? "Ready" : `${dash.cooldown.toFixed(1)}s`}
                 </span>
               </div>
               <div className="flex flex-col">
-                <span className="text-xs text-gray-400">Stage speed</span>
-                <span>{mode === "campaign" ? `${(currentStage().speedBoost * 100).toFixed(0)}%` : "Custom"}</span>
+                <span className="text-xs text-slate-400">Shield</span>
+                <span className={shieldCharges > 0 ? "text-sky-300 font-semibold" : "text-slate-400"}>
+                  {shieldCharges > 0 ? `${shieldCharges} charge${shieldCharges > 1 ? "s" : ""}` : "None"}
+                </span>
               </div>
               <div className="flex flex-col">
-                <span className="text-xs text-gray-400">Aim assist</span>
-                <span className={aimAssist ? "text-green-300" : "text-gray-400"}>
+                <span className="text-xs text-slate-400">Curve</span>
+                <span className={curveReady || curveTimer > 0 ? "text-cyan-300 font-semibold" : "text-slate-400"}>
+                  {curveReady
+                    ? "Ready"
+                    : curveTimer > 0
+                    ? `${curveTimer.toFixed(1)}s`
+                    : "Off"}
+                </span>
+              </div>
+              <div className="flex flex-col">
+                <span className="text-xs text-slate-400">Boost</span>
+                <span className={speedBoost.active ? "text-amber-300 font-semibold" : "text-slate-400"}>
+                  {speedBoost.active ? `${speedBoost.timer.toFixed(1)}s` : "Off"}
+                </span>
+              </div>
+              <div className="flex flex-col">
+                <span className="text-xs text-slate-400">Stage speed</span>
+                <span>
+                  {mode === "campaign" || mode === "time"
+                    ? `${(currentStage().speedBoost * 100).toFixed(0)}%`
+                    : "Custom"}
+                </span>
+              </div>
+              <div className="flex flex-col">
+                <span className="text-xs text-slate-400">Aim assist</span>
+                <span className={aimAssist ? "text-emerald-300" : "text-slate-400"}>
                   {aimAssist ? "Enabled" : "Off"}
                 </span>
               </div>
               <div className="flex flex-col">
-                <span className="text-xs text-gray-400">Auto-serve</span>
-                <span className={autoServe ? "text-green-300" : "text-gray-400"}>
+                <span className="text-xs text-slate-400">Auto-serve</span>
+                <span className={autoServe ? "text-emerald-300" : "text-slate-400"}>
                   {autoServe ? "After goals" : "Manual"}
                 </span>
+              </div>
+              <div className="flex flex-col">
+                <span className="text-xs text-slate-400">Best rally</span>
+                <span className="text-emerald-300 font-semibold">{progress.bestRally}</span>
+              </div>
+              <div className="flex flex-col">
+                <span className="text-xs text-slate-400">High score</span>
+                <span className="text-emerald-300 font-semibold">{progress.bestScore}</span>
               </div>
             </div>
             <div className="flex gap-2">
@@ -957,7 +1584,7 @@ export default function PixelPuckPage() {
                   startCrowd();
                   setFlash({ color: "rgba(59,130,246,0.25)", timer: 0.3 });
                 }}
-                className="px-3 py-2 rounded bg-indigo-600 text-white text-sm font-semibold"
+                className="px-3 py-2 rounded bg-[rgb(var(--grid-accent-2))] text-slate-950 text-sm font-semibold"
               >
                 Pump crowd noise
               </button>
@@ -967,33 +1594,33 @@ export default function PixelPuckPage() {
                   state.current.rallyCount = 0;
                   setStatus("Rally cooled; regain control.");
                 }}
-                className="px-3 py-2 rounded bg-gray-800 border border-gray-700 text-white text-sm"
+                className="px-3 py-2 rounded bg-[color:var(--grid-panel-strong)] border border-[color:var(--grid-border)] text-slate-200 text-sm"
               >
                 Cool down
               </button>
             </div>
           </div>
 
-          <div className="bg-gray-900 border border-gray-800 rounded-xl p-4 space-y-3">
+          <div className="gs-panel rounded-2xl p-4 space-y-3">
             <h3 className="text-lg font-semibold">Controls</h3>
-            <div className="grid grid-cols-2 gap-2 text-xs text-gray-300">
+            <div className="grid grid-cols-2 gap-2 text-xs text-slate-300">
               {(Object.keys(controls) as ControlAction[]).map((action) => (
                 <button
                   key={action}
                   onClick={() => setListening(action)}
                   className={`flex justify-between items-center px-3 py-2 rounded border ${
                     listening === action
-                      ? "border-green-500 text-white"
-                      : "border-gray-700 hover:border-gray-500"
+                      ? "border-[rgb(var(--grid-accent))] text-white"
+                      : "border-[color:var(--grid-border)] hover:border-[rgb(var(--grid-accent)/0.4)]"
                   }`}
                 >
                   <span className="capitalize">{action}</span>
-                  <span className="text-gray-400 font-mono">{listening === action ? "..." : controls[action]}</span>
+                  <span className="text-slate-400 font-mono">{listening === action ? "..." : controls[action]}</span>
                 </button>
               ))}
             </div>
             {listening && (
-              <div className="text-[11px] text-gray-400">
+              <div className="text-[11px] text-slate-400">
                 Press a key to bind <span className="text-white font-semibold">{listening}</span>
               </div>
             )}

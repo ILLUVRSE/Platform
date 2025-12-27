@@ -3,16 +3,19 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "predev": "pnpm --filter @illuvrse/contracts build && pnpm --filter @illuvrse/agent-manager build && pnpm --filter @illuvrse/db build",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
   },
   "dependencies": {
+    "@prisma/client": "^5.22.0",
     "@illuvrse/ui": "workspace:*",
     "@illuvrse/contracts": "workspace:*",
     "@illuvrse/agent-manager": "workspace:*",
     "@illuvrse/db": "workspace:*",
+    "date-fns": "^3.6.0",
     "hls.js": "^1.5.17",
     "openai": "^6.10.0",
     "react": "19.2.3",

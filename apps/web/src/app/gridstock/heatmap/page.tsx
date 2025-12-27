@@ -42,17 +42,17 @@ export default function HeatmapPage() {
     <div className="space-y-6">
       <header>
         <h1 className="text-4xl font-extrabold tracking-tight mb-2">Today’s Tape</h1>
-        <p className="text-gray-400">Heatmap of your tracked symbols.</p>
+        <p className="text-slate-400">Heatmap of your tracked symbols.</p>
       </header>
 
       {error && (
-        <div className="text-red-400 text-sm bg-red-500/10 border border-red-500/30 p-2 rounded">
+        <div className="text-rose-200 text-sm bg-rose-500/10 border border-rose-500/30 p-3 rounded-xl">
           {error}
         </div>
       )}
 
       {loading && quotes.length === 0 && (
-        <div className="text-gray-500">Loading heatmap...</div>
+        <div className="text-slate-500">Loading heatmap...</div>
       )}
 
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-3">

@@ -506,25 +506,30 @@ export default function DoomballPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between gap-4">
+      <div className="gs-panel-strong rounded-3xl p-6 sm:p-7 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-4xl font-extrabold tracking-tight">Doomball</h1>
-          <p className="text-gray-400 text-sm">Arcade breakout, rewritten for the browser.</p>
+          <p className="text-slate-300 text-sm">Arcade breakout, rewritten for the browser.</p>
         </div>
-        <Link href="/gridstock/minigames/pixelpuck" className="text-sm text-green-400 hover:underline">Try PixelPuck →</Link>
+        <Link
+          href="/gridstock/minigames/pixelpuck"
+          className="text-sm text-emerald-300 hover:text-emerald-200 hover:underline"
+        >
+          Try PixelPuck →
+        </Link>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-[auto,280px] gap-6">
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
-          <div className="flex justify-between mb-3 text-sm text-gray-400">
+        <div className="gs-panel rounded-2xl p-4">
+          <div className="flex justify-between mb-3 text-sm text-slate-400">
             <span>Score: <span className="text-white font-semibold">{hud.score}</span></span>
             <span>Lives: <span className="text-white font-semibold">{hud.lives}</span></span>
             <span>Level: <span className="text-white font-semibold">{hud.level}</span></span>
           </div>
           <div className="relative">
             {gameOver && (
-              <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-black/70 rounded-lg text-center space-y-2">
-                <div className="text-2xl font-bold text-red-300">Game Over</div>
+              <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-black/70 rounded-2xl text-center space-y-2">
+                <div className="text-2xl font-bold text-rose-300">Game Over</div>
                 <button
                   onClick={() => {
                     setGameOver(false);
@@ -535,7 +540,7 @@ export default function DoomballPage() {
                     resetBall();
                     draw();
                   }}
-                  className="px-4 py-2 bg-white text-black rounded font-semibold"
+                  className="px-4 py-2 bg-[rgb(var(--grid-accent))] text-slate-950 rounded font-semibold"
                 >
                   Reset
                 </button>
@@ -545,12 +550,12 @@ export default function DoomballPage() {
               ref={canvasRef}
               width={WIDTH}
               height={HEIGHT}
-              className="w-full h-auto rounded-lg border border-gray-800 bg-black"
+              className="w-full h-auto rounded-2xl border border-[color:var(--grid-border)] bg-black"
               onClick={launch}
             />
             {hud.message && !gameOver && (
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <div className="px-4 py-2 bg-black/60 rounded-full text-sm text-white border border-gray-700">
+                <div className="px-4 py-2 bg-black/60 rounded-full text-sm text-white border border-[color:var(--grid-border)]">
                   {hud.message}
                 </div>
               </div>
@@ -558,20 +563,20 @@ export default function DoomballPage() {
           </div>
         </div>
 
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-4 space-y-3">
+        <div className="gs-panel rounded-2xl p-4 space-y-3">
           <h3 className="text-lg font-semibold">How to play</h3>
-          <ul className="text-sm text-gray-400 space-y-1 list-disc list-inside">
+          <ul className="text-sm text-slate-400 space-y-1 list-disc list-inside">
             <li>Move with mouse, touch, or arrow / A / D keys; press P to pause.</li>
             <li>Click or press space to launch/serve; aim edge hits for sharper angles.</li>
             <li>Catching drops: +life, widen paddle, or slow time for control.</li>
             <li>Levels add rows and speed; keep the streak to push your score up.</li>
           </ul>
-          <div className="pt-3 space-y-1 text-xs text-gray-300 border-t border-gray-800">
+          <div className="pt-3 space-y-1 text-xs text-slate-300 border-t border-[color:var(--grid-border)]">
             <div className="flex justify-between">
               <span>Combo</span>
-              <span className="font-semibold text-green-300">x{state.current.combo.toFixed(1)}</span>
+              <span className="font-semibold text-emerald-300">x{state.current.combo.toFixed(1)}</span>
             </div>
-            <div className="w-full h-2 bg-gray-800 rounded-full overflow-hidden">
+            <div className="w-full h-2 bg-[color:var(--grid-panel-strong)] rounded-full overflow-hidden">
               <div
                 className="h-full bg-gradient-to-r from-green-500 to-emerald-300"
                 style={{
@@ -580,11 +585,11 @@ export default function DoomballPage() {
                 }}
               />
             </div>
-            <div className="flex justify-between text-gray-400">
+            <div className="flex justify-between text-slate-400">
               <span>Best streak</span>
               <span>{state.current.bestCombo.toFixed(1)}x</span>
             </div>
-            <div className="flex justify-between text-gray-400">
+            <div className="flex justify-between text-slate-400">
               <span>Buffs</span>
               <span>
                 {state.current.paddleBuffTimer > 0 ? "Wide paddle" : ""}
@@ -593,7 +598,7 @@ export default function DoomballPage() {
               </span>
             </div>
           </div>
-          <div className="pt-2 text-xs text-gray-500">
+          <div className="pt-2 text-xs text-slate-500">
             Reimagined from the original Pygame Doomball so it runs inside GridStock.
           </div>
         </div>

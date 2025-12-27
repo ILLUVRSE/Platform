@@ -1,0 +1,20 @@
+{
+  "avatars": [
+    {
+      "id": "avatar.ops.001",
+      "name": "Ops Curator",
+      "rig": "humanoid-v1",
+      "assets": ["s3://illuvrse-avatars/ops-curator.glb"],
+      "voiceConfigId": "voice.ops.001",
+      "agentId": "agent.ops.001"
+    },
+    {
+      "id": "avatar.finance.001",
+      "name": "Finance Steward",
+      "rig": "humanoid-v1",
+      "assets": ["s3://illuvrse-avatars/finance-steward.glb"],
+      "voiceConfigId": "voice.finance.001",
+      "agentId": "agent.finance.001"
+    }
+  ]
+}

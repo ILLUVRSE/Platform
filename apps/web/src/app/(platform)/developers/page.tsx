@@ -2,6 +2,24 @@ import { Card, PageSection, Pill } from "@illuvrse/ui";
 import Link from "next/link";
 import { ManifestViewer } from "@/components/ManifestViewer";
 import type { AceAgentManifest } from "@illuvrse/contracts";
+import { buildMetadata, buildJsonLd } from "@/lib/metadata";
+
+const title = "Developers | ACE specs and platform APIs";
+const description =
+  "Specs, endpoints, and manifests for ACE, Kernel, Marketplace, StorySphere, and LiveLoop.";
+
+export const metadata = buildMetadata({
+  title,
+  description,
+  path: "/developers"
+});
+
+const pageJsonLd = buildJsonLd({
+  title,
+  description,
+  path: "/developers",
+  type: "WebPage"
+});
 
 const sampleManifest: AceAgentManifest = {
   id: "agent.story-weaver.001",
@@ -20,14 +38,16 @@ const sampleManifest: AceAgentManifest = {
 
 export default function DevelopersPage() {
   return (
-    <div className="space-y-10">
-      <section className="rounded-3xl border border-slate-200 bg-white px-8 py-10 shadow-card">
-        <Pill className="bg-teal-50 text-teal-700">Developers</Pill>
-        <h1 className="mt-3 text-4xl font-semibold">Specs, legal, and support for ACE + platform</h1>
-        <p className="mt-3 max-w-2xl text-lg text-slate-700">
-          Official specs for ACE agents, Kernel/Marketplace contracts, and legal claims. Submit issues directly to Ryan’s team when you hit errors.
-        </p>
-      </section>
+    <>
+      <script type="application/ld+json">{JSON.stringify(pageJsonLd)}</script>
+      <div className="space-y-10">
+        <section className="rounded-3xl border border-slate-200 bg-white px-8 py-10 shadow-card">
+          <Pill className="bg-teal-50 text-teal-700">Developers</Pill>
+          <h1 className="mt-3 text-4xl font-semibold">Specs, legal, and support for ACE + platform</h1>
+          <p className="mt-3 max-w-2xl text-lg text-slate-700">
+            Official specs for ACE agents, Kernel/Marketplace contracts, and legal claims. Submit issues directly to Ryan’s team when you hit errors.
+          </p>
+        </section>
 
       <PageSection eyebrow="Starter pack" title="Get up and running fast" id="starter-pack">
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -118,6 +138,9 @@ export default function DevelopersPage() {
                 <div>Personality: traits (3–5), interaction style, emotional range.</div>
                 <div>Attributes: sliders, perks, preset build id.</div>
                 <div>Voice: base, modifiers, FX, activation line.</div>
+                <div>Tools: allowed actions/scopes for runtime execution.</div>
+                <div>Memory: short/long-term retention policies.</div>
+                <div>Presence: realm, room, and scheduling hints.</div>
               </div>
             }
           />
@@ -167,6 +190,18 @@ export default function DevelopersPage() {
             }
           />
           <Card
+            title="World / Memory / Voice"
+            body={
+              <div className="space-y-2 text-sm">
+                <code>POST /memory/write</code> – store agent memory entry.<br />
+                <code>POST /memory/query</code> – retrieve memory with embeddings.<br />
+                <code>WS /ws</code> – world state presence channel.<br />
+                <code>POST /tts</code> – text-to-speech output.<br />
+                <code>POST /stt</code> – speech-to-text input.
+              </div>
+            }
+          />
+          <Card
             title="Docs & legal"
             body={
               <div className="text-sm text-slate-700 space-y-2">
@@ -187,6 +222,8 @@ export default function DevelopersPage() {
                   <code>approvedBy</code> – required on exec when <code>AGENT_APPROVAL_REQUIRED</code> is not <code>false</code>.<br />
                   <code>GET /api/agent/requests</code> – approval queue for operators.<br />
                   <code>POST /api/agent/approve</code> – approve or reject pending requests.<br />
+                  <code>POST /api/agent/tasks</code> – create parent/child delegation tasks.<br />
+                  <code>GET /api/agent/tasks</code> – list delegation tasks.<br />
                   <code>GET /api/ace/registry</code> – list local ACE manifests (registry).<br />
                   <code>POST /api/ace/handoff</code> – set active handoff manifest.
                 </div>
@@ -211,7 +248,6 @@ export default function DevelopersPage() {
           <ManifestViewer manifest={sampleManifest} />
         </div>
       </PageSection>
-
       <PageSection eyebrow="Issues" title="Submit problems or errors">
         <div className="grid gap-4 md:grid-cols-2">
           <Card
@@ -241,5 +277,6 @@ export default function DevelopersPage() {
         </div>
       </PageSection>
     </div>
+    </>
   );
 }
