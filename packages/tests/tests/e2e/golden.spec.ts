@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 
 const webBase = process.env.WEB_URL ?? "http://localhost:3000";
-const studioBase = process.env.STUDIO_URL ?? "http://localhost:3001";
+const studioBase = process.env.STUDIO_URL ?? `${webBase}/studio`;
 const runUI = process.env.RUN_UI_SMOKE === "true";
 
 let webAvailable = false;

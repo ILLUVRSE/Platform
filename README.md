@@ -32,7 +32,15 @@ Monorepo for the governed creator platform and StorySphere studio.
 - `pnpm build` – build the unified platform.
 - `pnpm start:platform` – start the production build on port 3000 (requires `pnpm build` first).
 - `pnpm lint` – lint the unified platform.
-- `pnpm test:smoke` – Playwright smoke tests (skipped by default). Set `RUN_UI_SMOKE=true WEB_URL=http://localhost:3000 STUDIO_URL=http://localhost:3000/news` and run `pnpm dev`.
+- `pnpm test:smoke` – Playwright smoke tests (skipped by default). Set `RUN_UI_SMOKE=true WEB_URL=http://localhost:3000` and run `pnpm dev`.
+
+## Codespaces / Devcontainers
+- The repo ships with a `.devcontainer` tuned for GitHub Codespaces and VS Code Remote (Node 20 + pnpm 10).
+- Quick start:
+  1. Click **Code → Codespaces → Create codespace** (or reopen locally via VS Code Remote Containers).
+  2. Wait for the container to install dependencies (`pnpm install --frozen-lockfile` runs automatically).
+  3. Run `pnpm --filter web dev` to start the platform on port 3000 (ports are forwarded automatically in Codespaces).
+  4. Optional: run `pnpm env:check -- --allow-stubs` to see which external URLs/tokens are needed for a real backend (stub defaults are allowed with the flag).
 
 ## Infra (Terraform)
 See `infra/README.md` for AWS + Cloudflare provisioning and secret bootstrapping.

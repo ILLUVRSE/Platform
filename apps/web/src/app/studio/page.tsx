@@ -1832,6 +1832,7 @@ export default function StorySphereStudioPage() {
                         setPromptApplied(false);
                       }}
                       rows={3}
+                      data-testid="studio-prompt-input"
                       className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-100 outline-none focus:border-teal-300"
                     />
                     <div className="flex flex-wrap items-center gap-3">
@@ -1839,6 +1840,7 @@ export default function StorySphereStudioPage() {
                         type="button"
                         onClick={handleGeneratePrompt}
                         disabled={generateState === "submitting"}
+                        data-testid="studio-generate-button"
                         className="rounded-full bg-gradient-to-r from-gold-500 to-teal-500 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-900 disabled:opacity-70"
                       >
                         {generateState === "submitting" ? "Generating..." : "Generate preview"}
@@ -2122,13 +2124,15 @@ export default function StorySphereStudioPage() {
                       {jobs.length} jobs
                     </span>
                   </div>
-                  <div className="mt-4 space-y-3">
+                  <div className="mt-4 space-y-3" data-testid="studio-render-queue">
                     {queueItems.length === 0 ? (
                       <p className="text-sm text-slate-400">No jobs yet. Generate a preview to start.</p>
                     ) : (
                       queueItems.map((job) => (
                         <div
                           key={job.id}
+                          data-testid="studio-render-queue-item"
+                          data-job-id={job.id}
                           className="rounded-xl border border-white/10 bg-white/5 px-3 py-2"
                         >
                           <div className="truncate text-sm font-semibold text-slate-100" title={job.prompt}>

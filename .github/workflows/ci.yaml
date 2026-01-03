@@ -3,45 +3,52 @@ name: CI
 on:
   push:
   pull_request:
+  workflow_dispatch:
+
+env:
+  NEXT_TELEMETRY_DISABLED: "1"
 
 jobs:
-  lint-typecheck:
+  build-and-test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v3
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
         with:
           version: 10.24.0
-      - uses: actions/setup-node@v4
+          run_install: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 20.18.0
           cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm lint
-      - run: pnpm build --filter '!@illuvrse/tests'
-      - run: pnpm --filter @illuvrse/contracts build
-      - run: pnpm --filter @illuvrse/agent-manager build
-      - run: pnpm --filter @illuvrse/db build
-      - run: pnpm --filter @illuvrse/kernel build
-      - run: pnpm --filter @illuvrse/sentinel build
-      - run: pnpm --filter @illuvrse/marketplace build
-      - run: pnpm --filter @illuvrse/finance build
-      - run: pnpm --filter @illuvrse/artifact-publisher build
-      - run: pnpm --filter @illuvrse/agent-manager-service build
-      - run: pnpm --filter @illuvrse/memory build
-      - run: pnpm --filter @illuvrse/world-state build
-      - run: pnpm --filter @illuvrse/avatar-registry build
-      - run: pnpm --filter @illuvrse/voice build
-  integration:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v3
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
         with:
-          version: 10.24.0
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm --filter @illuvrse/agent-manager run test:integration
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Build
+        run: pnpm build
+
+      - name: Install Playwright browsers
+        run: pnpm exec playwright install --with-deps
+
+      - name: Unit tests
+        run: pnpm --filter @illuvrse/tests test:unit
+
+      - name: UI smoke tests
+        env:
+          RUN_UI_SMOKE: "true"
+          WEB_URL: http://127.0.0.1:3000
+        run: pnpm --filter @illuvrse/tests test

@@ -3,12 +3,17 @@
   "version": "0.0.1",
   "private": true,
   "description": "ILLUVRSE platform monorepo",
+  "engines": {
+    "node": ">=20.18.0",
+    "pnpm": ">=10.24.0"
+  },
   "scripts": {
-    "dev": "pnpm --filter web dev",
-    "build": "pnpm --filter web build",
-    "lint": "pnpm --filter web lint",
-    "test:smoke": "pnpm --filter @illuvrse/tests test",
-    "start:platform": "pnpm --filter web start -- --port 3000"
+    "dev": "pnpm --filter web run dev",
+    "build": "pnpm --filter web run build",
+    "lint": "pnpm --filter web run lint",
+    "test:smoke": "pnpm --filter @illuvrse/tests run test",
+    "start:platform": "pnpm --filter web run start -- --port 3000",
+    "env:check": "node tools/validate-env.mjs"
   },
   "packageManager": "pnpm@10.24.0",
   "devDependencies": {

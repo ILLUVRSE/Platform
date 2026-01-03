@@ -1,0 +1,43 @@
+{
+  "name": "ILLUVRSE Platform",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:20",
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "20.18.0",
+      "pnpm": "10.24.0"
+    },
+    "ghcr.io/devcontainers/features/git:1": {}
+  },
+  "remoteUser": "node",
+  "updateContentCommand": "corepack enable pnpm && pnpm install --frozen-lockfile",
+  "postCreateCommand": "pnpm env:check -- --allow-stubs || true",
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "bash",
+        "editor.formatOnSave": true,
+        "files.eol": "\n",
+        "npm.packageManager": "pnpm"
+      },
+      "extensions": [
+        "esbenp.prettier-vscode",
+        "dbaeumer.vscode-eslint",
+        "ms-vscode.vscode-typescript-next",
+        "ms-playwright.playwright",
+        "ms-azuretools.vscode-docker"
+      ]
+    }
+  },
+  "forwardPorts": [3000, 4040, 4100, 4105, 4300, 4400],
+  "portsAttributes": {
+    "3000": { "label": "web" },
+    "4040": { "label": "agent-manager" },
+    "4100": { "label": "marketplace" },
+    "4105": { "label": "sentinel" },
+    "4300": { "label": "finance" },
+    "4400": { "label": "artifact-publisher" }
+  },
+  "containerEnv": {
+    "NEXT_TELEMETRY_DISABLED": "1"
+  }
+}
